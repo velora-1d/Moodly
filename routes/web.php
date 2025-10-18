@@ -11,7 +11,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+
+    Route::get('missions', function () {
+        return Inertia::render('missions/index');
+    })->name('missions');
+
+    Route::get('profile', function () {
+        return Inertia::render('profile/index');
+    })->name('profile');
+
+    Route::get('shop', function () {
+        return Inertia::render('shop/index');
+    })->name('shop');
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';
