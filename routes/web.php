@@ -12,15 +12,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
-    // Missions (halaman misi / gamifikasi)
     Route::get('missions', function () {
         return Inertia::render('missions/index');
     })->name('missions');
 
-    // Profile user
     Route::get('profile', function () {
         return Inertia::render('profile/index');
     })->name('profile');
+
+    Route::get('shop', function () {
+        return Inertia::render('shop/index');
+    })->name('shop');
 });
 
 require __DIR__ . '/settings.php';

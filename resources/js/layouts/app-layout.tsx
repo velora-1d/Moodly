@@ -4,12 +4,14 @@ import { type ReactNode } from 'react';
 
 type AppLayoutProps = {
     breadcrumbs?: BreadcrumbItem[];
+    leftActions?: ReactNode;
     rightActions?: ReactNode;
     children: ReactNode;
 };
 
 export default function AppLayout({
     breadcrumbs,
+    leftActions,
     rightActions,
     children,
 }: AppLayoutProps) {
@@ -20,6 +22,7 @@ export default function AppLayout({
                 <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3">
                     {/* 🔸 kiri: breadcrumb / brand */}
                     <div className="flex min-w-0 items-center gap-2">
+                        {leftActions}
                         {breadcrumbs && breadcrumbs.length > 0 && (
                             <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
                                 {breadcrumbs.map((item, idx) => (
