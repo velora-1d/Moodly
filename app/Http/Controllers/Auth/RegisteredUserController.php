@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Validation\ValidationException;
+use App\Http\Controllers\Auth\SupabaseAuthService;
 
 class RegisteredUserController extends Controller
 {
@@ -35,15 +37,33 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $user = User::create([
-            'name' => $request->name,
+        $service = new SupabaseAuthService();
+        $signUp = $service->signUp($request->email, $request->password, $request->name);
+        if ($signUp === false) {
+            throw ValidationException::withMessages([
+                'email' => __('auth.failed'),
+            ]);
+        }
+
+        // Compose a supabase-like user payload for syncing
+        $supabaseUser = $signUp['user'] ?? [
             'email' => $request->email,
-            'password' => $request->password,
-        ]);
+            'user_metadata' => ['name' => $request->name],
+        ];
+
+        $user = $service->syncLocalUser($supabaseUser, $request->password);
 
         event(new Registered($user));
 
         Auth::login($user);
+
+        // Store tokens if Supabase returned a session
+        if (!empty($signUp['access_token'])) {
+            $request->session()->put('supabase.access_token', $signUp['access_token']);
+        }
+        if (!empty($signUp['refresh_token'])) {
+            $request->session()->put('supabase.refresh_token', $signUp['refresh_token']);
+        }
 
         $request->session()->regenerate();
 
