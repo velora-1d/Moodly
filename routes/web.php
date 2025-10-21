@@ -16,6 +16,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('missions/index');
     })->name('missions');
 
+    Route::get('mentoring', function () {
+        return Inertia::render('mentoring/index');
+    })->name('mentoring');
+
     Route::get('profile', function () {
         return Inertia::render('profile/index');
     })->name('profile');

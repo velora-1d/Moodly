@@ -1,6 +1,6 @@
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
-import { missions, profile, shop } from '@/routes';
+import { missions, profile, shop, mentoring } from '@/routes';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Flag, ShoppingCart, User, Trophy, Zap, Clock, ShieldCheck, BookOpen, Puzzle, Egg, Code2, Ghost } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -114,7 +114,7 @@ export default function Dashboard() {
                                 <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,#0000_0_8px,#ffffff10_8px_16px)]" />
                             </div>
                             <div className="flex items-center gap-2">
-                                <Link href={missions().url} prefetch>
+                                <Link href={mentoring().url} prefetch>
                                     <Button className="rounded-sm">Continue Learning</Button>
                                 </Link>
                                 <Link href={shop().url} prefetch>
@@ -171,7 +171,7 @@ export default function Dashboard() {
                             </div>
                         </div>
                         <div className="mt-3">
-                            <Link href={missions().url} prefetch>
+                            <Link href={mentoring().url} prefetch>
                                 <Button className="w-full rounded-sm">Mulai Pelajaran</Button>
                             </Link>
                         </div>
