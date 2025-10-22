@@ -90,37 +90,43 @@ export default function Dashboard() {
                     <PixelGreeting username={name} />
 
                     {/* Hero: Jump back in */}
-                    <div className="rounded-xl border border-sidebar-border/70 bg-gradient-to-br from-violet-500/20 via-fuchsia-500/10 to-emerald-500/20 p-5">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="text-sm font-semibold text-foreground">Jump back in</p>
-                                <h2 className="mt-1 text-xl font-bold tracking-tight text-foreground">Python</h2>
-                                <p className="text-xs text-muted-foreground">Next exercise: Initals</p>
-                            </div>
-                            <div className="hidden md:flex items-center gap-2 rounded-lg border border-sidebar-border/60 bg-background/60 px-3 py-1">
-                                <ShieldCheck className="size-4 text-emerald-400" />
-                                <span className="font-mono text-xs text-muted-foreground">Arcade</span>
-                            </div>
-                        </div>
+                    <div className="rounded-xl border-2 border-sidebar-border/80 bg-card p-3 shadow-[0_0_0_4px_rgba(9,9,16,0.4)]">
+                        <div className="relative overflow-hidden rounded-lg border border-sidebar-border/80">
+                            {/* Banner image uses intrinsic ratio; container follows image height */}
+                            <img
+                                src="/images/mentoring/chapter_1/main_banner.png"
+                                alt="Python Course Banner"
+                                className="block w-full h-auto"
+                                style={{ imageRendering: 'pixelated' }}
+                            />
+                            {/* Subtle gradient for text contrast (no black box, no blur) */}
+                            <div className="pointer-events-none absolute inset-0 z-20 bg-gradient-to-r from-black/30 via-black/15 to-transparent" />
 
-                        <div className="relative mt-4 w-full overflow-hidden rounded-lg border border-sidebar-border/60">
-                            <div className="h-36 w-full bg-[repeating-linear-gradient(45deg,#0000_0_12px,#ffffff10_12px_24px)]" />
-                            <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/10 dark:stroke-neutral-100/10" />
-                        </div>
+                            {/* Top-left overlay: progress + labels */}
+                            <div className="absolute left-4 top-4 z-30 text-white">
+                                 <div className="mb-2 h-3 w-28 sm:w-36 overflow-hidden rounded-sm border border-white/40 bg-white/20">
+                                     <div className="h-full bg-white" style={{ width: `${heroPct}%` }} />
+                                 </div>
+                                 <p className="text-[10px] font-semibold tracking-wide opacity-90">COURSE</p>
+                                 <h2 className="text-xl sm:text-2xl font-extrabold drop-shadow-md">Python</h2>
+                                 <p className="text-sm opacity-90">Next exercise: Initals</p>
+                             </div>
 
-                        <div className="mt-4 flex items-center justify-between">
-                            <div className="relative h-2 w-48 overflow-hidden rounded-md border border-sidebar-border/60 bg-muted">
-                                <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-indigo-500 to-fuchsia-500" style={{ width: `${heroPct}%` }} />
-                                <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,#0000_0_8px,#ffffff10_8px_16px)]" />
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Link href={mentoring().url} prefetch>
-                                    <Button className="rounded-sm">Continue Learning</Button>
-                                </Link>
-                                <Link href={shop().url} prefetch>
-                                    <Button variant="outline" className="rounded-sm">View course</Button>
-                                </Link>
-                            </div>
+                             {/* Top-right chip */}
+                             <div className="absolute right-4 top-4 hidden md:flex items-center gap-2 rounded-md border border-emerald-300/60 bg-emerald-400/20 px-2 py-1 text-xs text-emerald-100">
+                                 <ShieldCheck className="size-4" />
+                                 <span className="font-mono">Arcade</span>
+                             </div>
+
+                             {/* Bottom-left buttons styled arcade */}
+                            <div className="absolute bottom-4 left-4 z-30 flex flex-wrap items-center gap-3">
+                                 <Link href={mentoring().url} prefetch>
+                                     <Button className="rounded-sm bg-sky-500 text-white ring-2 ring-sky-300 shadow-[0_2px_0_0_rgba(0,0,0,0.45)] hover:bg-sky-600">Continue Learning</Button>
+                                 </Link>
+                                 <Link href={shop().url} prefetch>
+                                     <Button variant="outline" className="rounded-sm border-white/30 bg-black/40 text-white hover:bg-black/60">View course</Button>
+                                 </Link>
+                             </div>
                         </div>
                     </div>
 
