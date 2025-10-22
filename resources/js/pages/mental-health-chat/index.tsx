@@ -130,7 +130,7 @@ export default function MentalHealthChatPage() {
                         Selamat datang di{' '}
                         <span className="font-medium">ruang aman</span> Anda.
                         Asisten kami siap mendengarkan cerita dan membantu Anda
-                        memahami perasaan yang sedang muncul. Disini hanya ada kamu, aku, dan perasaan apapun yang boleh diungkapkan.
+                        memahami perasaan yang sedang muncul. Disini hanya ada aku, kamu, dan perasaan apapun yang boleh diungkapkan.
                     </p>
 
                     <div className="mt-3 space-y-1 text-xs text-muted-foreground">
