@@ -23,12 +23,12 @@ type SharedProps = {
 
 export default function MentalHealthChatPage() {
     const { auth } = usePage<SharedProps>().props;
-    const name = auth?.user?.name ?? 'Pengguna';
+    const name = auth?.user?.name ?? 'Teman';
 
     const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',
-            content: `Halo ${name}, saya adalah asisten kesehatan mental AI yang siap membantu Anda. Bagaimana perasaan Anda hari ini? Anda dapat berbagi apa pun yang sedang Anda rasakan, dan saya akan berusaha memberikan dukungan terbaik.`,
+            content: `Halo ${name} 🌿, senang bisa berbicara denganmu. Aku di sini untuk mendengarkan dan menemanimu. Bagaimana kabar hatimu hari ini?`,
             role: 'assistant',
             timestamp: new Date(),
         },
@@ -40,7 +40,7 @@ export default function MentalHealthChatPage() {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: dashboard().url },
-        { title: 'Mental Health Chat', href: '/mental-health-chat' },
+        { title: 'Ruang Konseling', href: '/mental-health-chat' },
     ];
 
     const scrollToBottom = () => {
@@ -54,7 +54,7 @@ export default function MentalHealthChatPage() {
     const handleSendMessage = async () => {
         if (!inputMessage.trim()) return;
 
-        // Add user message to chat
+        // Tambahkan pesan user ke chat
         const userMessage: Message = {
             id: Date.now().toString(),
             content: inputMessage,
@@ -67,30 +67,32 @@ export default function MentalHealthChatPage() {
         setIsLoading(true);
 
         try {
-            // Send request to backend API using axios
+            // Kirim ke backend
             const response = await axios.post('/api/mental-health-chat', {
-                message: inputMessage,
+                message: userMessage.content,
                 history: messages.map((msg) => ({
                     role: msg.role,
                     content: msg.content,
                 })),
             });
 
-            // Add AI response to chat
+            // Tambahkan balasan AI
             const aiMessage: Message = {
-                id: Date.now().toString(),
-                content: response.data.response,
+                id: (Date.now() + 1).toString(),
+                content:
+                    response?.data?.response ??
+                    'Terima kasih sudah bercerita. Aku sedang berusaha memahami situasimu dan akan menanggapi dengan sebaik mungkin.',
                 role: 'assistant',
                 timestamp: new Date(),
             };
 
             setMessages((prev) => [...prev, aiMessage]);
         } catch (error) {
-            // Handle error with a friendly message
+            // Tampilkan pesan error yang empatik
             const errorMessage: Message = {
-                id: Date.now().toString(),
+                id: (Date.now() + 2).toString(),
                 content:
-                    'Maaf, terjadi kesalahan dalam memproses pesan Anda. Silakan coba lagi nanti.',
+                    'Maaf, sepertinya ada kendala teknis. Mohon coba lagi sebentar lagi ya. Terima kasih sudah bersabar 💛',
                 role: 'assistant',
                 timestamp: new Date(),
             };
@@ -111,31 +113,45 @@ export default function MentalHealthChatPage() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Mental Health Chat" />
+            <Head title="Ruang Konseling — Asisten Kesehatan Mental" />
 
             <div className="flex h-[calc(100vh-12rem)] flex-col p-4">
-                <div className="mb-4 rounded-xl border border-sidebar-border/70 bg-card p-4">
-                    <h2 className="mb-2 text-lg font-semibold">
-                        Asisten Kesehatan Mental
+                {/* Header / Info */}
+                <div
+                    className="mb-4 rounded-xl border border-sidebar-border/70 bg-card p-4"
+                    aria-label="Informasi layanan"
+                >
+                    <h2 className="mb-2 flex items-center gap-2 text-lg font-semibold">
+                        <Bot className="size-5" />
+                        Ruang Konseling Kesehatan Mental
                     </h2>
+
                     <p className="text-sm text-muted-foreground">
-                        Selamat datang di layanan konsultasi kesehatan mental.
-                        Asisten AI kami dirancang untuk memberikan dukungan dan
-                        saran yang empatik. Silakan berbagi apa yang Anda
-                        rasakan, dan kami akan berusaha membantu.
+                        Selamat datang di{' '}
+                        <span className="font-medium">ruang aman</span> Anda.
+                        Asisten kami siap mendengarkan cerita dan membantu Anda
+                        memahami perasaan yang sedang muncul. Disini hanya ada kamu, aku, dan perasaan apapun yang boleh diungkapkan.
                     </p>
-                    <div className="mt-2 text-xs text-muted-foreground">
-                        <p className="font-semibold">Catatan penting:</p>
+
+                    <div className="mt-3 space-y-1 text-xs text-muted-foreground">
+                        <p className="font-semibold">Catatan penting</p>
                         <p>
-                            Layanan ini tidak menggantikan konsultasi dengan
-                            profesional kesehatan mental. Untuk masalah serius,
-                            silakan hubungi tenaga profesional.
+                            Asisten ini tidak menggantikan peran psikolog atau
+                            psikiater. Jika Anda mengalami tekanan berat,
+                            pikiran menyakiti diri, atau butuh bantuan segera,
+                            harap hubungi tenaga profesional atau layanan
+                            darurat terdekat.
                         </p>
                     </div>
                 </div>
 
                 {/* Chat container */}
-                <div className="mb-4 flex-1 overflow-y-auto rounded-xl border border-sidebar-border/70 bg-card p-4">
+                <div
+                    className="mb-4 flex-1 overflow-y-auto rounded-xl border border-sidebar-border/70 bg-card p-4"
+                    role="log"
+                    aria-live="polite"
+                    aria-relevant="additions"
+                >
                     <div className="space-y-4">
                         {messages.map((message) => (
                             <div
@@ -154,6 +170,7 @@ export default function MentalHealthChatPage() {
                                             ? 'border border-blue-400/40 bg-blue-400/10'
                                             : 'border border-green-400/40 bg-green-400/10',
                                     )}
+                                    aria-hidden="true"
                                 >
                                     {message.role === 'assistant' ? (
                                         <Bot className="size-4 text-blue-300" />
@@ -161,10 +178,13 @@ export default function MentalHealthChatPage() {
                                         <User className="size-4 text-green-300" />
                                     )}
                                 </div>
+
                                 <div className="flex-1">
                                     <div className="text-sm whitespace-pre-wrap">
                                         {message.content}
                                     </div>
+
+                                    {/* Tampilkan waktu kecil; bisa di-hide jika mau */}
                                     <div className="mt-1 text-xs text-muted-foreground">
                                         {new Date(
                                             message.timestamp,
@@ -173,34 +193,40 @@ export default function MentalHealthChatPage() {
                                 </div>
                             </div>
                         ))}
+
                         {isLoading && (
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <RefreshCw className="size-4 animate-spin" />
-                                <span>Asisten sedang mengetik...</span>
+                                <span>
+                                    Sedang menyiapkan tanggapan dengan penuh
+                                    perhatian...
+                                </span>
                             </div>
                         )}
+
                         <div ref={messagesEndRef} />
                     </div>
                 </div>
 
                 {/* Input area */}
-                <div className="flex gap-2">
+                <div className="relative">
                     <textarea
                         value={inputMessage}
                         onChange={(e) => setInputMessage(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        placeholder="Ketik pesan Anda di sini..."
-                        className="flex-1 resize-none rounded-md border border-sidebar-border/70 bg-card p-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="Tulis apa yang sedang Anda rasakan atau pikirkan..."
+                        className="w-full resize-none rounded-xl border border-sidebar-border/70 bg-card p-3 pr-12 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
                         rows={2}
                         disabled={isLoading}
+                        aria-label="Ketik perasaan atau pikiran Anda"
                     />
                     <Button
                         onClick={handleSendMessage}
                         disabled={!inputMessage.trim() || isLoading}
-                        className="self-end"
+                        className="absolute top-2 right-3 h-8 w-8 rounded-xl p-0"
+                        aria-label="Kirim pesan"
                     >
-                        <Send className="mr-2 size-4" />
-                        Kirim
+                        <Send className="size-4" />
                     </Button>
                 </div>
             </div>
