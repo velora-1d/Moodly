@@ -31,6 +31,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('leaderboard', function () {
         return Inertia::render('leaderboard/index');
     })->name('leaderboard');
+    
+    Route::get('mental-health-chat', function () {
+        return Inertia::render('mental-health-chat/index');
+    })->name('mental-health-chat');
+    
+    // Mental Health Chat API route
+    Route::post('/api/mental-health-chat', [App\Http\Controllers\MentalHealthChatController::class, 'chat'])
+        ->name('api.mental-health-chat');
 });
 
 require __DIR__ . '/settings.php';

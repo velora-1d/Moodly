@@ -157,10 +157,12 @@ export default function Dashboard() {
                             </div>
                             <div className="flex items-start gap-3 rounded-xl border border-sidebar-border/70 bg-card p-4">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-md border border-fuchsia-400/40 bg-fuchsia-400/10"><Code2 className="size-5 text-fuchsia-300" /></div>
-                                <div>
-                                    <p className="text-sm font-semibold">Builds</p>
-                                    <p className="text-xs text-muted-foreground">Create and share code projects directly in the browser.</p>
-                                </div>
+                                <Link href="/mental-health-chat" className="flex-1">
+                                    <div>
+                                        <p className="text-sm font-semibold">Mental Health Chat</p>
+                                        <p className="text-xs text-muted-foreground">Konsultasikan masalah kesehatan mental Anda dengan AI asisten kami.</p>
+                                    </div>
+                                </Link>
                             </div>
                         </div>
                     </div>
