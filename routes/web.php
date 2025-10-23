@@ -31,6 +31,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('leaderboard', function () {
         return Inertia::render('leaderboard/index');
     })->name('leaderboard');
+
+    // Mood tracker endpoints
+    Route::get('moods', [\App\Http\Controllers\MoodController::class, 'index'])->name('moods.index');
+    Route::post('moods', [\App\Http\Controllers\MoodController::class, 'store'])->name('moods.store');
 });
 
 require __DIR__ . '/settings.php';
