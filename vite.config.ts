@@ -23,6 +23,7 @@ export default defineConfig({
             '@': path.resolve(__dirname, 'resources/js'),
             'next/image': path.resolve(__dirname, 'resources/js/lib/next-image-shim.tsx'),
             'next/link': path.resolve(__dirname, 'resources/js/lib/next-link-shim.tsx'),
+            'next/navigation': path.resolve(__dirname, 'resources/js/lib/next-navigation-shim.ts'),
         },
     },
     server: {
