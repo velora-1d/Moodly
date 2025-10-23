@@ -35,6 +35,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Mood tracker endpoints
     Route::get('moods', [\App\Http\Controllers\MoodController::class, 'index'])->name('moods.index');
     Route::post('moods', [\App\Http\Controllers\MoodController::class, 'store'])->name('moods.store');
+    
+    Route::get('mental-health-chat', function () {
+        return Inertia::render('mental-health-chat/index');
+    })->name('mental-health-chat');
+    
+    // Mental Health Chat API route
+    Route::post('/api/mental-health-chat', [App\Http\Controllers\MentalHealthChatController::class, 'chat'])
+        ->name('api.mental-health-chat');
 });
 
 require __DIR__ . '/settings.php';
