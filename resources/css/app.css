@@ -2,6 +2,8 @@
 
 @import "tw-animate-css";
 
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap');
+
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
@@ -141,9 +143,6 @@
         @apply bg-background text-foreground;
     }
 }
-
-/* Inject codedex theme tokens and fonts */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap');
 
 /* Additional theme color mappings for codedex components */
 @theme {
