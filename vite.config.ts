@@ -20,7 +20,7 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
-            '@/components': path.resolve(__dirname, 'resources/js/components/components'),
+            '@/components': path.resolve(__dirname, 'resources/js/components'),
             '@': path.resolve(__dirname, 'resources/js'),
             'next/image': path.resolve(__dirname, 'resources/js/lib/next-image-shim.tsx'),
             'next/link': path.resolve(__dirname, 'resources/js/lib/next-link-shim.tsx'),
