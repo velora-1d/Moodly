@@ -1,10 +1,26 @@
+import { useEffect, useState } from "react";
 import AppLayout from '@/layouts/app-layout';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
-import { Pencil } from 'lucide-react';
+import { Pencil, Loader2 } from 'lucide-react';
+import { supabase } from "@/lib/supabaseClient";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+} from "@/components/ui/card";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+} from "recharts";
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: route('dashboard') },
@@ -17,6 +33,19 @@ type SharedProps = {
     };
 };
 
+interface MoodLog {
+  created_at: string;
+  mood: string;
+}
+
+const moodToScore: Record<string, number> = {
+    "😡": 1,
+    "😟": 2,
+    "😐": 3,
+    "🙂": 4,
+    "😄": 5,
+};
+
 export default function ProfilePage() {
     const { auth } = usePage<SharedProps>().props;
 
@@ -24,7 +53,6 @@ export default function ProfilePage() {
     const email = auth?.user?.email ?? 'user@example.com';
     const handle = `@${(email.split('@')[0] || 'player').replace(/[^a-zA-Z0-9_]/g, '')}`;
 
-    // Mock stats to mirror the reference design
     const stats = [
         { label: 'EXERCISES', value: 2 },
         { label: 'TOTAL XP', value: 20 },
@@ -32,9 +60,48 @@ export default function ProfilePage() {
         { label: 'DAILY STREAK', value: 2 },
     ];
 
+    // State untuk grafik mood
+    const [moodData, setMoodData] = useState<MoodLog[]>([]);
+    const [loadingMood, setLoadingMood] = useState(true);
+
+    useEffect(() => {
+        const fetchMoods = async () => {
+            setLoadingMood(true);
+
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                console.error("User not logged in");
+                setLoadingMood(false);
+                return;
+            }
+            const userId = auth?.user?.id; 
+            const { data, error } = await supabase
+                .from("mood_logs")
+                .select("created_at, mood")
+                .eq("user_id", userId) // cocok dengan bigint
+                .order("created_at", { ascending: true });
+
+            if (error) console.error("Error fetching moods:", error);
+            else setMoodData(data || []);
+
+            setLoadingMood(false);
+        };
+
+        fetchMoods();
+    }, []);
+
+    const chartData = moodData.map((log) => ({
+        date: new Date(log.created_at).toLocaleDateString("id-ID", {
+            day: "2-digit",
+            month: "short",
+        }),
+        score: moodToScore[log.mood] ?? 0,
+    }));
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Profile" />
+            
 
             <div className="space-y-6 p-6">
                 {/* Header banner */}
@@ -99,7 +166,7 @@ export default function ProfilePage() {
                         <p className="font-mono text-sm text-muted-foreground">Pin a project</p>
                     </div>
 
-                    {/* Right: Stats + Tabs */}
+                    {/* Right: Stats + Tabs + Mood Chart */}
                     <div className="space-y-4 md:col-span-1">
                         {/* Stats */}
                         <div className="grid grid-cols-2 gap-3 md:grid-cols-2">
@@ -120,6 +187,47 @@ export default function ProfilePage() {
                             <div className="rounded-sm border border-sidebar-border/70 px-3 py-1 text-xs text-muted-foreground">Projects (0)</div>
                             <div className="rounded-sm border border-sidebar-border/70 px-3 py-1 text-xs text-muted-foreground">Certificates</div>
                         </div>
+
+                        {/* Mood Chart */}
+                        <Card className="rounded-lg border border-sidebar-border/70 shadow-sm">
+                            <CardHeader>
+                                <h3 className="text-sm font-semibold text-foreground">Grafik Mood Kamu</h3>
+                            </CardHeader>
+                            <CardContent>
+                                {loadingMood ? (
+                                    <div className="flex items-center justify-center py-10">
+                                        <Loader2 className="animate-spin h-6 w-6 text-gray-500" />
+                                    </div>
+                                ) : moodData.length === 0 ? (
+                                    <p className="text-center text-gray-500 py-6">
+                                        Belum ada data mood 😴
+                                    </p>
+                                ) : (
+                                    <ResponsiveContainer width="100%" height={200}>
+                                        <LineChart data={chartData}>
+                                            <CartesianGrid strokeDasharray="3 3" />
+                                            <XAxis dataKey="date" />
+                                            <YAxis domain={[0, 5]} ticks={[1, 2, 3, 4, 5]} />
+                                            <Tooltip
+                                                formatter={(value: number) => {
+                                                    const mood = Object.keys(moodToScore).find(
+                                                        (key) => moodToScore[key] === value
+                                                    );
+                                                    return [mood, "Mood"];
+                                                }}
+                                            />
+                                            <Line
+                                                type="monotone"
+                                                dataKey="score"
+                                                stroke="#4f46e5"
+                                                strokeWidth={3}
+                                                dot={{ r: 5 }}
+                                            />
+                                        </LineChart>
+                                    </ResponsiveContainer>
+                                )}
+                            </CardContent>
+                        </Card>
 
                         {/* Empty state message */}
                         <div className="rounded-lg border border-sidebar-border/70 bg-muted/40 p-4 text-center dark:bg-muted/20">

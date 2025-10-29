@@ -36,6 +36,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('leaderboard', function () {
         return Inertia::render('leaderboard/index');
     })->name('leaderboard');
+<<<<<<< HEAD
+=======
+
+    // Mood tracker endpoints
+    Route::get('moods', [\App\Http\Controllers\MoodController::class, 'index'])->name('moods.index');
+    Route::post('moods', [\App\Http\Controllers\MoodController::class, 'store'])->name('moods.store');
+    
+>>>>>>> 06c0e6a4146661cb4ef47c0f93ffd9543794a832
     Route::get('mental-health-chat', function () {
         return Inertia::render('mental-health-chat/index');
     })->name('mental-health-chat');

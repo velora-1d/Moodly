@@ -25,13 +25,47 @@ import {
     User,
     Zap,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+
 
 type SharedProps = {
     auth: {
         user: { id: number; name: string; email: string } | null;
     };
 };
+
+// helper: format date as YYYY-MM-DD
+function ymd(date: Date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+// helper: list all days for the current month
+function getMonthDays(date = new Date()) {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const days: string[] = [];
+    for (let i = 1; i <= daysInMonth; i++) {
+        days.push(ymd(new Date(year, month, i)));
+    }
+    return days;
+}
+
+// helper: build calendar grid with leading blanks (Monday-first)
+function getMonthGrid(date = new Date()) {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDay = new Date(year, month, 1).getDay(); // 0=Sun..6=Sat
+    const leadingBlanks = (firstDay + 6) % 7; // shift to Monday-first (Sun becomes 6)
+    const grid: Array<string | null> = [];
+    for (let i = 0; i < leadingBlanks; i++) grid.push(null);
+    for (let d = 1; d <= daysInMonth; d++) grid.push(ymd(new Date(year, month, d)));
+    return grid;
+}
 
 export default function Dashboard() {
     const { auth } = usePage<SharedProps>().props;
@@ -52,13 +86,22 @@ export default function Dashboard() {
     );
 
     const moods = [
-        { emoji: '😡', label: 'Sangat Buruk' },
-        { emoji: '😟', label: 'Buruk' },
-        { emoji: '😐', label: 'Netral' },
-        { emoji: '🙂', label: 'Baik' },
-        { emoji: '😄', label: 'Sangat Baik' },
+        { emoji: "😡", label: "Sangat Buruk" },
+        { emoji: "😟", label: "Buruk" },
+        { emoji: "😐", label: "Netral" },
+        { emoji: "🙂", label: "Baik" },
+        { emoji: "😄", label: "Sangat Baik" },
     ];
     const [selectedMood, setSelectedMood] = useState<number | null>(null);
+    const [moodHistory, setMoodHistory] = useState<Record<string, { emoji: string; label?: string }>>({});
+    const [streak, setStreak] = useState<number>(0);
+    const monthDays = useMemo(() => getMonthDays(new Date()), []);
+    const [currentMonthDate, setCurrentMonthDate] = useState(new Date());
+    const monthGrid = useMemo(() => getMonthGrid(currentMonthDate), [currentMonthDate]);
+    const weekdays = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+    const prevMonth = () => setCurrentMonthDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
+    const nextMonth = () => setCurrentMonthDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
+    const [openMoodDialog, setOpenMoodDialog] = useState(false);
 
     // Pixel/arcade greeting bubble component
     function PixelGreeting({ username }: { username: string }) {
@@ -74,6 +117,57 @@ export default function Dashboard() {
                 </div>
             </div>
         );
+    }
+
+    // load moods and streak on mount
+    useEffect(() => {
+        const loadMoods = async () => {
+            try {
+                const res = await fetch('/moods', { headers: { Accept: 'application/json' } });
+                if (!res.ok) return;
+                const payload = await res.json();
+                const map: Record<string, { emoji: string; label?: string }> = {};
+                if (Array.isArray(payload?.data)) {
+                    for (const log of payload.data) {
+                        if (log?.date && log?.mood) {
+                            map[log.date] = { emoji: log.mood as string, label: (log.label as string | undefined) };
+                        }
+                    }
+                }
+                setMoodHistory(map);
+                setStreak(typeof payload?.streak === 'number' ? payload.streak : 0);
+                const today = ymd(new Date());
+                const idx = moods.findIndex((m) => m.emoji === map[today]?.emoji);
+                setSelectedMood(idx >= 0 ? idx : null);
+            } catch {
+                // ignore
+            }
+        };
+        loadMoods();
+    }, []);
+
+    // save today mood
+    async function saveMood(i: number) {
+        try {
+            setSelectedMood(i);
+            const mood = moods[i];
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            const res = await fetch('/moods', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    Accept: 'application/json',
+                },
+                body: JSON.stringify({ mood: mood.emoji, label: mood.label, date: ymd(new Date()) }),
+            });
+            const payload = await res.json().catch(() => ({}));
+            const date = typeof payload?.date === 'string' ? payload.date : ymd(new Date());
+            setMoodHistory((prev) => ({ ...prev, [date]: { emoji: mood.emoji, label: mood.label } }));
+            setStreak((s) => (typeof payload?.streak === 'number' ? payload.streak : s));
+        } catch {
+            // ignore
+        }
     }
 
     return (
@@ -314,10 +408,8 @@ export default function Dashboard() {
 
                     <div className="rounded-xl border border-sidebar-border/70 bg-card p-4">
                         <div className="flex items-center justify-between gap-2">
-                            <p className="text-sm font-semibold">
-                                Mood Tracker
-                            </p>
-                            <Dialog>
+                            <p className="text-sm font-semibold">Mood Tracker</p>
+                            <Dialog open={openMoodDialog} onOpenChange={setOpenMoodDialog}>
                                 <DialogTrigger asChild>
                                     <Button size="sm" className="rounded-sm">
                                         Buka
@@ -339,15 +431,11 @@ export default function Dashboard() {
                                                 key={mood.label}
                                                 type="button"
                                                 aria-label={mood.label}
-                                                onClick={() =>
-                                                    setSelectedMood(i)
-                                                }
-                                                className={
-                                                    'flex items-center justify-center rounded-md border border-sidebar-border/60 bg-muted/40 p-3 transition hover:bg-muted/60 focus:ring-2 focus:ring-ring focus:outline-hidden ' +
-                                                    (selectedMood === i
-                                                        ? 'bg-indigo-500/10 ring-2 ring-indigo-500'
-                                                        : '')
-                                                }
+                                                onClick={async () => {
+                                                    await saveMood(i);
+                                                    setOpenMoodDialog(false);
+                                                }}
+                                                className={"flex items-center justify-center rounded-md border border-sidebar-border/60 bg-muted/40 p-3 transition hover:bg-muted/60 focus:outline-hidden focus:ring-2 focus:ring-ring " + (selectedMood === i ? "ring-2 ring-indigo-500 bg-indigo-500/10" : "")}
                                             >
                                                 <span className="text-3xl leading-none">
                                                     {mood.emoji}
@@ -358,11 +446,54 @@ export default function Dashboard() {
                                 </DialogContent>
                             </Dialog>
                         </div>
+                        <div className="mt-3 text-xs text-muted-foreground">
+                            Streak: {streak} hari berturut-turut
+                        </div>
+                    </div>
+                    <div className="rounded-xl border border-sidebar-border/70 bg-card p-4">
+                        <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm font-semibold">Kalender Mood</p>
+                            <div className="flex items-center gap-2">
+                                <Button size="sm" variant="outline" className="rounded-sm" onClick={prevMonth}>Sebelumnya</Button>
+                                <span className="text-xs font-medium text-muted-foreground">
+                                    {currentMonthDate.toLocaleString('id-ID', { month: 'long', year: 'numeric' })}
+                                </span>
+                                <Button size="sm" variant="outline" className="rounded-sm" onClick={nextMonth}>Berikutnya</Button>
+                            </div>
+                        </div>
+                        {/* Weekday header */}
+                        <div className="mt-3 grid grid-cols-7 gap-2 text-[10px] text-muted-foreground">
+                            {weekdays.map((w) => (
+                                <div key={w} className="text-center font-medium">{w}</div>
+                            ))}
+                        </div>
+
+                        <div className="mt-2 grid grid-cols-7 gap-2">
+                            {monthGrid.map((date, idx) => {
+                                if (!date) {
+                                    return <div key={`blank-${idx}`} className="h-16 rounded-md border border-sidebar-border/40 bg-muted/10" />;
+                                }
+                                const [y, m, d] = date.split('-').map(Number);
+                                const emoji = moodHistory[date]?.emoji ?? '';
+                                const isToday = date === ymd(new Date());
+                                return (
+                                    <div
+                                        key={date}
+                                        className={"h-16 rounded-md border bg-muted/30 p-2 flex flex-col justify-between " + (isToday ? "border-indigo-500" : "border-sidebar-border/60")}
+                                    >
+                                        <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                                            <span className="font-mono">{d}</span>
+                                        </div>
+                                        <div className="flex items-center justify-center text-2xl leading-none">
+                                            {emoji}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             </div>
         </AppLayout>
     );
 }
-
-/* mood state moved inside component */
