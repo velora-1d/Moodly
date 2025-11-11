@@ -1,154 +1,340 @@
-import AppLayout from '@/layouts/app-layout';
-import { dashboard, missions } from '@/routes';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Zap, Lock, Trophy, Clock, Medal } from 'lucide-react';
-import { useMemo, useState } from 'react';
+"use client";
 
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: dashboard().url },
-    { title: 'Missions', href: missions().url },
-];
+import { Head, Link, usePage } from "@inertiajs/react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { mentoring, leaderboard as leaderboardRoute, missions as missionsRoute, shop, profile } from "@/routes";
+import { useAppearance } from "@/hooks/use-appearance";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import {
+  Trophy,
+  Target,
+  Star,
+  Flame,
+  CheckCircle2,
+  ShoppingCart,
+  User,
+  MoreHorizontal,
+  Award,
+  Zap,
+  Clock,
+  Calendar,
+} from "lucide-react";
+
+type SharedProps = {
+  auth: { user: { id: number; name: string; email: string } | null };
+};
 
 export default function MissionsPage() {
-    // Daily mission progress (mock for now)
-    const DAILY_GOAL_XP = 10;
-    const [dailyXP, setDailyXP] = useState(2);
-    const progressPct = useMemo(
-        () => Math.min(100, Math.round((dailyXP / DAILY_GOAL_XP) * 100)),
-        [dailyXP],
-    );
+  const [activeTab, setActiveTab] = useState<"daily" | "weekly">("daily");
+  const { updateAppearance } = useAppearance();
+  const { auth } = usePage<SharedProps>().props;
+  const name = auth?.user?.name ?? "Player";
 
-    const timeLeftLabel = '2 JAM';
+  useEffect(() => {
+    updateAppearance("light");
+  }, [updateAppearance]);
 
-    const lockedMissions = [
-        {
-            id: 'locked-1',
-            title: 'Misi lain akan segera terbuka',
-            description: 'Selesaikan misi harian untuk membuka misi berikutnya',
-        },
-    ];
+  return (
+    <div className="missions-ref-theme antialiased min-h-screen bg-gradient-to-b from-purple-50 to-white">
+      <Head title="Missions" />
 
-    return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Missions" />
-
-            <div className="space-y-6 p-6">
-                {/* Top grid: welcome + monthly challenge */}
-                <div className="grid gap-6 lg:grid-cols-3">
-                    {/* Welcome banner */}
-                    <div className="lg:col-span-2 rounded-xl border border-sidebar-border/70 bg-gradient-to-br from-violet-500/20 via-fuchsia-500/10 to-emerald-500/20 p-5">
-                        <div className="flex items-start justify-between">
-                            <div className="max-w-xl">
-                                <h2 className="text-lg font-bold text-foreground">Selamat datang!</h2>
-                                <p className="mt-1 text-sm text-muted-foreground">
-                                    Taklukkan misi untuk mendapatkan hadiah! Misi direset setiap hari.
-                                </p>
-                            </div>
-                            <div className="hidden md:flex items-center gap-2 rounded-lg border border-sidebar-border/60 bg-background/60 px-3 py-2">
-                                <Medal className="size-5 text-yellow-400" />
-                                <span className="font-mono text-xs text-muted-foreground">Arcade Mode</span>
-                            </div>
-                        </div>
-
-                        {/* Pixel pattern */}
-                        <div className="mt-4 h-24 w-full rounded-md border border-sidebar-border/60 bg-[repeating-linear-gradient(45deg,#0000_0_12px,#ffffff10_12px_24px)]" />
-                    </div>
-
-                    {/* Monthly challenge card */}
-                    <div className="rounded-xl border border-sidebar-border/70 bg-sidebar p-5">
-                        <div className="flex items-center gap-3">
-                            <Trophy className="size-5 text-yellow-400" />
-                            <p className="text-sm font-semibold text-foreground">
-                                Tantangan bulanan akan segera terbuka!
-                            </p>
-                        </div>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                            Selesaikan tantangan setiap bulan untuk mendapatkan lencana eksklusif.
-                        </p>
-                        <div className="mt-3">
-                            <Link href={dashboard()} prefetch>
-                                <Button className="w-full rounded-sm" variant="default">
-                                    Mulai Pelajaran
-                                </Button>
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Daily mission */}
-                <div className="rounded-xl border border-sidebar-border/70 bg-card p-5">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-md border border-yellow-400/40 bg-yellow-400/10">
-                                <Zap className="size-4 text-yellow-300" />
-                            </div>
-                            <div>
-                                <p className="text-sm font-semibold">Dapatkan {DAILY_GOAL_XP} XP</p>
-                                <p className="text-xs text-muted-foreground">Misi Harian</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Clock className="size-4" />
-                            {timeLeftLabel}
-                        </div>
-                    </div>
-
-                    {/* Progress bar */}
-                    <div className="mt-3">
-                        <div className="relative h-3 w-full overflow-hidden rounded-md border border-sidebar-border/60 bg-muted">
-                            <div
-                                className="absolute left-0 top-0 h-full bg-gradient-to-r from-indigo-500 to-fuchsia-500"
-                                style={{ width: `${progressPct}%` }}
-                            />
-                            <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,#0000_0_8px,#ffffff10_8px_16px)]" />
-                        </div>
-                        <div className="mt-2 flex items-center justify-between">
-                            <span className="font-mono text-xs text-muted-foreground">
-                                {dailyXP} / {DAILY_GOAL_XP}
-                            </span>
-                            <div className="flex items-center gap-2">
-                                <div className="flex items-center gap-1 rounded-md border border-sidebar-border/60 px-2 py-1">
-                                    <Zap className="size-3 text-yellow-300" />
-                                    <span className="font-mono text-xs">XP</span>
-                                </div>
-                                <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="rounded-sm"
-                                    onClick={() => setDailyXP((v) => Math.min(DAILY_GOAL_XP, v + 2))}
-                                >
-                                    Kerjakan Misi
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Locked missions */}
-                <div className="rounded-xl border border-sidebar-border/70 bg-muted/40 p-5">
-                    {lockedMissions.map((m) => (
-                        <div
-                            key={m.id}
-                            className="flex items-center justify-between rounded-lg border border-dashed border-sidebar-border/60 bg-background/50 px-4 py-3"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className="flex h-8 w-8 items-center justify-center rounded-md border border-sidebar-border/60 bg-background/60">
-                                    <Lock className="size-4 opacity-70" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium">{m.title}</p>
-                                    <p className="text-xs text-muted-foreground">{m.description}</p>
-                                </div>
-                            </div>
-                            <Button variant="secondary" size="sm" className="rounded-sm" disabled>
-                                Segera
-                            </Button>
-                        </div>
-                    ))}
-                </div>
+      {/* Top Navigation Bar (copied with identical visual) */}
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center">
+                <Star className="w-6 h-6 text-white fill-white" />
+              </div>
+              <div>
+                <h1 className="font-bold text-lg">MindPath</h1>
+                <p className="text-xs text-gray-500">Perjalanan Mental Sehat</p>
+              </div>
             </div>
-        </AppLayout>
-    );
+
+            {/* Navigation Tabs */}
+            <div className="hidden md:flex items-center gap-2">
+              <Link href={mentoring()} className="contents" prefetch>
+                <NavTab icon={<Target className="w-4 h-4" />} label="Belajar" />
+              </Link>
+              <Link href={leaderboardRoute()} className="contents" prefetch>
+                <NavTab icon={<Trophy className="w-4 h-4" />} label="Skor" />
+              </Link>
+              <Link href={missionsRoute()} className="contents" prefetch>
+                <NavTab icon={<Award className="w-4 h-4" />} label="Misi" active />
+              </Link>
+              <Link href={shop()} className="contents" prefetch>
+                <NavTab icon={<ShoppingCart className="w-4 h-4" />} label="Toko" />
+              </Link>
+              <Link href={profile()} className="contents" prefetch>
+                <NavTab icon={<User className="w-4 h-4" />} label="Profil" />
+              </Link>
+              <NavTab icon={<MoreHorizontal className="w-4 h-4" />} label="Lainnya" />
+            </div>
+
+            {/* User Avatar */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold">
+                {name.slice(0, 1).toUpperCase()}
+              </div>
+              <span className="hidden sm:block font-semibold">{name}</span>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Misi Kamu</h1>
+          <p className="text-gray-600">Selesaikan misi untuk mendapatkan XP dan naik level</p>
+        </div>
+
+        {/* Tab Switcher */}
+        <div className="flex items-center gap-3 mb-8">
+          <button
+            onClick={() => setActiveTab("daily")}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
+              activeTab === "daily"
+                ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg"
+                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+            }`}
+          >
+            <Clock className="w-4 h-4" />
+            Misi Harian
+            {activeTab === "daily" && (
+              <Badge variant="secondary" className="ml-2 bg-white/20 text-white border-0">
+                4
+              </Badge>
+            )}
+          </button>
+          
+          <button
+            onClick={() => setActiveTab("weekly")}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
+              activeTab === "weekly"
+                ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg"
+                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+            }`}
+          >
+            <Calendar className="w-4 h-4" />
+            Misi Mingguan
+            {activeTab === "weekly" && (
+              <Badge variant="secondary" className="ml-2 bg-white/20 text-white border-0">
+                2
+              </Badge>
+            )}
+          </button>
+        </div>
+
+        {/* Daily Missions */}
+        {activeTab === "daily" && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-4"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Misi Harian</h2>
+              <Badge variant="outline" className="text-orange-600 border-orange-300 bg-orange-50">
+                <Clock className="w-3 h-3 mr-1" />
+                Reset dalam 6 jam
+              </Badge>
+            </div>
+
+            <MissionCard
+              title="Selesaikan 8 misi lagi hari ini"
+              description="Target harian kamu untuk terus berkembang"
+              icon="🎯"
+              iconBg="from-purple-400 to-purple-600"
+              progress={2}
+              total={10}
+              xp={50}
+              delay={0.1}
+            />
+            
+            <MissionCard
+              title="Dapatkan 10 XP"
+              description="Complete any lesson or exercise"
+              icon="⚡"
+              iconBg="from-yellow-400 to-orange-500"
+              progress={7}
+              total={10}
+              xp={50}
+              delay={0.2}
+            />
+            
+            <MissionCard
+              title="Capai Target Harian"
+              description="Reach 100 points in one day"
+              icon="🎯"
+              iconBg="from-blue-400 to-cyan-500"
+              progress={65}
+              total={100}
+              xp={100}
+              delay={0.3}
+            />
+            
+            <MissionCard
+              title="Jaga Streak-mu"
+              description="Don't break your daily streak"
+              icon="🔥"
+              iconBg="from-orange-400 to-red-500"
+              progress={1}
+              total={1}
+              xp={75}
+              isCompleted
+              delay={0.4}
+            />
+          </motion.div>
+        )}
+
+        {/* Weekly Missions */}
+        {activeTab === "weekly" && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-4"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Misi Mingguan</h2>
+              <Badge variant="outline" className="text-blue-600 border-blue-300 bg-blue-50">
+                <Calendar className="w-3 h-3 mr-1" />
+                Reset dalam 3 hari
+              </Badge>
+            </div>
+
+            <MissionCard
+              title="Juara Mingguan"
+              description="Complete 50 missions this week"
+              icon="🏆"
+              iconBg="from-amber-400 to-yellow-500"
+              progress={32}
+              total={50}
+              xp={500}
+              delay={0.1}
+            />
+            
+            <MissionCard
+              title="Master Class"
+              description="Get grade A in 10 different lessons"
+              icon="👑"
+              iconBg="from-indigo-400 to-purple-600"
+              progress={6}
+              total={10}
+              xp={750}
+              delay={0.2}
+            />
+          </motion.div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function NavTab({ icon, label, active = false }: { icon: React.ReactNode; label: string; active?: boolean }) {
+  return (
+    <button
+      className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-colors ${
+        active
+          ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/30"
+          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+      }`}
+    >
+      {icon}
+      <span className="text-sm">{label}</span>
+    </button>
+  );
+}
+
+interface MissionCardProps {
+  title: string;
+  description: string;
+  icon: string;
+  iconBg: string;
+  progress: number;
+  total: number;
+  xp: number;
+  isCompleted?: boolean;
+  delay: number;
+}
+
+function MissionCard({
+  title,
+  description,
+  icon,
+  iconBg,
+  progress,
+  total,
+  xp,
+  isCompleted = false,
+  delay,
+}: MissionCardProps) {
+  const percentage = (progress / total) * 100;
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay }}>
+      <Card
+        className={`border-0 shadow-md hover:shadow-xl transition-all cursor-pointer ${
+          isCompleted ? "bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-l-green-500" : "bg-white hover:scale-[1.02]"
+        }`}
+      >
+        <CardContent className="p-6">
+          <div className="flex items-start gap-5">
+            {/* Icon */}
+            <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${iconBg} flex items-center justify-center text-3xl flex-shrink-0 shadow-lg`}>
+              {icon}
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <h3 className="font-bold text-lg mb-1 text-gray-900">{title}</h3>
+                  <p className="text-sm text-gray-600">{description}</p>
+                </div>
+                
+                {isCompleted ? (
+                  <Badge className="bg-green-500 hover:bg-green-500 text-white ml-3 shadow-md">
+                    <CheckCircle2 className="w-3 h-3 mr-1" />
+                    Selesai
+                  </Badge>
+                ) : (
+                  <div className="flex items-center gap-1.5 bg-purple-100 text-purple-700 font-bold px-3 py-1.5 rounded-full ml-3">
+                    <Zap className="w-4 h-4 fill-current" />
+                    <span className="text-sm">+{xp} XP</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Progress Bar */}
+              <div className="mt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-bold text-gray-700">
+                    {progress} / {total}
+                  </span>
+                  <span className="text-sm font-semibold text-purple-600">{Math.round(percentage)}%</span>
+                </div>
+                <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${percentage}%` }}
+                    transition={{ duration: 1, delay: delay + 0.2 }}
+                    className={`h-full rounded-full ${
+                      isCompleted ? "bg-gradient-to-r from-green-400 to-emerald-500" : "bg-gradient-to-r from-purple-500 to-purple-600"
+                    }`}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
 }

@@ -173,3 +173,9 @@
 .font-accent {
   font-family: 'Space Grotesk', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
 }
+
+/* Override token khusus untuk halaman missions agar identik dengan referensi */
+.missions-ref-theme {
+  --ring: oklch(0.708 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}

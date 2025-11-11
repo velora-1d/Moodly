@@ -32,6 +32,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { Head, Link, usePage } from "@inertiajs/react";
 import { mentoring, leaderboard, missions, shop, profile } from "@/routes";
+import { useAppearance } from "@/hooks/use-appearance";
 
 type SharedProps = {
   auth: {
@@ -49,6 +50,7 @@ function ymd(date: Date) {
 export default function Dashboard() {
   const { auth } = usePage<SharedProps>().props;
   const name = auth?.user?.name ?? "Player";
+  const { updateAppearance } = useAppearance();
 
   const [currentStreak, setCurrentStreak] = useState(3);
   const [totalPoints] = useState(245);
@@ -62,6 +64,11 @@ export default function Dashboard() {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Force light theme for this page to match the reference design
+  useEffect(() => {
+    updateAppearance("light");
+  }, [updateAppearance]);
 
   const DAILY_GOAL_XP = 10;
   const [dailyXP, setDailyXP] = useState(2);
@@ -357,7 +364,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className="border-purple-100 shadow-lg">
+            <Card className="border-purple-100 shadow-lg bg-white">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
@@ -383,7 +390,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className="border-blue-100 shadow-lg">
+            <Card className="border-blue-100 shadow-lg bg-white">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
@@ -405,7 +412,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className="border-green-100 shadow-lg">
+            <Card className="border-green-100 shadow-lg bg-white">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" onClick={() => setCurrentMonthDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}>
