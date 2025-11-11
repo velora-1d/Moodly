@@ -3,6 +3,7 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
+import viteCompression from 'vite-plugin-compression';
 import path from 'node:path';
 
 export default defineConfig({
@@ -16,6 +17,20 @@ export default defineConfig({
         tailwindcss(),
         wayfinder({
             formVariants: true,
+        }),
+        // Generate precompressed assets for production (Brotli & Gzip)
+        viteCompression({
+            algorithm: 'brotliCompress',
+            ext: '.br',
+            apply: 'build',
+            threshold: 1024,
+            compressionOptions: { quality: 11 },
+        }),
+        viteCompression({
+            algorithm: 'gzip',
+            ext: '.gz',
+            apply: 'build',
+            threshold: 1024,
         }),
     ],
     resolve: {
@@ -37,5 +52,20 @@ export default defineConfig({
     },
     esbuild: {
         jsx: 'automatic',
+    },
+    optimizeDeps: {
+        include: [
+            'react',
+            'react-dom',
+            '@inertiajs/react',
+            'lucide-react',
+            '@radix-ui/react-label',
+            '@radix-ui/react-dialog',
+        ],
+    },
+    build: {
+        sourcemap: false,
+        cssCodeSplit: true,
+        chunkSizeWarningLimit: 700,
     },
 });
