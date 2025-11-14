@@ -12,15 +12,8 @@ import {
   CardHeader,
   CardContent,
 } from "@/components/ui/card";
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-} from "recharts";
+import React, { Suspense } from "react";
+const MoodChart = React.lazy(() => import("./components/MoodChart"));
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: route('dashboard') },
@@ -203,28 +196,15 @@ export default function ProfilePage() {
                                         Belum ada data mood 😴
                                     </p>
                                 ) : (
-                                    <ResponsiveContainer width="100%" height={200}>
-                                        <LineChart data={chartData}>
-                                            <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="date" />
-                                            <YAxis domain={[0, 5]} ticks={[1, 2, 3, 4, 5]} />
-                                            <Tooltip
-                                                formatter={(value: number) => {
-                                                    const mood = Object.keys(moodToScore).find(
-                                                        (key) => moodToScore[key] === value
-                                                    );
-                                                    return [mood, "Mood"];
-                                                }}
-                                            />
-                                            <Line
-                                                type="monotone"
-                                                dataKey="score"
-                                                stroke="#4f46e5"
-                                                strokeWidth={3}
-                                                dot={{ r: 5 }}
-                                            />
-                                        </LineChart>
-                                    </ResponsiveContainer>
+                                    <Suspense
+                                      fallback={
+                                        <div className="flex items-center justify-center py-10">
+                                          <Loader2 className="animate-spin h-6 w-6 text-gray-500" />
+                                        </div>
+                                      }
+                                    >
+                                      <MoodChart data={chartData} />
+                                    </Suspense>
                                 )}
                             </CardContent>
                         </Card>

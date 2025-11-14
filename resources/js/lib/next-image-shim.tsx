@@ -14,6 +14,11 @@ export default function Image(props: any) {
     objectFit,
     objectPosition,
     priority,
+    sizes,
+    srcSet,
+    loading,
+    decoding,
+    fetchpriority,
   } = props || {};
 
   const resolvedSrc = typeof src === 'string' ? src : src?.src ?? '';
@@ -41,7 +46,11 @@ export default function Image(props: any) {
       height={isFill ? undefined : height}
       className={className}
       style={baseStyle}
-      loading={priority ? 'eager' : 'lazy'}
+      loading={loading ?? (priority ? 'eager' : 'lazy')}
+      decoding={decoding ?? 'async'}
+      fetchPriority={fetchpriority ?? (priority ? 'high' : undefined)}
+      sizes={sizes ?? (isFill ? '100vw' : undefined)}
+      srcSet={srcSet}
     />
   );
 }

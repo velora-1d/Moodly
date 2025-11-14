@@ -3,6 +3,7 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
+import { visualizer } from 'rollup-plugin-visualizer';
 import viteCompression from 'vite-plugin-compression';
 import path from 'node:path';
 
@@ -17,6 +18,11 @@ export default defineConfig({
         tailwindcss(),
         wayfinder({
             formVariants: true,
+        }),
+        visualizer({
+            filename: 'bundle-visualizer.html',
+            template: 'treemap',
+            brotliSize: true,
         }),
         // Generate precompressed assets for production (Brotli & Gzip)
         viteCompression({
@@ -67,5 +73,23 @@ export default defineConfig({
         sourcemap: false,
         cssCodeSplit: true,
         chunkSizeWarningLimit: 700,
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    recharts: ['recharts'],
+                    framer: ['framer-motion'],
+                    radix: [
+                        '@radix-ui/react-dialog',
+                        '@radix-ui/react-tooltip',
+                        '@radix-ui/react-select',
+                        '@radix-ui/react-navigation-menu',
+                        '@radix-ui/react-dropdown-menu',
+                        '@radix-ui/react-accordion',
+                    ],
+                    supabase: ['@supabase/supabase-js'],
+                    lucide: ['lucide-react'],
+                },
+            },
+        },
     },
 });
