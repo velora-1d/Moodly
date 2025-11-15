@@ -10,7 +10,7 @@ import {
   Trophy,
   Flame,
   ShoppingCart,
-  Settings,
+  UserRound,
   Menu,
   Sparkles,
   Star,
@@ -82,7 +82,7 @@ export default function Dashboard() {
     { icon: Trophy, label: "Skor", color: "bg-yellow-500", href: leaderboard().url },
     { icon: Target, label: "Misi", color: "bg-blue-500", href: missions().url },
     { icon: ShoppingCart, label: "Toko", color: "bg-green-500", href: shop().url },
-    { icon: Settings, label: "Profil", color: "bg-pink-500", href: profile().url },
+    { icon: UserRound, label: "Profil", color: "bg-pink-500", href: profile().url },
     { icon: Award, label: "Lainnya", color: "bg-gray-500", href: "/" },
   ] as const;
 
