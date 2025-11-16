@@ -13,6 +13,7 @@ import {
 import React from "react";
 import { useAppearance } from '@/hooks/use-appearance';
 import { Progress } from "@/components/ui/progress";
+import DashboardTopNav from '@/components/dashboard-top-nav';
 
 type StatItem = { label: string; value: number | string; icon: React.ReactNode };
 
@@ -74,47 +75,7 @@ export default function ProfilePage() {
     return (
       <div className="missions-ref-theme antialiased min-h-screen bg-gradient-to-b from-purple-50 to-white">
         <Head title="Profil" />
-        <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center">
-                  <Star className="w-6 h-6 text-white fill-white" />
-                </div>
-                <div>
-                  <h1 className="font-bold text-lg">MindPath</h1>
-                  <p className="text-xs text-gray-500">Perjalanan Mental Sehat</p>
-                </div>
-              </div>
-
-              <div className="hidden md:flex items-center gap-2">
-                <Link href={mentoring()} className="contents" prefetch>
-                  <NavTab icon={<Target className="w-4 h-4" />} label="Belajar" />
-                </Link>
-                <Link href={leaderboardRoute()} className="contents" prefetch>
-                  <NavTab icon={<Trophy className="w-4 h-4" />} label="Skor" />
-                </Link>
-                <Link href={missionsRoute()} className="contents" prefetch>
-                  <NavTab icon={<Award className="w-4 h-4" />} label="Misi" />
-                </Link>
-                <Link href={shop()} className="contents" prefetch>
-                  <NavTab icon={<ShoppingCart className="w-4 h-4" />} label="Toko" />
-                </Link>
-                <Link href={profileRoute()} className="contents" prefetch>
-                  <NavTab icon={<User className="w-4 h-4" />} label="Profil" active />
-                </Link>
-                <NavTab icon={<MoreHorizontal className="w-4 h-4" />} label="Lainnya" />
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold">
-                  {name.slice(0, 1).toUpperCase()}
-                </div>
-                <span className="hidden sm:block font-semibold">{name}</span>
-              </div>
-            </div>
-          </div>
-        </nav>
+        <DashboardTopNav />
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
           <div className="flex items-start gap-8">
             <div className="flex-1 space-y-8">
