@@ -34,6 +34,9 @@ import { Head, Link, usePage } from "@inertiajs/react";
 import { mentoring, leaderboard, missions, shop, profile } from "@/routes";
 import DashboardTopNav from "@/components/dashboard-top-nav";
 import { useAppearance } from "@/hooks/use-appearance";
+import { supabase } from "@/lib/supabaseClient";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 type SharedProps = {
   auth: {
@@ -54,8 +57,7 @@ export default function Dashboard() {
   const { updateAppearance } = useAppearance();
 
   const [currentStreak, setCurrentStreak] = useState(3);
-  const [totalPoints] = useState(245);
-  const [level] = useState(5);
+  const [stats, setStats] = useState({ totalPoints: 245, level: 5, badges: 12 });
   const [timeRemaining, setTimeRemaining] = useState(2 * 60 * 60);
   const [friendEmail, setFriendEmail] = useState("");
 
@@ -72,7 +74,10 @@ export default function Dashboard() {
   }, [updateAppearance]);
 
   const DAILY_GOAL_XP = 10;
-  const [dailyXP, setDailyXP] = useState(2);
+  const [dailyXP, setDailyXP] = useState(0);
+  const [isMoodOpen, setMoodOpen] = useState(false);
+  const [selectedMood, setSelectedMood] = useState<string>("");
+  const [note, setNote] = useState<string>("");
   const dailyPct = useMemo(
     () => Math.min(100, Math.round((dailyXP / DAILY_GOAL_XP) * 100)),
     [dailyXP]
@@ -89,9 +94,9 @@ export default function Dashboard() {
 
   const achievements = [
     { icon: Flame, label: "Streak", value: `${currentStreak} hari`, color: "text-orange-500" },
-    { icon: Star, label: "Level", value: level, color: "text-yellow-500" },
-    { icon: Zap, label: "XP", value: totalPoints, color: "text-purple-500" },
-    { icon: Award, label: "Badge", value: "12", color: "text-blue-500" },
+    { icon: Star, label: "Level", value: stats.level, color: "text-yellow-500" },
+    { icon: Zap, label: "XP", value: stats.totalPoints, color: "text-purple-500" },
+    { icon: Award, label: "Badge", value: String(stats.badges), color: "text-blue-500" },
   ] as const;
 
   const [streak, setStreak] = useState<number>(0);
@@ -102,45 +107,142 @@ export default function Dashboard() {
   const currentMonthLabel = currentMonthDate.toLocaleString("id-ID", { month: "long", year: "numeric" });
 
   useEffect(() => {
-    const loadMoods = async () => {
-      try {
-        const res = await fetch("/moods", { headers: { Accept: "application/json" } });
-        if (!res.ok) return;
-        const payload = await res.json();
-        const map: Record<string, { emoji: string; label?: string }> = {};
-        if (Array.isArray(payload?.data)) {
-          for (const log of payload.data) {
-            if (log?.date && log?.mood) {
-              map[log.date] = { emoji: log.mood as string, label: (log.label as string | undefined) };
-            }
+    const loadDashboardData = async () => {
+      const userId = auth?.user?.id;
+      if (!userId) return;
+      const isSupabaseConfigured = Boolean(
+        (import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) &&
+        (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY)
+      );
+      if (!isSupabaseConfigured) return;
+      const { data: moods } = await supabase
+        .from("mood_logs")
+        .select("date,created_at,mood,label")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: true });
+      const map: Record<string, { emoji: string; label?: string }> = {};
+      if (Array.isArray(moods)) {
+        for (const log of moods) {
+          const key = typeof log.date === "string" && log.date.length >= 10
+            ? log.date
+            : (()=>{ const d = new Date(log.created_at); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` })();
+          map[key] = { emoji: log.mood as string, label: (log.label as string | undefined) };
+        }
+      }
+      setMoodHistory(map);
+      const s = (() => {
+        let c = 0;
+        let date = new Date();
+        while (true) {
+          const key = ymd(date);
+          if (map[key]) {
+            c++;
+            date = new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1);
+          } else {
+            break;
           }
         }
-        setMoodHistory(map);
-        setStreak(typeof payload?.streak === "number" ? payload.streak : 0);
-        setCurrentStreak(typeof payload?.streak === "number" ? payload.streak : currentStreak);
+        return c;
+      })();
+      setStreak(s);
+      setCurrentStreak(s);
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      try {
+        const { data: xpToday } = await supabase
+          .from("xp_events")
+          .select("points,created_at")
+          .eq("user_id", userId)
+          .gte("created_at", start.toISOString());
+        const sum = Array.isArray(xpToday) ? xpToday.reduce((acc, e) => acc + (e.points || 0), 0) : 0;
+        setDailyXP(sum);
+      } catch {}
+
+      try {
+        const { data: userStats } = await supabase
+          .from("user_stats")
+          .select("level,total_points,badges_count")
+          .eq("user_id", userId)
+          .limit(1);
+        const row = Array.isArray(userStats) ? userStats[0] : null;
+        if (row) setStats({ level: row.level ?? stats.level, totalPoints: row.total_points ?? stats.totalPoints, badges: row.badges_count ?? stats.badges });
       } catch {}
     };
-    loadMoods();
-  }, []);
+    loadDashboardData();
+  }, [auth?.user?.id]);
 
   async function saveMoodQuick() {
+    const userId = auth?.user?.id;
+    if (!userId) return;
+    const isSupabaseConfigured = Boolean(
+      (import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) &&
+      (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY)
+    );
+    if (!isSupabaseConfigured) return;
+    const now = new Date();
+    const today = ymd(now);
+    const mood = selectedMood || "🙂";
+    const label = note || "";
+    const hadMoodBefore = !!moodHistory[today];
+    let existingRows: any[] | null = null;
     try {
-      const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "";
-      const today = ymd(new Date());
-      const res = await fetch("/moods", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-TOKEN": token,
-          Accept: "application/json",
-        },
-        body: JSON.stringify({ mood: "🙂", label: "Baik", date: today }),
-      });
-      const payload = await res.json().catch(() => ({}));
-      const date = typeof payload?.date === "string" ? payload.date : today;
-      setMoodHistory((prev) => ({ ...prev, [date]: { emoji: "🙂", label: "Baik" } }));
-      setStreak((s) => (typeof payload?.streak === "number" ? payload.streak : s));
+      const res = await supabase
+        .from("mood_logs")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("date", today)
+        .limit(1);
+      existingRows = res.data as any[] | null;
+    } catch {
+      existingRows = null;
+    }
+    const existingId = existingRows?.[0]?.id as number | undefined;
+    try {
+      if (existingId) {
+        await supabase
+          .from("mood_logs")
+          .update({ mood, label, updated_at: now.toISOString() })
+          .eq("id", existingId);
+      } else {
+        await supabase
+          .from("mood_logs")
+          .insert({ user_id: userId, date: today, created_at: now.toISOString(), mood, label });
+      }
+    } catch {
+      toast.error("Gagal mencatat mood");
+      return;
+    }
+    setMoodHistory((prev) => ({ ...prev, [today]: { emoji: mood, label } }));
+    if (!hadMoodBefore) {
+      try {
+        await supabase.from("xp_events").insert({ user_id: userId, points: 2, type: "mood_quick", created_at: now.toISOString() });
+      } catch {}
+      setDailyXP((v) => v + 2);
+      setStreak((s) => s + 1);
+    }
+    setMoodOpen(false);
+    setSelectedMood("");
+    setNote("");
+    toast.success(hadMoodBefore ? "Mood diperbarui" : "Mood dicatat");
+  }
+
+  async function addDailyXP(points: number) {
+    const userId = auth?.user?.id;
+    if (!userId) return;
+    const isSupabaseConfigured = Boolean(
+      (import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) &&
+      (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY)
+    );
+    if (!isSupabaseConfigured) return;
+    const now = new Date();
+    try {
+      await supabase.from("xp_events").insert({ user_id: userId, points, type: "daily_task", created_at: now.toISOString() });
     } catch {}
+    setDailyXP((v) => Math.min(DAILY_GOAL_XP, v + points));
+  }
+
+  function prevMoodHasToday(prev: Record<string, { emoji: string; label?: string }>) {
+    return !!prev[ymd(new Date())];
   }
 
   const calendarDays = (() => {
@@ -149,19 +251,29 @@ export default function Dashboard() {
     const firstDay = new Date(year, month, 1).getDay();
     const leading = (firstDay + 6) % 7;
     const totalDays = new Date(year, month + 1, 0).getDate();
-    const days: Array<{ day: number | null; highlighted: boolean }> = [];
-    for (let i = 0; i < leading; i++) days.push({ day: null, highlighted: false });
+    const days: Array<{ day: number | null; highlighted: boolean; emoji?: string }> = [];
+    for (let i = 0; i < leading; i++) days.push({ day: null, highlighted: false, emoji: undefined });
     for (let d = 1; d <= totalDays; d++) {
       const date = ymd(new Date(year, month, d));
-      const hasMood = !!moodHistory[date];
-      days.push({ day: d, highlighted: hasMood });
+      const entry = moodHistory[date];
+      const hasMood = !!entry;
+      days.push({ day: d, highlighted: hasMood, emoji: entry?.emoji });
     }
     return days;
   })();
 
-  const handleInviteFriend = (e: React.FormEvent) => {
+  const handleInviteFriend = async (e: React.FormEvent) => {
     e.preventDefault();
+    const userId = auth?.user?.id;
+    if (!userId || !friendEmail) return;
+    const isSupabaseConfigured = Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY);
+    if (!isSupabaseConfigured) return;
+    const now = new Date();
+    try {
+      await supabase.from("invites").insert({ inviter_user_id: userId, email: friendEmail, created_at: now.toISOString() });
+    } catch {}
     setFriendEmail("");
+    toast.success("Undangan dikirim");
   };
 
   return (
@@ -217,7 +329,7 @@ export default function Dashboard() {
                     </div>
                     <Badge className="bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white border-0 flex items-center gap-1.5 px-4 py-2 shadow-lg">
                       <Sparkles className="w-4 h-4" />
-                      <span className="font-bold">Level {level}</span>
+                      <span className="font-bold">Level {stats.level}</span>
                     </Badge>
                   </div>
                 </div>
@@ -346,7 +458,7 @@ export default function Dashboard() {
                   <p className="text-sm text-purple-700 font-semibold">Selesaikan {Math.max(0, DAILY_GOAL_XP - dailyXP)} misi lagi hari ini</p>
                 </div>
 
-                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold" onClick={() => setDailyXP((v) => Math.min(DAILY_GOAL_XP, v + 2))}>Kerjakan</Button>
+                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold" onClick={() => addDailyXP(2)}>Kerjakan</Button>
               </CardContent>
             </Card>
 
@@ -365,10 +477,30 @@ export default function Dashboard() {
                     <p className="text-sm font-semibold text-gray-700">Streak: <span className="text-orange-600">{streak} hari berturut-turut</span></p>
                   </div>
                 </div>
-                <Button variant="outline" className="w-full border-blue-200 text-blue-600 hover:bg-blue-50 font-semibold" onClick={saveMoodQuick}>
-                  <Smile className="w-4 h-4 mr-2" />
-                  Catat Mood Hari Ini
-                </Button>
+                <Dialog open={isMoodOpen} onOpenChange={setMoodOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full border-blue-200 text-blue-600 hover:bg-blue-50 font-semibold">
+                      <Smile className="w-4 h-4 mr-2" />
+                      Catat Mood Hari Ini
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Pilih Mood Hari Ini</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid grid-cols-5 gap-2">
+                      {["😡","😟","😐","🙂","😄"].map((m) => (
+                        <button key={m} onClick={() => setSelectedMood(m)} className={`aspect-square rounded-xl border ${selectedMood===m?"border-purple-600 bg-purple-50":"border-gray-200 hover:bg-gray-50"} text-2xl flex items-center justify-center`}>{m}</button>
+                      ))}
+                    </div>
+                    <div className="mt-3">
+                      <textarea value={note} onChange={(e)=>setNote(e.target.value)} placeholder="Catatan singkat (opsional)" className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-purple-500" rows={3} />
+                    </div>
+                    <div className="mt-4">
+                      <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white" onClick={saveMoodQuick} disabled={!selectedMood}>Simpan</Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </CardContent>
             </Card>
 
@@ -391,8 +523,21 @@ export default function Dashboard() {
                   </div>
                   <div className="grid grid-cols-7 gap-1">
                     {calendarDays.map((item, idx) => (
-                      <div key={idx} className={`aspect-square flex items-center justify-center text-sm font-semibold rounded-lg transition-all ${ item.day === null ? "invisible" : item.highlighted ? "bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-lg scale-110" : "bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer" }`}>
-                        {item.day}
+                      <div
+                        key={idx}
+                        className={`aspect-square flex items-center justify-center text-sm font-semibold rounded-lg transition-all ${
+                          item.day === null
+                            ? "invisible"
+                            : item.highlighted
+                            ? "bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-lg scale-110"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer"
+                        }`}
+                      >
+                        {item.highlighted && item.emoji ? (
+                          <span className="text-xl">{item.emoji}</span>
+                        ) : (
+                          item.day
+                        )}
                       </div>
                     ))}
                   </div>

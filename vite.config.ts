@@ -8,6 +8,10 @@ import viteCompression from 'vite-plugin-compression';
 import path from 'node:path';
 
 export default defineConfig({
+    define: {
+        'import.meta.env.SUPABASE_URL': process.env.SUPABASE_URL,
+        'import.meta.env.SUPABASE_ANON_KEY': process.env.SUPABASE_ANON_KEY,
+    },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
@@ -28,14 +32,11 @@ export default defineConfig({
         viteCompression({
             algorithm: 'brotliCompress',
             ext: '.br',
-            apply: 'build',
             threshold: 1024,
-            compressionOptions: { quality: 11 },
         }),
         viteCompression({
             algorithm: 'gzip',
             ext: '.gz',
-            apply: 'build',
             threshold: 1024,
         }),
     ],

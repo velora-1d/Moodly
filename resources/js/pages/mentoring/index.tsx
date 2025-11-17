@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardTopNav from "@/components/dashboard-top-nav";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, Lock, Trophy, Sparkles, Heart, Brain, Sun, Moon, Wind, Zap, CheckCircle2, Target, Award, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link, usePage } from "@inertiajs/react";
+import { supabase } from "@/lib/supabaseClient";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,21 +20,22 @@ interface Level {
   xpReward: number;
 }
 
-const levels: Level[] = [
+let initialLevels: Level[] = [
   { id: 1, title: "Mengenal Diri", description: "Memahami emosi dan perasaan diri", icon: Heart, status: "completed", stars: 3, maxStars: 3, xpReward: 50 },
   { id: 2, title: "Kesadaran Pikiran", description: "Belajar mindfulness dan meditasi", icon: Brain, status: "completed", stars: 2, maxStars: 3, xpReward: 50 },
-  { id: 3, title: "Pagi yang Produktif", description: "Rutinitas pagi untuk kesehatan mental", icon: Sun, status: "completed", stars: 3, maxStars: 3, xpReward: 75 },
-  { id: 4, title: "Mengatasi Stres", description: "Teknik mengelola stres sehari-hari", icon: Wind, status: "completed", stars: 1, maxStars: 3, xpReward: 75 },
-  { id: 5, title: "Tidur Berkualitas", description: "Meningkatkan kualitas tidur malam", icon: Moon, status: "current", stars: 0, maxStars: 3, xpReward: 100 },
-  { id: 6, title: "Energi Positif", description: "Membangun mindset positif", icon: Zap, status: "locked", stars: 0, maxStars: 3, xpReward: 100 },
+  { id: 3, title: "Pagi yang Produktif", description: "Rutinitas pagi untuk kesehatan mental", icon: Sun, status: "current", stars: 0, maxStars: 3, xpReward: 75 },
 ];
 
+// moved inside component
+
 export default function MentoringPage() {
+  const { auth } = usePage<any>().props;
+  const [levels, setLevelState] = useState<Level[]>(initialLevels);
   const [selectedLevel, setSelectedLevel] = useState<Level | null>(null);
   const [showAchievement, setShowAchievement] = useState(false);
 
-  const totalXP = levels.reduce((sum, level) => (level.status === "completed" ? sum + level.xpReward : sum), 0);
-  const completedLevels = levels.filter((l) => l.status === "completed").length;
+  const totalXP = levels.reduce((sum: number, level: Level) => (level.status === "completed" ? sum + level.xpReward : sum), 0);
+  const completedLevels = levels.filter((l: Level) => l.status === "completed").length;
   const progressPercentage = (completedLevels / levels.length) * 100;
 
   const handleLevelClick = (level: Level) => {
@@ -53,6 +56,26 @@ export default function MentoringPage() {
     { top: 650, left: 50 },
     { top: 800, left: 30 },
   ];
+
+  useEffect(() => {
+    const loadCompletion = async () => {
+      const userId = auth?.user?.id;
+      if (!userId) return;
+      const isConfigured = Boolean((import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) && (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY));
+      if (!isConfigured) return;
+      const { data } = await supabase
+        .from('level_completions')
+        .select('level_id,stars')
+        .eq('user_id', userId);
+      const set = new Map<number, number>();
+      if (Array.isArray(data)) data.forEach((r: any) => set.set(r.level_id, r.stars ?? 0));
+      const updated = levels.map((l: Level) => set.has(l.id) ? { ...l, status: 'completed' as const, stars: set.get(l.id) ?? 0 } : l);
+      const firstNot = updated.find((l: Level) => l.status !== 'completed');
+      const final = updated.map((l: Level) => l.id === firstNot?.id ? { ...l, status: 'current' as const } : l.status === 'completed' ? l : { ...l, status: 'locked' as const });
+      setLevelState(final);
+    };
+    loadCompletion();
+  }, [auth?.user?.id]);
 
   const generatePath = () => {
     let pathString = "";
@@ -149,7 +172,7 @@ export default function MentoringPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {(() => {
+                    {(() => {
                     const currentLevel = levels.find((l) => l.status === "current")!;
                     const Icon = currentLevel.icon;
                     return (
@@ -163,9 +186,9 @@ export default function MentoringPage() {
                             <p className="text-xs text-gray-600">{currentLevel.description}</p>
                           </div>
                         </div>
-                        <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700" onClick={() => handleLevelClick(currentLevel)}>
-                          Mulai Pelajaran
-                        </Button>
+                        <Link href={`/mentoring/level/${currentLevel.id}`} className="contents" prefetch>
+                          <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">Mulai Pelajaran</Button>
+                        </Link>
                       </div>
                     );
                   })()}
@@ -237,17 +260,17 @@ export default function MentoringPage() {
                         )}
                         {level.status !== "locked" && (
                           <div className="absolute top-full mt-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                            <div className="bg-white rounded-lg shadow-xl p-3 w-48 border-2 border-purple-200">
-                              <h4 className="font-bold text-gray-900 text-sm mb-1">{level.title}</h4>
-                              <p className="text-xs text-gray-600 mb-2">{level.description}</p>
-                              <div className="flex items-center justify-between">
-                                <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
-                                  <Sparkles className="w-3 h-3 mr-1" />
-                                  +{level.xpReward} XP
-                                </Badge>
-                                {level.status === "current" && <span className="text-xs font-semibold text-purple-600">Aktif</span>}
-                              </div>
+                          <div className="bg-white rounded-lg shadow-xl p-3 w-48 border-2 border-purple-200">
+                            <h4 className="font-bold text-gray-900 text-sm mb-1">{level.title}</h4>
+                            <p className="text-xs text-gray-600 mb-2">{level.description}</p>
+                        <div className="flex items-center justify-between">
+                              <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+                                <Sparkles className="w-3 h-3 mr-1" />
+                                +{level.xpReward} XP
+                              </Badge>
+                              {level.status === "current" && <span className="text-xs font-semibold text-purple-600">Aktif</span>}
                             </div>
+                          </div>
                           </div>
                         )}
                       </motion.div>

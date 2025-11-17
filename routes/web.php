@@ -20,10 +20,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('mentoring/index');
     })->name('mentoring');
 
-    // Tambah rute GET untuk halaman Gamifikasi Alchemist (Inertia)
-    Route::get('gamifikasi/alchemist', function () {
-        return Inertia::render('gamifikasi/alchemist');
-    })->name('gamifikasi.alchemist');
 
     Route::get('profile', function () {
         return Inertia::render('profile/index');
@@ -48,9 +44,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/api/mental-health-chat', [App\Http\Controllers\MentalHealthChatController::class, 'chat'])
         ->name('api.mental-health-chat');
 
-    // Alchemist API endpoints (v1 minimal)
-    Route::post('alchemist/mix', [\App\Http\Controllers\AlchemistController::class, 'mix'])->name('alchemist.mix');
-    Route::post('alchemist/finish', [\App\Http\Controllers\AlchemistController::class, 'finish'])->name('alchemist.finish');
+    Route::get('mentoring/level/{id}', function ($id) {
+        $allowed = [1, 2, 3];
+        if (!in_array((int)$id, $allowed, true)) {
+            abort(404);
+        }
+        return Inertia::render('mentoring/levels/level-' . $id);
+    })->name('mentoring.level.show');
 });
 
 require __DIR__ . '/settings.php';
