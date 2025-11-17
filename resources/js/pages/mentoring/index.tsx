@@ -246,34 +246,42 @@ export default function MentoringPage() {
                           ))}
                         </motion.div>
                       )}
-                      <motion.div className="relative cursor-pointer group" onClick={() => handleLevelClick(level)} whileHover={level.status !== "locked" ? { scale: 1.1 } : {}} whileTap={level.status !== "locked" ? { scale: 0.95 } : {}}>
-                        {level.status === "current" && (
-                          <motion.div className="absolute -inset-2 rounded-full bg-gradient-to-br from-purple-500 to-pink-500" animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }} transition={{ repeat: Infinity, duration: 2 }} />
-                        )}
-                        <div className={`relative w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-all ${level.status === "locked" ? "bg-gray-300" : level.status === "current" ? "bg-gradient-to-br from-purple-500 to-pink-500" : "bg-gradient-to-br from-purple-400 to-pink-400"}`}>
-                          {level.status === "locked" ? <Lock className="w-8 h-8 text-gray-600" /> : <Icon className="w-8 h-8 text-white" />}
-                        </div>
-                        {level.status === "completed" && (
-                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-green-500 flex items-center justify-center shadow-lg border-2 border-white">
-                            <CheckCircle2 className="w-4 h-4 text-white" />
-                          </motion.div>
-                        )}
-                        {level.status !== "locked" && (
-                          <div className="absolute top-full mt-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                          <div className="bg-white rounded-lg shadow-xl p-3 w-48 border-2 border-purple-200">
-                            <h4 className="font-bold text-gray-900 text-sm mb-1">{level.title}</h4>
-                            <p className="text-xs text-gray-600 mb-2">{level.description}</p>
-                        <div className="flex items-center justify-between">
-                              <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
-                                <Sparkles className="w-3 h-3 mr-1" />
-                                +{level.xpReward} XP
-                              </Badge>
-                              {level.status === "current" && <span className="text-xs font-semibold text-purple-600">Aktif</span>}
+                      {level.status !== "locked" ? (
+                        <Link href={`/mentoring/level/${level.id}`} className="contents" prefetch aria-label={`Buka level ${level.title}`}>
+                          <motion.div className="relative cursor-pointer group" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                            {level.status === "current" && (
+                              <motion.div className="absolute -inset-2 rounded-full bg-gradient-to-br from-purple-500 to-pink-500" animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }} transition={{ repeat: Infinity, duration: 2 }} />
+                            )}
+                            <div className={`relative w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-all ${level.status === "current" ? "bg-gradient-to-br from-purple-500 to-pink-500" : "bg-gradient-to-br from-purple-400 to-pink-400"}`}>
+                              <Icon className="w-8 h-8 text-white" />
                             </div>
+                            {level.status === "completed" && (
+                              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-green-500 flex items-center justify-center shadow-lg border-2 border-white">
+                                <CheckCircle2 className="w-4 h-4 text-white" />
+                              </motion.div>
+                            )}
+                            <div className="absolute top-full mt-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                              <div className="bg-white rounded-lg shadow-xl p-3 w-48 border-2 border-purple-200">
+                                <h4 className="font-bold text-gray-900 text-sm mb-1">{level.title}</h4>
+                                <p className="text-xs text-gray-600 mb-2">{level.description}</p>
+                                <div className="flex items-center justify-between">
+                                  <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+                                    <Sparkles className="w-3 h-3 mr-1" />
+                                    +{level.xpReward} XP
+                                  </Badge>
+                                  {level.status === "current" && <span className="text-xs font-semibold text-purple-600">Aktif</span>}
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        </Link>
+                      ) : (
+                        <motion.div className="relative group">
+                          <div className={`relative w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-all bg-gray-300`}>
+                            <Lock className="w-8 h-8 text-gray-600" />
                           </div>
-                          </div>
-                        )}
-                      </motion.div>
+                        </motion.div>
+                      )}
                     </motion.div>
                   );
                 })}
@@ -305,11 +313,10 @@ export default function MentoringPage() {
                     +{selectedLevel.xpReward} XP
                   </Badge>
                   <div className="space-y-3">
-                    {selectedLevel.status === "current" && (
-                      <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">Mulai Pelajaran</Button>
-                    )}
-                    {selectedLevel.status === "completed" && (
-                      <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">Ulangi Pelajaran</Button>
+                    {selectedLevel.status !== "locked" && (
+                      <Link href={`/mentoring/level/${selectedLevel.id}`} className="contents" prefetch>
+                        <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">Buka Halaman Level</Button>
+                      </Link>
                     )}
                     <Button variant="outline" className="w-full" onClick={() => setSelectedLevel(null)}>Tutup</Button>
                   </div>
