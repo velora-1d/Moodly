@@ -186,7 +186,7 @@ export default function MentoringPage() {
                             <p className="text-xs text-gray-600">{currentLevel.description}</p>
                           </div>
                         </div>
-                        <Link href={`/mentoring/level/${currentLevel.id}`} className="contents" prefetch>
+                        <Link href="/mentoring/level/2" className="contents" prefetch>
                           <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">Mulai Pelajaran</Button>
                         </Link>
                       </div>

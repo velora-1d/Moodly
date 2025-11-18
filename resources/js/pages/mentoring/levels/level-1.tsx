@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePage } from '@inertiajs/react'
@@ -61,7 +62,7 @@ export default function Level1() {
   const levelId = 1
   const [phase, setPhase] = useState<Phase>('idle')
   const [breaths, setBreaths] = useState(0)
-  const [targetBreaths] = useState(8)
+  const [targetBreaths, setTargetBreaths] = useState(8)
   const [started, setStarted] = useState(false)
   const [elapsed, setElapsed] = useState(0)
   const [burst, setBurst] = useState(0)
@@ -69,6 +70,13 @@ export default function Level1() {
   const [streak, setStreak] = useState(0)
   const [bestStreak, setBestStreak] = useState(0)
   const [exhaleFx, setExhaleFx] = useState(0)
+  const [paceSec, setPaceSec] = useState(4)
+  const [autoGuide, setAutoGuide] = useState(false)
+  const [audioEnabled, setAudioEnabled] = useState(false)
+  const [hasCompleted, setHasCompleted] = useState(false)
+  const [showSummary, setShowSummary] = useState(false)
+  const [summary, setSummary] = useState<{ breaths: number; targetBreaths: number; bestStreak: number; duration: number; stars: number } | null>(null)
+  const audioCtxRef = useRef<AudioContext | null>(null)
 
   useEffect(() => {
     if (!started || !auth?.user?.id) return
@@ -87,6 +95,23 @@ export default function Level1() {
     idle: { background: 'radial-gradient(1200px 400px at 50% 20%, rgba(147,197,253,0.25), rgba(167,243,208,0.15))' },
     inhale: { background: 'radial-gradient(1200px 400px at 50% 20%, rgba(147,197,253,0.35), rgba(199,210,254,0.2))' },
     exhale: { background: 'radial-gradient(1200px 400px at 50% 20%, rgba(167,243,208,0.35), rgba(252,211,77,0.15))' }
+  }
+
+  function playDing() {
+    try {
+      if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const ctx = audioCtxRef.current
+      const o = ctx.createOscillator()
+      const g = ctx.createGain()
+      o.type = 'sine'
+      o.frequency.value = 880
+      o.connect(g)
+      g.connect(ctx.destination)
+      g.gain.setValueAtTime(0.0001, ctx.currentTime)
+      g.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.01)
+      o.start()
+      o.stop(ctx.currentTime + 0.12)
+    } catch {}
   }
 
   function onInhale() {
@@ -111,6 +136,7 @@ export default function Level1() {
       }
     })
     setPhase('exhale')
+    if (audioEnabled) playDing()
   }
   function onReset() {
     setPhase('idle')
@@ -118,6 +144,7 @@ export default function Level1() {
     setElapsed(0)
     setStarted(false)
     setStreak(0)
+    setHasCompleted(false)
   }
 
   const guideScale = phase === 'inhale' ? 1.25 : phase === 'exhale' ? 0.9 : 1
@@ -129,12 +156,78 @@ export default function Level1() {
   const completed = breaths >= targetBreaths
 
   useEffect(() => {
-    if (!completed || !auth?.user?.id) return
+    if (!completed || hasCompleted || !auth?.user?.id) return
+    setHasCompleted(true)
     const durationMs = elapsed * 1000
     const stars = bestStreak >= 4 ? 3 : 2
-    endSession(auth.user.id, levelId, { breaths, targetBreaths, bestStreak }, durationMs)
+    endSession(auth.user.id, levelId, { breaths, targetBreaths, bestStreak, paceSec, autoGuide }, durationMs)
     complete(auth.user.id, levelId, stars, 50)
-  }, [completed])
+    setSummary({ breaths, targetBreaths, bestStreak, duration: elapsed, stars })
+    setShowSummary(true)
+  }, [completed, hasCompleted, auth?.user?.id, elapsed, bestStreak, breaths, targetBreaths, paceSec, autoGuide])
+
+  useEffect(() => {
+    if (!autoGuide) return
+    if (!started) setStarted(true)
+    let current: Phase = 'inhale'
+    setPhase('inhale')
+    const id = setInterval(() => {
+      if (current === 'inhale') {
+        setPhase('exhale')
+        setBreaths((b) => {
+          setExhaleFx((n) => n + 1)
+          setBurst((k) => k + 1)
+          setStreak((s) => {
+            const ns = s + 1
+            setBestStreak((bs) => Math.max(bs, ns))
+            return ns
+          })
+          return b + 1
+        })
+        if (audioEnabled) playDing()
+        current = 'exhale'
+      } else {
+        setPhase('inhale')
+        setStreak(0)
+        if (audioEnabled) playDing()
+        current = 'inhale'
+      }
+    }, paceSec * 1000)
+    return () => clearInterval(id)
+  }, [autoGuide, paceSec, audioEnabled, started])
+
+  useEffect(() => {
+    const key = `level1:${auth?.user?.id ?? 'anon'}`
+    try {
+      const raw = localStorage.getItem(key)
+      if (raw) {
+        const p = JSON.parse(raw)
+        if (p.pet) setPet(p.pet)
+        if (p.targetBreaths) setTargetBreaths(p.targetBreaths)
+        if (p.paceSec) setPaceSec(p.paceSec)
+        setAudioEnabled(!!p.audioEnabled)
+      }
+    } catch {}
+  }, [auth?.user?.id])
+
+  useEffect(() => {
+    const key = `level1:${auth?.user?.id ?? 'anon'}`
+    try {
+      localStorage.setItem(key, JSON.stringify({ pet, targetBreaths, paceSec, audioEnabled }))
+    } catch {}
+  }, [pet, targetBreaths, paceSec, audioEnabled, auth?.user?.id])
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const k = e.key.toLowerCase()
+      if (k === 'i') onInhale()
+      else if (k === 'e') onExhale()
+      else if (k === 'r') onReset()
+      else if (k === 's') setAutoGuide((v) => !v)
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
 
   return (
     <LevelLayout title="Level 1 · Latihan Pernapasan">
@@ -201,6 +294,25 @@ export default function Level1() {
                 <Button size="sm" variant={pet === 'cat' ? 'default' : 'outline'} onClick={() => setPet('cat')}>🐱</Button>
               </div>
             </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Pace</span>
+                <input type="range" min={3} max={6} value={paceSec} onChange={(e)=>setPaceSec(Number(e.target.value))} className="h-2 w-40 rounded-lg accent-purple-600" />
+                <span className="text-xs">{paceSec}s</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" checked={autoGuide} onChange={(e)=>setAutoGuide(e.target.checked)} />
+                <span className="text-xs">Auto-Guide</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" checked={audioEnabled} onChange={(e)=>setAudioEnabled(e.target.checked)} />
+                <span className="text-xs">Audio</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Target</span>
+                <input type="number" min={4} max={16} value={targetBreaths} onChange={(e)=>setTargetBreaths(Math.max(4, Math.min(16, Number(e.target.value))))} className="h-8 w-16 rounded-md border border-gray-300 px-2" />
+              </div>
+            </div>
             {completed && (
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-lg border bg-secondary/50 p-3 text-center text-sm">
                 Sesi selesai! Nafasmu lebih tenang.
@@ -209,6 +321,24 @@ export default function Level1() {
           </div>
         </CardContent>
       </Card>
+      <Dialog open={showSummary} onOpenChange={setShowSummary}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ringkasan Sesi</DialogTitle>
+          </DialogHeader>
+          {summary && (
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between"><span>Breaths</span><span>{summary.breaths}/{summary.targetBreaths}</span></div>
+              <div className="flex justify-between"><span>Best Combo</span><span>{summary.bestStreak}</span></div>
+              <div className="flex justify-between"><span>Durasi</span><span>{formatTime(summary.duration)}</span></div>
+              <div className="flex justify-between"><span>Bintang</span><span>{summary.stars}</span></div>
+            </div>
+          )}
+          <div className="mt-4">
+            <a href="/mentoring" className="inline-flex items-center justify-center rounded-md bg-purple-600 px-4 py-2 text-white">Kembali ke Peta</a>
+          </div>
+        </DialogContent>
+      </Dialog>
     </LevelLayout>
   )
 }
