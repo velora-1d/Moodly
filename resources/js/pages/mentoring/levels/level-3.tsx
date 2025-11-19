@@ -1,47 +1,18 @@
-import LevelLayout from './LevelLayout'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { useEffect, useState } from 'react'
-import { usePage } from '@inertiajs/react'
-import { startSession, endSession, complete } from './useLevelState'
+"use client";
 
-type SharedProps = { auth: { user: { id: number } | null } }
+import React, { Suspense, lazy } from "react";
+import LevelLayout from "./LevelLayout";
 
-const items = ['Minum air','Cahaya pagi','Gerak ringan','Tulis niat','Fokus satu tugas']
+const CBTGameContainer = lazy(() => import("@/components/cbt-game/CBTGameContainer"));
 
 export default function Level3() {
-  const { auth } = usePage<SharedProps>().props
-  const levelId = 3
-  const [checked, setChecked] = useState<boolean[]>(items.map(()=>false))
-
-  useEffect(() => { if (auth?.user?.id) startSession(auth.user.id, levelId) }, [auth?.user?.id])
-
-  function toggle(i:number){ setChecked(prev=> prev.map((v,idx)=> idx===i ? !v : v)) }
-
-  async function finish(){
-    const done = checked.filter(Boolean).length
-    if (auth?.user?.id){
-      await endSession(auth.user.id, levelId, { items, checked }, 0)
-      const stars = done>=5 ? 3 : done>=4 ? 2 : 1
-      await complete(auth.user.id, levelId, stars, 50)
-    }
-  }
-
   return (
-    <LevelLayout title="Level 3 · Pagi Produktif">
-      <div className="bg-white rounded-2xl border border-purple-100 p-6">
-        <div className="space-y-3">
-          {items.map((label,i)=> (
-            <label key={i} className="flex items-center gap-3">
-              <Checkbox checked={checked[i]} onCheckedChange={()=>toggle(i)} />
-              <span className="text-sm font-medium text-gray-900">{label}</span>
-            </label>
-          ))}
-        </div>
-        <div className="flex gap-3 mt-4">
-          <Button className="bg-purple-600 hover:bg-purple-700 text-white" onClick={finish}>Selesai</Button>
-        </div>
+    <LevelLayout title="Level 3 · CBT Game">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Suspense fallback={<div className="py-24 text-center text-muted-foreground">Memuat permainan…</div>}>
+          <CBTGameContainer />
+        </Suspense>
       </div>
     </LevelLayout>
-  )
+  );
 }
