@@ -1,4 +1,4 @@
-import NavigationHeader from '@/components/sections/navigation-header';
+import DashboardTopNav from '@/components/dashboard-top-nav';
 import HeroSection from '@/components/sections/hero-section';
 import LanguageCarousel from '@/components/sections/language-carousel';
 import FeaturesEffective from '@/components/sections/features-effective';
@@ -15,7 +15,7 @@ import Footer from '@/components/sections/footer';
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white font-nunito">
-      <NavigationHeader />
+      <DashboardTopNav />
       
       <div className="pt-[64px] md:pt-[80px]">
         <HeroSection />
