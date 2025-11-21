@@ -114,6 +114,15 @@ export default function Level1() {
     } catch {}
   }
 
+  useEffect(() => {
+    return () => {
+      try {
+        audioCtxRef.current?.close()
+      } catch {}
+      audioCtxRef.current = null
+    }
+  }, [])
+
   function onInhale() {
     if (!started) setStarted(true)
     setPhase('inhale')

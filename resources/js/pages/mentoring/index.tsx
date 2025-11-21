@@ -38,12 +38,15 @@ export default function MentoringPage() {
   const completedLevels = levels.filter((l: Level) => l.status === "completed").length;
   const progressPercentage = (completedLevels / levels.length) * 100;
 
+  const achievementTimeoutRef = { current: 0 as any }
+
   const handleLevelClick = (level: Level) => {
     if (level.status !== "locked") {
       setSelectedLevel(level);
       if (level.status === "completed" && level.stars === 3) {
         setShowAchievement(true);
-        setTimeout(() => setShowAchievement(false), 3000);
+        if (achievementTimeoutRef.current) clearTimeout(achievementTimeoutRef.current)
+        achievementTimeoutRef.current = setTimeout(() => setShowAchievement(false), 3000)
       }
     }
   };
@@ -75,6 +78,9 @@ export default function MentoringPage() {
       setLevelState(final);
     };
     loadCompletion();
+    return () => {
+      if (achievementTimeoutRef.current) clearTimeout(achievementTimeoutRef.current)
+    }
   }, [auth?.user?.id]);
 
   const generatePath = () => {

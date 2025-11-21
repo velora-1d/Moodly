@@ -86,9 +86,10 @@ export default function ProfilePage() {
 
     useEffect(() => {
         let isMounted = true;
+        const abort = new AbortController();
         async function loadMood() {
             try {
-                const res = await fetch(route('moods.index'));
+                const res = await fetch(route('moods.index'), { signal: abort.signal });
                 const json = await res.json();
                 if (!isMounted) return;
                 setStreak(Number(json?.streak ?? 0));
@@ -102,20 +103,33 @@ export default function ProfilePage() {
                 return;
             }
             try {
-                const { data } = await supabase.from('xp_events').select('points').eq('user_id', auth.user.id).limit(10000);
-                const sum = Array.isArray(data) ? data.reduce((acc: number, r: any) => acc + (Number(r?.points ?? 0) || 0), 0) : 0;
+                const { data } = await supabase
+                    .from('xp_events')
+                    .select('points.sum()')
+                    .eq('user_id', auth.user.id);
+                const sumField = Array.isArray(data) && data.length ? (data[0] as any).sum ?? (data[0] as any).points_sum : 0;
+                const sum = Number(sumField ?? 0) || 0;
                 setTotalXp(sum);
                 const lg = sum >= 10000 ? 'Diamond' : sum >= 5000 ? 'Emerald' : sum >= 2000 ? 'Gold' : sum >= 500 ? 'Silver' : 'Bronze';
                 setLeague(lg);
             } catch {
-                setTotalXp(0);
-                setLeague('Bronze');
+                try {
+                    const { data } = await supabase.from('xp_events').select('points').eq('user_id', auth.user.id).limit(10000);
+                    const sum = Array.isArray(data) ? data.reduce((acc: number, r: any) => acc + (Number(r?.points ?? 0) || 0), 0) : 0;
+                    setTotalXp(sum);
+                    const lg = sum >= 10000 ? 'Diamond' : sum >= 5000 ? 'Emerald' : sum >= 2000 ? 'Gold' : sum >= 500 ? 'Silver' : 'Bronze';
+                    setLeague(lg);
+                } catch {
+                    setTotalXp(0);
+                    setLeague('Bronze');
+                }
             }
         }
         loadMood();
         loadXp();
         return () => {
             isMounted = false;
+            abort.abort();
         };
     }, [auth?.user?.id]);
 
