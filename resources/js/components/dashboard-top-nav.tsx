@@ -1,6 +1,6 @@
 "use client";
 import { Link, usePage } from "@inertiajs/react";
-import { Menu, Sparkles, Brain, Trophy, Target, ShoppingCart, UserRound, Award } from "lucide-react";
+import { Menu, Sparkles, Brain, Trophy, Target, ShoppingCart, Award } from "lucide-react";
 import { mentoring, leaderboard, missions, shop, profile } from "@/routes";
 
 type Item = { href: string; label: string; icon: any };
@@ -14,7 +14,6 @@ export default function DashboardTopNav({ items }: { items?: Item[] }) {
       { icon: Trophy, label: "Skor", href: leaderboard().url },
       { icon: Target, label: "Misi", href: missions().url },
       { icon: ShoppingCart, label: "Toko", href: shop().url },
-      { icon: UserRound, label: "Profil", href: profile().url },
       { icon: Award, label: "Lainnya", href: "/" },
     ];
 
@@ -55,12 +54,16 @@ export default function DashboardTopNav({ items }: { items?: Item[] }) {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-3 bg-gradient-to-r from-purple-100 to-pink-100 px-4 py-2 rounded-full">
+            <Link
+              href={profile().url}
+              prefetch
+              className="hidden sm:flex items-center gap-3 bg-gradient-to-r from-purple-100 to-pink-100 px-4 py-2 rounded-full"
+            >
               <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
                 {name.slice(0, 1).toUpperCase()}
               </div>
-              <span className="text-sm font-semibold text-purple-900">{name}</span>
-            </div>
+              <span className="text-sm font-semibold text-purple-900">Profil</span>
+            </Link>
             <button className="md:hidden p-2 rounded-lg hover:bg-gray-100">
               <Menu className="w-6 h-6" />
             </button>

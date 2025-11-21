@@ -1,11 +1,10 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useEffect } from 'react';
 import { useAppearance } from '@/hooks/use-appearance';
 import {
-  Brain,
   Heart,
   Sparkles,
   TrendingUp,
@@ -23,13 +22,8 @@ import {
   Book,
   Music,
   Gem,
-  Menu,
-  Settings,
-  ShoppingCart,
-  Target,
-  Award,
 } from 'lucide-react';
-import { mentoring, leaderboard as leaderboardRoute, missions, shop, profile } from '@/routes';
+import DashboardTopNav from '@/components/dashboard-top-nav';
 
 type SharedProps = {
   auth: {
@@ -68,18 +62,7 @@ const statusIcons = {
 
 export default function Leaderboard() {
   const { updateAppearance } = useAppearance();
-  const { auth } = usePage<SharedProps>().props;
-  const name = auth?.user?.name ?? 'Player';
 
-  const quickActions = [
-    // Di halaman leaderboard: hanya "Skor" aktif ungu, lainnya normal abu-abu
-    { icon: Brain, label: 'Belajar', color: '', href: mentoring(), active: false },
-    { icon: Trophy, label: 'Skor', color: 'bg-gradient-to-r from-purple-500 to-pink-500', href: leaderboardRoute(), active: true },
-    { icon: Target, label: 'Misi', color: '', href: missions(), active: false },
-    { icon: ShoppingCart, label: 'Toko', color: '', href: shop(), active: false },
-    { icon: Settings, label: 'Profil', color: '', href: profile(), active: false },
-    { icon: Award, label: 'Lainnya', color: '', href: '/', active: false },
-  ] as const;
   useEffect(() => {
     // Force light theme to replicate reference visuals exactly
     updateAppearance('light');
@@ -88,49 +71,7 @@ export default function Leaderboard() {
   return (
     <div className="min-h-screen bg-background">
       <Head title="Leaderboard" />
-      {/* Header/Navbar selaras dengan Dashboard */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-purple-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">MindPath</h1>
-                <p className="text-xs text-gray-500">Perjalanan Mental Sehat</p>
-              </div>
-            </div>
-
-            <div className="hidden md:flex items-center gap-2">
-              {quickActions.map((action, idx) => (
-                <Link
-                  key={idx}
-                  href={action.href}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
-                    action.active ? `${action.color} text-white shadow-lg scale-105` : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  <action.icon className="w-4 h-4" />
-                  <span className="text-sm font-semibold">{action.label}</span>
-                </Link>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="hidden sm:flex items-center gap-3 bg-gradient-to-r from-purple-100 to-pink-100 px-4 py-2 rounded-full">
-                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                  {name.slice(0, 1).toUpperCase()}
-                </div>
-                <span className="text-sm font-semibold text-purple-900">{name}</span>
-              </div>
-              <button className="md:hidden p-2 rounded-lg hover:bg-gray-100">
-                <Menu className="w-6 h-6" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <DashboardTopNav />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">

@@ -24,7 +24,6 @@ import AppLogo from './app-logo';
 
 const navItems: NavItem[] = [
     { title: 'Belajar', href: dashboard(), icon: Home },
-    // { title: 'BUNYI', href: dashboard(), icon: Megaphone }, // removed
     { title: 'PAPAN SKOR', href: '/leaderboard', icon: Shield },
     { title: 'MISI', href: missions(), icon: Package },
     { title: 'TOKO', href: shop(), icon: ShoppingBag },
