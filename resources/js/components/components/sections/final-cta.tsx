@@ -1,5 +1,7 @@
 import React from 'react';
 import { Rocket, Sparkles, Star, Heart, Trophy, Brain, Zap } from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import { dashboard } from '@/routes';
 
 const FinalCta = () => {
   return (
@@ -51,15 +53,14 @@ const FinalCta = () => {
 
           {/* CTA Button */}
           <div className="pt-6">
-            <button className="group relative inline-flex items-center gap-3 bg-[#58cc02] hover:bg-[#46a302] text-white px-12 py-5 rounded-2xl font-bold text-xl uppercase shadow-2xl transition-all hover:scale-105 border-b-4 border-[#46a302] hover:border-b-2 active:translate-y-1 overflow-hidden">
+            <Link href={dashboard()} className="group hover-bob relative inline-flex items-center gap-3 bg-[#58cc02] hover:bg-[#46a302] text-white px-12 py-5 rounded-2xl font-bold text-xl uppercase shadow-2xl transition-all duration-200 ease-out hover:scale-105 hover:-translate-y-1 border-b-4 border-[#46a302] hover:border-b-2 active:translate-y-1 overflow-hidden">
               <span className="relative z-10 flex items-center gap-3">
                 <Brain className="w-6 h-6" />
                 Mulai Sekarang Gratis
                 <Rocket className="w-6 h-6" />
               </span>
-              {/* Shimmer effect */}
               <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
-            </button>
+            </Link>
           </div>
 
           {/* Trust indicators */}

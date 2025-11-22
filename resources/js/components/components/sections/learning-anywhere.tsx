@@ -94,15 +94,22 @@ const LearningAnywhere = () => {
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mt-12">
             {[
-              { icon: '📱', label: 'Cross-Platform', value: 'iOS & Android' },
-              { icon: '💾', label: 'Offline Mode', value: 'Available' },
-              { icon: '🔔', label: 'Smart Reminders', value: 'Enabled' },
-              { icon: '🌙', label: 'Night Mode', value: 'Supported' },
+              { icon: '📱', label: 'Cross-Platform', value: 'iOS & Android', color: 'from-violet-400 to-purple-500' },
+              { icon: '💾', label: 'Offline Mode', value: 'Available', color: 'from-teal-400 to-cyan-600' },
+              { icon: '🔔', label: 'Smart Reminders', value: 'Enabled', color: 'from-pink-500 to-rose-600' },
+              { icon: '🌙', label: 'Night Mode', value: 'Supported', color: 'from-indigo-500 to-blue-600' },
             ].map((stat, idx) => (
-              <div key={idx} className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="text-4xl mb-2">{stat.icon}</div>
-                <div className="font-bold text-gray-800 text-sm mb-1">{stat.label}</div>
-                <div className="text-xs text-gray-600">{stat.value}</div>
+              <div
+                key={idx}
+                className="group relative bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-2 border-gray-100 hover:border-purple-300 cursor-pointer"
+                style={{ animationDelay: `${idx * 50}ms` }}
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-10 rounded-2xl transition-opacity duration-300`}></div>
+                <div className="relative z-10">
+                  <div className="text-4xl mb-2">{stat.icon}</div>
+                  <div className="font-bold text-gray-800 text-sm mb-1">{stat.label}</div>
+                  <div className="text-xs text-gray-600">{stat.value}</div>
+                </div>
               </div>
             ))}
           </div>

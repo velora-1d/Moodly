@@ -22,19 +22,19 @@ const FeaturesMotivated = () => {
 
             {/* Motivation features */}
             <div className="grid grid-cols-2 gap-3 mt-8 max-w-lg mx-auto lg:mx-0">
-              <div className="bg-gradient-to-br from-yellow-400 to-amber-500 text-white p-4 rounded-xl shadow-md">
+              <div className="bg-gradient-to-br from-yellow-400 to-amber-500 text-white p-4 rounded-xl shadow-md transition-all duration-200 ease-out hover:-translate-y-1 hover:scale-[1.02] hover-bob cursor-pointer">
                 <div className="text-3xl mb-2">🔥</div>
                 <div className="font-bold text-sm">Daily Streaks</div>
               </div>
-              <div className="bg-gradient-to-br from-purple-500 to-pink-500 text-white p-4 rounded-xl shadow-md">
+              <div className="bg-gradient-to-br from-purple-500 to-pink-500 text-white p-4 rounded-xl shadow-md transition-all duration-200 ease-out hover:-translate-y-1 hover:scale-[1.02] hover-bob cursor-pointer">
                 <div className="text-3xl mb-2">🏆</div>
                 <div className="font-bold text-sm">Achievements</div>
               </div>
-              <div className="bg-gradient-to-br from-cyan-500 to-blue-500 text-white p-4 rounded-xl shadow-md">
+              <div className="bg-gradient-to-br from-cyan-500 to-blue-500 text-white p-4 rounded-xl shadow-md transition-all duration-200 ease-out hover:-translate-y-1 hover:scale-[1.02] hover-bob cursor-pointer">
                 <div className="text-3xl mb-2">📊</div>
                 <div className="font-bold text-sm">Progress Tracking</div>
               </div>
-              <div className="bg-gradient-to-br from-green-500 to-emerald-500 text-white p-4 rounded-xl shadow-md">
+              <div className="bg-gradient-to-br from-green-500 to-emerald-500 text-white p-4 rounded-xl shadow-md transition-all duration-200 ease-out hover:-translate-y-1 hover:scale-[1.02] hover-bob cursor-pointer">
                 <div className="text-3xl mb-2">💪</div>
                 <div className="font-bold text-sm">Daily Goals</div>
               </div>

@@ -1,5 +1,7 @@
 import { ParallaxLayer } from '@/components/ui/parallax';
 import { Brain, Heart, Sparkles, Star } from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import { dashboard } from '@/routes';
 
 const HeroSection = () => {
     return (
@@ -119,23 +121,22 @@ const HeroSection = () => {
                     </div>
 
                     <div className="mt-2 flex w-full max-w-md flex-col items-stretch gap-3">
-                        <a
-                            href="#"
-                            className="group relative block overflow-hidden rounded-2xl border-b-4 border-[#46a302] bg-[#58cc02] px-8 py-4 text-center font-bold text-white uppercase transition hover:scale-[1.02] hover:brightness-105 active:translate-y-0.5 active:border-b-2"
+                        <Link
+                            href={dashboard()}
+                            className="group hover-bob relative block overflow-hidden rounded-2xl border-b-4 border-[#46a302] bg-[#58cc02] px-8 py-4 text-center font-bold text-white uppercase transition-all duration-200 ease-out hover:scale-[1.02] hover:brightness-105 hover:-translate-y-1 active:translate-y-0.5 active:border-b-2"
                         >
                             <span className="relative z-10 flex items-center justify-center gap-2">
                                 <Brain className="h-5 w-5" />
                                 Mulai Perjalanan
                             </span>
-                            {/* Shimmer effect */}
                             <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000 group-hover:translate-x-full"></div>
-                        </a>
-                        <a
-                            href="#"
-                            className="block rounded-2xl border-2 border-solid border-purple-300 bg-white px-8 py-4 text-center font-bold text-purple-600 uppercase shadow-sm transition hover:border-purple-400 hover:bg-purple-50 active:translate-y-px"
+                        </Link>
+                        <Link
+                            href={dashboard()}
+                            className="hover-bob block rounded-2xl border-2 border-solid border-purple-300 bg-white px-8 py-4 text-center font-bold text-purple-600 uppercase shadow-sm transition-all duration-200 ease-out hover:border-purple-400 hover:bg-purple-50 hover:-translate-y-1 active:translate-y-px"
                         >
                             Saya Sudah Punya Akun
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </div>

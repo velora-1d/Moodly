@@ -20,15 +20,15 @@ const FeaturesScience = () => {
             </p>
 
             <div className="grid grid-cols-3 gap-4 mt-8 max-w-lg mx-auto lg:mx-0">
-              <div className="bg-white rounded-xl p-4 shadow-md">
+              <div className="bg-white rounded-xl p-4 shadow-md transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg">
                 <div className="text-2xl font-bold text-purple-600">90%</div>
                 <div className="text-xs text-gray-600">Mengurangi Stress</div>
               </div>
-              <div className="bg-white rounded-xl p-4 shadow-md">
+              <div className="bg-white rounded-xl p-4 shadow-md transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg">
                 <div className="text-2xl font-bold text-cyan-600">85%</div>
                 <div className="text-xs text-gray-600">Tidur Lebih Baik</div>
               </div>
-              <div className="bg-white rounded-xl p-4 shadow-md">
+              <div className="bg-white rounded-xl p-4 shadow-md transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg">
                 <div className="text-2xl font-bold text-emerald-600">95%</div>
                 <div className="text-xs text-gray-600">Mood Membaik</div>
               </div>

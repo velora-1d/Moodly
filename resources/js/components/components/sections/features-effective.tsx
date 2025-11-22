@@ -37,7 +37,7 @@ const FeaturesEffective = () => {
 
             {/* Stats cards - gamified */}
             <div className="grid grid-cols-2 gap-4 pt-4">
-              <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-5 rounded-2xl shadow-lg transform hover:scale-105 transition-transform">
+              <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-5 rounded-2xl shadow-lg transform transition-all duration-200 ease-out hover:scale-[1.02] hover:-translate-y-1">
                 <div className="flex items-center gap-2 mb-2">
                   <TrendingUp className="w-5 h-5" />
                   <span className="text-sm font-semibold opacity-90">Efektivitas</span>
@@ -46,7 +46,7 @@ const FeaturesEffective = () => {
                 <div className="text-xs opacity-80">Tingkat Kepuasan</div>
               </div>
               
-              <div className="bg-gradient-to-br from-cyan-500 to-blue-600 text-white p-5 rounded-2xl shadow-lg transform hover:scale-105 transition-transform">
+              <div className="bg-gradient-to-br from-cyan-500 to-blue-600 text-white p-5 rounded-2xl shadow-lg transform transition-all duration-200 ease-out hover:scale-[1.02] hover:-translate-y-1">
                 <div className="flex items-center gap-2 mb-2">
                   <Heart className="w-5 h-5" fill="currentColor" />
                   <span className="text-sm font-semibold opacity-90">Well-being</span>
