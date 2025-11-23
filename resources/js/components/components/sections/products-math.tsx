@@ -5,7 +5,7 @@ const ProductsMath = () => {
     <section className="bg-gradient-to-br from-amber-50 to-orange-50 py-16 md:py-20">
       <div className="max-w-7xl mx-auto px-5 md:px-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          <div className="relative flex justify-center lg:justify-start">
+          <div className="relative flex justify-center lg:justify-end lg:order-2">
             <div className="relative bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-100 rounded-3xl p-8 shadow-2xl max-w-md">
               <div className="bg-white rounded-2xl p-6">
                 <div className="text-6xl mb-4 text-center">📝✨</div>
@@ -36,13 +36,13 @@ const ProductsMath = () => {
               </div>
 
               {/* Floating pen badge */}
-              <div className="absolute -top-4 -left-4 bg-gradient-to-br from-orange-500 to-red-500 text-white p-3 rounded-xl shadow-xl animate-float">
+              <div className="absolute -top-4 -right-4 bg-gradient-to-br from-orange-500 to-red-500 text-white p-3 rounded-xl shadow-xl animate-float">
                 <Pen className="w-6 h-6" />
               </div>
             </div>
           </div>
 
-          <div className="text-center lg:text-left">
+          <div className="text-center lg:text-left lg:order-1">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-700 px-4 py-2 rounded-full text-sm font-bold mb-4">
               <BookHeart className="w-4 h-4" />

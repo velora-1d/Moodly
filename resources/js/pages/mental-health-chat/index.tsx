@@ -1,8 +1,6 @@
 import { Button } from '@/components/ui/button';
-import AppLayout from '@/layouts/app-layout';
+import DashboardTopNav from '@/components/dashboard-top-nav';
 import { cn } from '@/lib/utils';
-import { dashboard } from '@/routes';
-import { type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { Bot, RefreshCw, Send, User } from 'lucide-react';
@@ -38,10 +36,7 @@ export default function MentalHealthChatPage() {
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Dashboard', href: dashboard().url },
-        { title: 'Ruang Konseling', href: '/mental-health-chat' },
-    ];
+    const bgClass = 'min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-green-50';
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -112,19 +107,26 @@ export default function MentalHealthChatPage() {
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <div className={bgClass}>
             <Head title="Ruang Konseling — Asisten Kesehatan Mental" />
+            <DashboardTopNav />
 
-            <div className="flex h-[calc(100vh-12rem)] flex-col p-4">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex h-[calc(100vh-16rem)] flex-col">
                 {/* Header / Info */}
                 <div
-                    className="mb-4 rounded-xl border border-sidebar-border/70 bg-card p-4"
+                    className="mb-4 rounded-2xl border-0 shadow-xl bg-gradient-to-br from-teal-50 via-green-50 to-emerald-50 p-6"
                     aria-label="Informasi layanan"
                 >
-                    <h2 className="mb-2 flex items-center gap-2 text-lg font-semibold">
-                        <Bot className="size-5" />
-                        Ruang Konseling Kesehatan Mental
-                    </h2>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h2 className="mb-2 flex items-center gap-2 text-2xl font-black text-gray-900">
+                            <Bot className="w-6 h-6" />
+                            Ruang Konseling Kesehatan Mental
+                        </h2>
+                        <p className="text-sm text-gray-700 font-medium">Berbagi cerita dan perasaanmu dengan aman.</p>
+                      </div>
+                    </div>
 
                     <p className="text-sm text-muted-foreground">
                         Selamat datang di{' '}
@@ -147,7 +149,7 @@ export default function MentalHealthChatPage() {
 
                 {/* Chat container */}
                 <div
-                    className="mb-4 flex-1 overflow-y-auto rounded-xl border border-sidebar-border/70 bg-card p-4"
+                    className="mb-4 flex-1 overflow-y-auto rounded-2xl border-2 border-gray-100 bg-white/80 backdrop-blur-sm p-4 shadow-sm"
                     role="log"
                     aria-live="polite"
                     aria-relevant="additions"
@@ -215,7 +217,7 @@ export default function MentalHealthChatPage() {
                         onChange={(e) => setInputMessage(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder="Tulis apa yang sedang Anda rasakan atau pikirkan..."
-                        className="w-full resize-none rounded-xl border border-sidebar-border/70 bg-card p-3 pr-12 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                        className="w-full resize-none rounded-2xl border-2 border-gray-100 bg-white/80 backdrop-blur-sm p-3 pr-12 text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none shadow-sm"
                         rows={2}
                         disabled={isLoading}
                         aria-label="Ketik perasaan atau pikiran Anda"
@@ -223,13 +225,14 @@ export default function MentalHealthChatPage() {
                     <Button
                         onClick={handleSendMessage}
                         disabled={!inputMessage.trim() || isLoading}
-                        className="absolute top-2 right-3 h-8 w-8 rounded-xl p-0"
+                        className="absolute top-2 right-3 h-8 w-8 rounded-xl p-0 bg-purple-600 hover:bg-purple-700 text-white"
                         aria-label="Kirim pesan"
                     >
                         <Send className="size-4" />
                     </Button>
                 </div>
             </div>
-        </AppLayout>
+            </main>
+        </div>
     );
 }

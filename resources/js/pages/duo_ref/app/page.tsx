@@ -7,7 +7,6 @@ import FeaturesMotivated from '@/components/sections/features-motivated'
 import FeaturesPersonalized from '@/components/sections/features-personalized'
 import LearningAnywhere from '@/components/sections/learning-anywhere'
 import ProductsSchools from '@/components/sections/products-schools'
-import ProductsAbc from '@/components/sections/products-abc'
 import ProductsMath from '@/components/sections/products-math'
 import FinalCta from '@/components/sections/final-cta'
 import Footer from '@/components/sections/footer'
@@ -25,7 +24,6 @@ export default function HomePage() {
         <FeaturesPersonalized />
         <LearningAnywhere />
         <ProductsSchools />
-        <ProductsAbc />
         <ProductsMath />
         <FinalCta />
         <Footer />

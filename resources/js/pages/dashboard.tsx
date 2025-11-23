@@ -25,13 +25,13 @@ import {
   Clock,
   ChevronRight,
   Play,
-  BookOpen,
-  Code2,
   MessageCircle,
+  Pen,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Head, Link, usePage } from "@inertiajs/react";
 import { mentoring, leaderboard, missions, shop, profile } from "@/routes";
+import { journal } from "@/routes";
 import DashboardTopNav from "@/components/dashboard-top-nav";
 import { useAppearance } from "@/hooks/use-appearance";
 import { supabase } from "@/lib/supabaseClient";
@@ -388,7 +388,7 @@ export default function Dashboard() {
                 <p className="text-sm text-gray-600">Temukan aktivitas menarik untuk pengembangan dirimu</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {[{ title: "Challenge Packs", description: "Prove what you learned with bite-sized code challenges.", icon: Code2, gradient: "from-orange-400 via-yellow-500 to-orange-500" }, { title: "Project Tutorials", description: "Explore fun, step-by-step projects from first build to pro.", icon: BookOpen, gradient: "from-blue-400 via-cyan-500 to-blue-500" }, { title: "#30NitesOfCode", description: "Commit to 30 days of learning with a virtual pet.", icon: Award, gradient: "from-green-400 via-emerald-500 to-green-500" }, { title: "Teman Cerita AI", description: "Tempat aman untuk berbagi pikiran dan perasaanmu.", icon: MessageCircle, gradient: "from-pink-400 via-rose-500 to-pink-500" }].map((card, idx) => (
+                {[{ title: "Daily Journaling", description: "Tulis refleksi harianmu dan pantau mood serta tujuan.", icon: Pen, gradient: "from-amber-400 via-orange-500 to-amber-500", href: journal().url }, { title: "Teman Cerita AI", description: "Tempat aman untuk berbagi pikiran dan perasaanmu.", icon: MessageCircle, gradient: "from-pink-400 via-rose-500 to-pink-500", href: "/mental-health-chat" }].map((card, idx) => (
                   <div key={idx} className="group relative">
                     <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500 rounded-3xl`} />
                     <Card className="relative border-2 border-gray-100 hover:border-transparent overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl bg-white/80 backdrop-blur-sm">
@@ -407,10 +407,12 @@ export default function Dashboard() {
                           </div>
                         </div>
                         <p className="text-sm text-gray-600 leading-relaxed mb-5">{card.description}</p>
-                        <Button className="w-full bg-gradient-to-r from-gray-900 to-gray-800 hover:from-purple-600 hover:to-pink-600 text-white font-semibold group/btn h-11 transition-all duration-300">
-                          <span>Mulai Sekarang</span>
-                          <ChevronRight className="w-4 h-4 ml-1 group-hover/btn:translate-x-1 transition-transform" />
-                        </Button>
+                        <Link href={card.href} className="contents">
+                          <Button className="w-full bg-gradient-to-r from-gray-900 to-gray-800 hover:from-purple-600 hover:to-pink-600 text-white font-semibold group/btn h-11 transition-all duration-300">
+                            <span>Mulai Sekarang</span>
+                            <ChevronRight className="w-4 h-4 ml-1 group-hover/btn:translate-x-1 transition-transform" />
+                          </Button>
+                        </Link>
                       </CardContent>
                     </Card>
                   </div>

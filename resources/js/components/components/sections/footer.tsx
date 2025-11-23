@@ -18,7 +18,6 @@ const Footer = () => {
     { name: 'MindQuest App', href: '#' },
     { name: 'MindQuest Therapy', href: '#' },
     { name: 'MindQuest Community', href: '#' },
-    { name: 'MindQuest Sleep', href: '#' },
     { name: 'MindQuest Journal', href: '#' },
     { name: 'MindQuest Pro', href: '#' },
   ];

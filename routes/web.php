@@ -93,6 +93,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('leaderboard/index');
     })->name('leaderboard');
     
+    Route::get('journal', function () {
+        return Inertia::render('journal/index');
+    })->name('journal');
+    
     // Mood tracker endpoints
     Route::get('moods', [\App\Http\Controllers\MoodController::class, 'index'])->name('moods.index');
     Route::post('moods', [\App\Http\Controllers\MoodController::class, 'store'])->name('moods.store');
