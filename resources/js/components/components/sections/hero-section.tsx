@@ -6,6 +6,7 @@ import { dashboard } from '@/routes';
 const HeroSection = () => {
     return (
         <main className="relative overflow-hidden bg-gradient-to-br from-white via-purple-50 to-cyan-50">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-white/80" />
             {/* Floating decorative elements - Codedex inspired */}
             <div className="animate-float absolute top-20 left-10">
                 <div className="h-8 w-8 rotate-12 rounded-lg bg-yellow-400 opacity-60"></div>
@@ -36,6 +37,14 @@ const HeroSection = () => {
                 {/* Left Column: Image with adventure badges */}
                 <div className="relative flex justify-center lg:justify-start">
                     <div className="relative">
+                        <div className="absolute -top-10 left-0 right-0 h-16 bg-white/70 rounded-b-[2rem]" />
+                        <ParallaxLayer speed={0.22}>
+                            <div className="absolute -top-10 -left-10 z-10 rounded-3xl border-2 border-purple-100 bg-white/70 shadow-xl backdrop-blur-sm px-4 py-5">
+                                <div className="absolute -top-3 -right-3 h-6 w-6 rounded-full bg-pink-300/60" />
+                                <div className="absolute -bottom-3 -left-3 h-6 w-6 rounded-lg bg-cyan-300/60 rotate-12" />
+                                <div className="absolute inset-0 rounded-3xl ring-1 ring-white/60" />
+                            </div>
+                        </ParallaxLayer>
                         <ParallaxLayer speed={0.18}>
                             <script
                                 type="module"
@@ -45,32 +54,45 @@ const HeroSection = () => {
                             <spline-viewer url="https://prod.spline.design/2pXoBvPOhLXPorS1/scene.splinecode"></spline-viewer>
                         </ParallaxLayer>
 
-                        {/* Wellness Badge - Codedex style */}
-                        <ParallaxLayer speed={0.28}>
-                            <div className="animate-float absolute -top-4 -right-4 z-20 rotate-12 transform rounded-2xl bg-gradient-to-br from-green-400 to-emerald-500 px-4 py-2 text-white shadow-lg">
-                                <div className="flex items-center gap-1.5">
-                                    <Heart
-                                        className="h-5 w-5"
-                                        fill="currentColor"
-                                    />
-                                    <span className="text-lg font-bold">
-                                        +100 Poin
-                                    </span>
-                                </div>
-                            </div>
-                        </ParallaxLayer>
-
-                        {/* Achievement Badge */}
-                        <ParallaxLayer speed={0.32}>
-                            <div
-                                className="animate-float absolute -bottom-2 -left-4 z-20 -rotate-6 transform rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 px-3 py-2 text-white shadow-lg"
-                                style={{ animationDelay: '1.5s' }}
-                            >
-                                <div className="flex items-center gap-1">
-                                    <Brain className="h-4 w-4" />
-                                    <span className="text-sm font-bold">
-                                        Mental Warrior
-                                    </span>
+                        
+                        
+                        <ParallaxLayer speed={0.26}>
+                            <div className="absolute -top-14 md:-top-20 left-2 z-10">
+                                <div className="relative rounded-3xl bg-gradient-to-br from-rose-100 via-purple-100 to-cyan-100 p-1 shadow-2xl">
+                                    <div className="rounded-[22px] bg-white p-5">
+                                        <div className="flex items-center gap-2">
+                                            <div className="rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-1.5 text-sm font-bold shadow">
+                                                <span className="inline-flex items-center gap-2"><Brain className="h-4 w-4" />Goal Harian</span>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4 space-y-3 text-sm">
+                                            <div>
+                                                <div className="flex items-center justify-between"><span className="text-gray-700">XP Hari Ini</span><span className="font-bold text-gray-900">30 XP</span></div>
+                                                <div className="mt-1 h-2 w-64 max-w-full rounded-full bg-gray-200"><div className="h-2 w-[30%] rounded-full bg-gradient-to-r from-emerald-400 to-green-600"></div></div>
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center justify-between"><span className="text-gray-700">Misi Aktif</span><span className="font-bold text-gray-900">2/3</span></div>
+                                                <div className="mt-1 h-2 w-64 max-w-full rounded-full bg-gray-200"><div className="h-2 w-[66%] rounded-full bg-gradient-to-r from-amber-400 to-orange-600"></div></div>
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center justify-between"><span className="text-gray-700">Jurnal</span><span className="font-bold text-gray-900">1x</span></div>
+                                                <div className="mt-1 h-2 w-64 max-w-full rounded-full bg-gray-200"><div className="h-2 w-[100%] rounded-full bg-gradient-to-r from-sky-400 to-blue-600"></div></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="animate-float absolute -top-8 -left-10 -rotate-6 z-30 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 px-3 py-2 text-white shadow-lg" style={{ animationDelay: '0.4s' }}>
+                                        <div className="flex items-center gap-1">
+                                            <Brain className="h-4 w-4" />
+                                            <span className="text-sm font-bold">Mental Warrior</span>
+                                        </div>
+                                    </div>
+                                    <div className="animate-float absolute -bottom-14 left-10 rotate-12 z-20 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-500 px-4 py-2 text-white shadow-lg" style={{ animationDelay: '1s' }}>
+                                        <div className="flex items-center gap-1.5">
+                                            <Heart className="h-5 w-5" fill="currentColor" />
+                                            <span className="text-lg font-bold">+10 Poin</span>
+                                        </div>
+                                    </div>
+                                    <div className="absolute -top-3 -right-3 flex items-center justify-center h-9 w-9 rounded-full bg-pink-400 text-white shadow"><Heart className="h-5 w-5" fill="currentColor" /></div>
                                 </div>
                             </div>
                         </ParallaxLayer>

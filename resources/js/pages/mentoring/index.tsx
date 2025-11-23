@@ -20,7 +20,7 @@ interface Level {
   xpReward: number;
 }
 
-let initialLevels: Level[] = [
+const initialLevels: Level[] = [
   { id: 1, title: "Mengenal Diri", description: "Memahami emosi dan perasaan diri", icon: Heart, status: "completed", stars: 3, maxStars: 3, xpReward: 50 },
   { id: 2, title: "Kesadaran Pikiran", description: "Belajar mindfulness dan meditasi", icon: Brain, status: "completed", stars: 2, maxStars: 3, xpReward: 50 },
   { id: 3, title: "Pagi yang Produktif", description: "Rutinitas pagi untuk kesehatan mental", icon: Sun, status: "current", stars: 0, maxStars: 3, xpReward: 75 },

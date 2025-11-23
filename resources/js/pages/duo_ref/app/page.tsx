@@ -13,9 +13,9 @@ import Footer from '@/components/sections/footer'
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white font-nunito">
+    <div className="min-h-screen bg-gradient-to-br from-white via-purple-50 to-cyan-50 font-nunito">
       <DashboardTopNav />
-      <div className="pt-[64px] md:pt-[80px]">
+      <div className="pt-[80px] md:pt-[96px] scroll-mt-24">
         <HeroSection />
         <LanguageCarousel />
         <FeaturesEffective />
