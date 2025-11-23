@@ -19,7 +19,7 @@ const FeaturesEffective = () => {
             </div>
 
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight">
-              <span className="text-gradient-adventure">gratis. seru. efektif.</span>
+              <span className="text-[#58cc02]">gratis. seru. efektif.</span>
             </h2>
 
             <div className="space-y-4 text-gray-700 text-lg">
