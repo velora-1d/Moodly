@@ -1,12 +1,12 @@
 import { ParallaxLayer } from '@/components/ui/parallax';
 import { Brain, Heart, Sparkles, Star } from 'lucide-react';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { dashboard } from '@/routes';
 
 const HeroSection = () => {
+    const { auth } = usePage<any>().props;
     return (
         <main className="relative overflow-hidden bg-gradient-to-br from-white via-purple-50 to-cyan-50">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-white/80" />
             {/* Floating decorative elements - Codedex inspired */}
             <div className="animate-float absolute top-20 left-10">
                 <div className="h-8 w-8 rotate-12 rounded-lg bg-yellow-400 opacity-60"></div>
@@ -33,7 +33,7 @@ const HeroSection = () => {
                 <div className="h-6 w-6 rounded-full bg-pink-400 opacity-50"></div>
             </div>
 
-            <div className="relative z-10 mx-auto grid max-w-6xl grid-cols-1 items-center gap-y-8 px-5 py-12 md:py-16 lg:grid-cols-2 lg:gap-x-16 lg:py-20">
+            <div className="relative z-10 mx-auto -mt-6 md:-mt-8 lg:-mt-10 grid max-w-6xl grid-cols-1 items-center gap-y-2 px-5 pt-0 pb-4 md:pb-6 lg:grid-cols-2 lg:gap-x-16 lg:pb-7">
                 {/* Left Column: Image with adventure badges */}
                 <div className="relative flex justify-center lg:justify-start">
                     <div className="relative">
@@ -57,7 +57,7 @@ const HeroSection = () => {
                         
                         
                         <ParallaxLayer speed={0.26}>
-                            <div className="absolute -top-14 md:-top-20 left-2 z-10">
+                            <div className="absolute -top-26 md:-top-32 left-2 z-10">
                                 <div className="relative rounded-3xl bg-gradient-to-br from-rose-100 via-purple-100 to-cyan-100 p-1 shadow-2xl">
                                     <div className="rounded-[22px] bg-white p-5">
                                         <div className="flex items-center gap-2">
@@ -153,12 +153,14 @@ const HeroSection = () => {
                             </span>
                             <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000 group-hover:translate-x-full"></div>
                         </Link>
-                        <Link
-                            href={dashboard()}
-                            className="hover-bob block rounded-2xl border-2 border-solid border-purple-300 bg-white px-8 py-4 text-center font-bold text-purple-600 uppercase shadow-sm transition-all duration-200 ease-out hover:border-purple-400 hover:bg-purple-50 hover:-translate-y-1 active:translate-y-px"
-                        >
-                            Saya Sudah Punya Akun
-                        </Link>
+                        {!auth?.user && (
+                            <Link
+                                href={dashboard()}
+                                className="hover-bob block rounded-2xl border-2 border-solid border-purple-300 bg-white px-8 py-4 text-center font-bold text-purple-600 uppercase shadow-sm transition-all duration-200 ease-out hover:border-purple-400 hover:bg-purple-50 hover:-translate-y-1 active:translate-y-px"
+                            >
+                                Saya Sudah Punya Akun
+                            </Link>
+                        )}
                     </div>
                 </div>
             </div>

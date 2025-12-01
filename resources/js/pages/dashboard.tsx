@@ -51,6 +51,21 @@ function ymd(date: Date) {
   return `${y}-${m}-${d}`;
 }
 
+function getJakartaRemainingSeconds() {
+  const parts = new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Jakarta",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).formatToParts(new Date());
+  const h = Number(parts.find((p) => p.type === "hour")?.value || 0);
+  const m = Number(parts.find((p) => p.type === "minute")?.value || 0);
+  const s = Number(parts.find((p) => p.type === "second")?.value || 0);
+  const elapsed = h * 3600 + m * 60 + s;
+  return Math.max(0, 24 * 3600 - elapsed);
+}
+
 export default function Dashboard() {
   const { auth } = usePage<SharedProps>().props;
   const name = auth?.user?.name ?? "Player";
@@ -58,12 +73,12 @@ export default function Dashboard() {
 
   const [currentStreak, setCurrentStreak] = useState(3);
   const [stats, setStats] = useState({ totalPoints: 245, level: 5, badges: 12 });
-  const [timeRemaining, setTimeRemaining] = useState(2 * 60 * 60);
+  const [timeRemaining, setTimeRemaining] = useState(getJakartaRemainingSeconds());
   const [friendEmail, setFriendEmail] = useState("");
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeRemaining((prev) => (prev > 0 ? prev - 1 : 0));
+      setTimeRemaining(getJakartaRemainingSeconds());
     }, 1000);
     return () => clearInterval(timer);
   }, []);
@@ -73,15 +88,29 @@ export default function Dashboard() {
     updateAppearance("light");
   }, [updateAppearance]);
 
+  
+
   const DAILY_GOAL_XP = 10;
   const [dailyXP, setDailyXP] = useState(0);
+  const [missionsTotal, setMissionsTotal] = useState(0);
+  const [missionsCompleted, setMissionsCompleted] = useState(0);
   const [isMoodOpen, setMoodOpen] = useState(false);
   const [selectedMood, setSelectedMood] = useState<string>("");
   const [note, setNote] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const dailyPct = useMemo(
     () => Math.min(100, Math.round((dailyXP / DAILY_GOAL_XP) * 100)),
     [dailyXP]
   );
+  const missionsPct = useMemo(
+    () => (missionsTotal > 0 ? Math.round((missionsCompleted / missionsTotal) * 100) : 0),
+    [missionsTotal, missionsCompleted]
+  );
+
+  useEffect(() => {
+    if (loadError) toast.error(loadError);
+  }, [loadError]);
 
   const quickActions = [
     { icon: Brain, label: "Belajar", color: "bg-purple-500", href: mentoring().url, active: true },
@@ -102,12 +131,16 @@ export default function Dashboard() {
   const [streak, setStreak] = useState<number>(0);
   const [moodHistory, setMoodHistory] = useState<Record<string, { emoji: string; label?: string }>>({});
   const [currentMonthDate, setCurrentMonthDate] = useState(new Date());
+  const [weeklyCompletedLessons, setWeeklyCompletedLessons] = useState(0);
+  const [weeklyTotalLessons, setWeeklyTotalLessons] = useState(3);
 
   const weekDays = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
   const currentMonthLabel = currentMonthDate.toLocaleString("id-ID", { month: "long", year: "numeric" });
 
   useEffect(() => {
     const loadDashboardData = async () => {
+      setLoadError(null);
+      setLoading(true);
       const userId = auth?.user?.id;
       if (!userId) return;
       const isSupabaseConfigured = Boolean(
@@ -115,11 +148,12 @@ export default function Dashboard() {
         (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY)
       );
       if (!isSupabaseConfigured) return;
-      const { data: moods } = await supabase
-        .from("mood_logs")
-        .select("date,created_at,mood,label")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: true });
+      try {
+        const { data: moods } = await supabase
+          .from("mood_logs")
+          .select("date,created_at,mood,label")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: true });
       const map: Record<string, { emoji: string; label?: string }> = {};
       if (Array.isArray(moods)) {
         for (const log of moods) {
@@ -146,6 +180,9 @@ export default function Dashboard() {
       })();
       setStreak(s);
       setCurrentStreak(s);
+      } catch (e) {
+        setLoadError("Gagal memuat mood");
+      }
       const start = new Date();
       start.setHours(0, 0, 0, 0);
       try {
@@ -159,14 +196,37 @@ export default function Dashboard() {
       } catch {}
 
       try {
-        const { data: userStats } = await supabase
-          .from("user_stats")
+        const { data: agg } = await supabase
+          .from("dashboard_user_stats")
           .select("level,total_points,badges_count")
           .eq("user_id", userId)
           .limit(1);
-        const row = Array.isArray(userStats) ? userStats[0] : null;
+        const row = Array.isArray(agg) ? agg[0] : null;
         if (row) setStats({ level: row.level ?? stats.level, totalPoints: row.total_points ?? stats.totalPoints, badges: row.badges_count ?? stats.badges });
       } catch {}
+
+      try {
+        const { data: missions } = await supabase
+          .from("user_daily_missions")
+          .select("computed_progress,target_total")
+          .eq("user_id", userId);
+        const list = Array.isArray(missions) ? missions : [];
+        const total = list.length;
+        const done = list.filter((m: any) => (Number(m.computed_progress) || 0) >= Number(m.target_total)).length;
+        setMissionsTotal(total);
+        setMissionsCompleted(done);
+      } catch {}
+      try {
+        const { data: comps } = await supabase
+          .from("level_completions")
+          .select("level_id,stars")
+          .eq("user_id", userId);
+        const list = Array.isArray(comps) ? comps : [];
+        const completed = list.filter((r: any) => Number(r.stars || 0) > 0).length;
+        setWeeklyCompletedLessons(completed);
+        setWeeklyTotalLessons(3);
+      } catch {}
+      setLoading(false);
     };
     loadDashboardData();
   }, [auth?.user?.id]);
@@ -215,7 +275,7 @@ export default function Dashboard() {
     setMoodHistory((prev) => ({ ...prev, [today]: { emoji: mood, label } }));
     if (!hadMoodBefore) {
       try {
-        await supabase.from("xp_events").insert({ user_id: userId, points: 2, type: "mood_quick", created_at: now.toISOString() });
+        await supabase.from("user_xp_events").insert({ user_id: userId, amount: 2, source: "mood_quick", occurred_at: now.toISOString(), created_at: now.toISOString() });
       } catch {}
       setDailyXP((v) => v + 2);
       setStreak((s) => s + 1);
@@ -236,7 +296,7 @@ export default function Dashboard() {
     if (!isSupabaseConfigured) return;
     const now = new Date();
     try {
-      await supabase.from("xp_events").insert({ user_id: userId, points, type: "daily_task", created_at: now.toISOString() });
+      await supabase.from("user_xp_events").insert({ user_id: userId, amount: points, source: "daily_task", occurred_at: now.toISOString(), created_at: now.toISOString() });
     } catch {}
     setDailyXP((v) => Math.min(DAILY_GOAL_XP, v + points));
   }
@@ -339,14 +399,16 @@ export default function Dashboard() {
                       <TrendingUp className="w-5 h-5 text-teal-600" />
                       <span className="text-sm font-bold text-gray-700">Progress Minggu Ini</span>
                     </div>
-                    <span className="text-2xl font-black bg-gradient-to-r from-teal-600 to-green-600 bg-clip-text text-transparent">65%</span>
+                    <span className="text-2xl font-black bg-gradient-to-r from-teal-600 to-green-600 bg-clip-text text-transparent">
+                      {weeklyTotalLessons > 0 ? Math.round((weeklyCompletedLessons / weeklyTotalLessons) * 100) : 0}%
+                    </span>
                   </div>
 
                   <div className="relative">
-                    <Progress value={65} className="h-4 mb-2" />
+                    <Progress value={weeklyTotalLessons > 0 ? Math.round((weeklyCompletedLessons / weeklyTotalLessons) * 100) : 0} className="h-4 mb-2" />
                     <div className="flex items-center justify-between text-xs text-gray-600 font-semibold">
-                      <span>13 dari 20 latihan selesai</span>
-                      <span className="text-teal-700">+7 latihan lagi!</span>
+                      <span>{weeklyCompletedLessons} dari {weeklyTotalLessons} latihan selesai</span>
+                      <span className="text-teal-700">+{Math.max(0, weeklyTotalLessons - weeklyCompletedLessons)} latihan lagi!</span>
                     </div>
                   </div>
 
@@ -453,14 +515,15 @@ export default function Dashboard() {
 
                 <div className="bg-purple-50 rounded-xl p-4 mb-4 border border-purple-200">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-2xl font-black text-purple-900">{dailyXP} / {DAILY_GOAL_XP}</span>
+                    <span className="text-2xl font-black text-purple-900">{missionsCompleted} / {missionsTotal}</span>
                     <Zap className="w-6 h-6 text-purple-600" />
                   </div>
-                  <Progress value={dailyPct} className="h-3 mb-2" />
-                  <p className="text-sm text-purple-700 font-semibold">Selesaikan {Math.max(0, DAILY_GOAL_XP - dailyXP)} misi lagi hari ini</p>
+                  <Progress value={missionsPct} className="h-3 mb-2" />
+                  <p className="text-sm text-purple-700 font-semibold">Selesaikan {Math.max(0, missionsTotal - missionsCompleted)} misi lagi hari ini</p>
                 </div>
-
-                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold" onClick={() => addDailyXP(2)}>Kerjakan</Button>
+                <Link href={missions().url} className="block">
+                  <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold">Kerjakan</Button>
+                </Link>
               </CardContent>
             </Card>
 

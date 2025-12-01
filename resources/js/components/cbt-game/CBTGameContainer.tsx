@@ -7,13 +7,14 @@ import BattleEncounter from "./BattleEncounter";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Trophy, Skull, RefreshCw, Star, Heart, Play } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 
 type GameState = 'intro' | 'avatar_selection' | 'playing' | 'victory' | 'game_over';
 
 const MAX_HEALTH = 100;
 
-export default function CBTGameContainer() {
+export default function CBTGameContainer({ onComplete }: { onComplete?: (payload: { score: number; health: number }) => void }) {
   const [gameState, setGameState] = useState<GameState>('avatar_selection');
   const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
   const [health, setHealth] = useState(MAX_HEALTH);
@@ -118,6 +119,9 @@ export default function CBTGameContainer() {
     } else {
       setGameState('victory');
       triggerConfetti();
+      try {
+        onComplete?.({ score, health });
+      } catch {}
     }
   };
 
@@ -195,9 +199,11 @@ export default function CBTGameContainer() {
   }
 
   if (gameState === 'victory') {
+    const stars = score >= 90 ? 3 : score >= 60 ? 2 : 1
+    const xp = 75
     return (
       <div className="flex flex-col items-center justify-center min-h-[600px] p-8 text-center space-y-8">
-        <motion.div 
+        <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           className="bg-card p-12 rounded-2xl shadow-2xl border-4 border-yellow-500/20 max-w-2xl w-full"
@@ -205,26 +211,37 @@ export default function CBTGameContainer() {
           <div className="mx-auto bg-yellow-100 w-24 h-24 rounded-full flex items-center justify-center mb-6">
             <Trophy className="w-12 h-12 text-yellow-600" />
           </div>
-          <h2 className="text-4xl font-bold text-yellow-600 mb-4">Quest Completed!</h2>
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Quest Completed!</h2>
+            <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">+{xp} XP</Badge>
+          </div>
+          <div className="flex items-center justify-center gap-1 mb-6">
+            {[0,1,2].map((i)=> (
+              <Star key={i} className={`w-7 h-7 ${i < stars ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-300'}`} />
+            ))}
+          </div>
           <p className="text-xl text-muted-foreground mb-8">
             You have successfully navigated through the valley of shadows and learned to challenge your negative thoughts.
           </p>
-          <div className="flex justify-center gap-12 mb-8">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground uppercase tracking-wider">Final Score</p>
-              <p className="text-4xl font-bold">{score}</p>
+          <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="rounded-xl bg-purple-50 p-4 border border-purple-200">
+              <p className="text-sm text-purple-700">Final Score</p>
+              <p className="text-3xl font-bold text-purple-900">{score}</p>
             </div>
-            <div className="text-center">
-               <p className="text-sm text-muted-foreground uppercase tracking-wider">Health Remaining</p>
-               <p className="text-4xl font-bold text-green-600">{health}</p>
+            <div className="rounded-xl bg-green-50 p-4 border border-green-200">
+              <p className="text-sm text-green-700">Health Remaining</p>
+              <p className="text-3xl font-bold text-green-900">{health}</p>
             </div>
           </div>
-          <Button size="lg" onClick={handleRestart} className="gap-2">
-            <RefreshCw className="w-4 h-4" /> Play Again
-          </Button>
+          <div className="flex items-center justify-center gap-3">
+            <Button size="lg" onClick={handleRestart} className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+              <RefreshCw className="w-4 h-4" /> Play Again
+            </Button>
+            <a href="/mentoring" className="inline-flex items-center justify-center rounded-md border px-4 py-2">Back to Map</a>
+          </div>
         </motion.div>
       </div>
-    );
+    )
   }
 
   if (gameState === 'game_over') {

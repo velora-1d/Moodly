@@ -4,10 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Star } from 'lucide-react'
+import { supabase } from '@/lib/supabaseClient'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePage } from '@inertiajs/react'
-import { startSession, endSession, complete } from './useLevelState'
+import { startSession, endSession, getCompletion } from './useLevelState'
 
 type SharedProps = { auth: { user: { id: number } | null } }
 type Phase = 'idle' | 'inhale' | 'exhale'
@@ -170,7 +172,23 @@ export default function Level1() {
     const durationMs = elapsed * 1000
     const stars = bestStreak >= 4 ? 3 : 2
     endSession(auth.user.id, levelId, { breaths, targetBreaths, bestStreak, paceSec, autoGuide }, durationMs)
-    complete(auth.user.id, levelId, stars, 50)
+    ;(async () => {
+      const uid = auth.user!.id
+      const now = new Date().toISOString()
+      const existing = await getCompletion(uid, levelId)
+      if (!existing) {
+        await supabase.from('level_completions').upsert({ user_id: uid, level_id: levelId, stars, xp_awarded: 50, completed_at: now }, { onConflict: 'user_id,level_id' })
+        await supabase.from('xp_events').insert({ user_id: uid, points: 50, type: 'level_complete', created_at: now })
+      } else {
+        const prevStars = Number(existing.stars || 0)
+        const prevXp = Number((existing as any).xp_awarded || 0)
+        if (stars > prevStars) await supabase.from('level_completions').update({ stars }).eq('user_id', uid).eq('level_id', levelId)
+        if (!prevXp || prevXp <= 0) {
+          await supabase.from('level_completions').update({ xp_awarded: 50, completed_at: existing.completed_at ?? now }).eq('user_id', uid).eq('level_id', levelId)
+          await supabase.from('xp_events').insert({ user_id: uid, points: 50, type: 'level_complete', created_at: now })
+        }
+      }
+    })()
     setSummary({ breaths, targetBreaths, bestStreak, duration: elapsed, stars })
     setShowSummary(true)
   }, [completed, hasCompleted, auth?.user?.id, elapsed, bestStreak, breaths, targetBreaths, paceSec, autoGuide])
@@ -331,21 +349,44 @@ export default function Level1() {
         </CardContent>
       </Card>
       <Dialog open={showSummary} onOpenChange={setShowSummary}>
-        <DialogContent>
+        <DialogContent className="rounded-2xl border-2 border-purple-200">
           <DialogHeader>
-            <DialogTitle>Ringkasan Sesi</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent font-black">Sesi Selesai</span>
+              <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">+50 XP</Badge>
+            </DialogTitle>
           </DialogHeader>
           {summary && (
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between"><span>Breaths</span><span>{summary.breaths}/{summary.targetBreaths}</span></div>
-              <div className="flex justify-between"><span>Best Combo</span><span>{summary.bestStreak}</span></div>
-              <div className="flex justify-between"><span>Durasi</span><span>{formatTime(summary.duration)}</span></div>
-              <div className="flex justify-between"><span>Bintang</span><span>{summary.stars}</span></div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-center gap-1">
+                {[0,1,2].map((i)=> (
+                  <Star key={i} className={`w-7 h-7 ${i < summary.stars ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-300'}`} />
+                ))}
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-purple-50 p-3 border border-purple-200">
+                  <div className="text-xs text-purple-700">Breaths</div>
+                  <div className="text-lg font-bold text-purple-900">{summary.breaths}/{summary.targetBreaths}</div>
+                </div>
+                <div className="rounded-xl bg-pink-50 p-3 border border-pink-200">
+                  <div className="text-xs text-pink-700">Best Streak</div>
+                  <div className="text-lg font-bold text-pink-900">{summary.bestStreak}</div>
+                </div>
+                <div className="rounded-xl bg-indigo-50 p-3 border border-indigo-200">
+                  <div className="text-xs text-indigo-700">Durasi</div>
+                  <div className="text-lg font-bold text-indigo-900">{formatTime(summary.duration)}</div>
+                </div>
+                <div className="rounded-xl bg-teal-50 p-3 border border-teal-200">
+                  <div className="text-xs text-teal-700">Bintang</div>
+                  <div className="text-lg font-bold text-teal-900">{summary.stars} / 3</div>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white" onClick={onReset}>Ulangi</Button>
+                <a href="/mentoring" className="flex-1 inline-flex items-center justify-center rounded-md border px-4 py-2">Tutup</a>
+              </div>
             </div>
           )}
-          <div className="mt-4">
-            <a href="/mentoring" className="inline-flex items-center justify-center rounded-md bg-purple-600 px-4 py-2 text-white">Kembali ke Peta</a>
-          </div>
         </DialogContent>
       </Dialog>
     </LevelLayout>

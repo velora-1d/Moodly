@@ -3,13 +3,13 @@ import { Heart, TrendingUp, Award, Brain } from 'lucide-react';
 
 const FeaturesEffective = () => {
   return (
-    <section className="relative bg-white py-16 md:py-24 overflow-hidden">
+    <section className="relative bg-white py-8 md:py-12 overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute top-20 right-10 w-20 h-20 bg-purple-200 rounded-full opacity-20 blur-2xl"></div>
       <div className="absolute bottom-20 left-10 w-32 h-32 bg-cyan-200 rounded-full opacity-20 blur-2xl"></div>
 
       <div className="container mx-auto px-5">
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12 max-w-6xl mx-auto">
           {/* Left Column: Text content with mental health elements */}
           <div className="space-y-6">
             {/* Badge indicator */}

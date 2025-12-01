@@ -1,6 +1,8 @@
 "use client"
 
 import LevelLayout from "./LevelLayout"
+import { supabase } from "@/lib/supabaseClient"
+import { usePage } from "@inertiajs/react"
 import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
@@ -40,6 +42,7 @@ const MOTIVATIONAL_MESSAGES = [
 ]
 
 export default function Level2() {
+  const { auth } = usePage<any>().props
   const [gameState, setGameState] = useState<GameState>("playing")
   const [score, setScore] = useState(0)
   const [level, setLevel] = useState(1)
@@ -186,6 +189,26 @@ export default function Level2() {
 
   const accuracy = round > 0 ? Math.round((reactionTime.length / round) * 100) : 0
   const newUnlockedAchievements = achievements.filter(a => a.unlocked)
+
+  const [reportedComplete, setReportedComplete] = useState(false)
+
+  useEffect(() => {
+    if (gameState !== "completed" || reportedComplete) return
+    const userId = auth?.user?.id
+    if (!userId) return
+    const isConfigured = Boolean((import.meta as any).env.VITE_SUPABASE_URL || (import.meta as any).env.SUPABASE_URL)
+    if (!isConfigured) return
+    const stars = accuracy >= 90 ? 3 : accuracy >= 70 ? 2 : 1
+    const now = new Date().toISOString()
+    ;(async () => {
+      try {
+        await supabase
+          .from("level_completions")
+          .upsert({ user_id: userId, level_id: 2, stars, completed_at: now, updated_at: now }, { onConflict: "user_id,level_id" })
+        setReportedComplete(true)
+      } catch {}
+    })()
+  }, [gameState, reportedComplete, auth?.user?.id, accuracy])
 
   return (
     <LevelLayout title="Level 2 · Mindfulness">

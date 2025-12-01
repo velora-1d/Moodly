@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { mentoring, leaderboard as leaderboardRoute, missions as missionsRoute, shop, profile } from "@/routes";
 import { useAppearance } from "@/hooks/use-appearance";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { toast } from "sonner";
 import {
   Trophy,
   Target,
@@ -33,10 +35,31 @@ export default function MissionsPage() {
   const { updateAppearance } = useAppearance();
   const { auth } = usePage<SharedProps>().props;
   const name = auth?.user?.name ?? "Player";
+  const userId = auth?.user?.id ?? null;
+  const [dailyMissions, setDailyMissions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     updateAppearance("light");
   }, [updateAppearance]);
+
+  useEffect(() => {
+    const isSupabaseConfigured = Boolean(
+      (import.meta as any).env.VITE_SUPABASE_URL || (import.meta as any).env.SUPABASE_URL
+    );
+    if (!userId || !isSupabaseConfigured) return;
+    const load = async () => {
+      setLoading(true);
+      const { data } = await supabase
+        .from("user_daily_missions")
+        .select("mission_id,slug,title,description,icon,icon_bg,target_total,xp_reward,order_index,computed_progress,completed_at,user_id")
+        .eq("user_id", userId)
+        .order("order_index", { ascending: true });
+      setDailyMissions(Array.isArray(data) ? data : []);
+      setLoading(false);
+    };
+    load();
+  }, [userId]);
 
   return (
     <div className="missions-ref-theme antialiased min-h-screen bg-gradient-to-b from-purple-50 to-white">
@@ -104,50 +127,41 @@ export default function MissionsPage() {
               </Badge>
             </div>
 
-            <MissionCard
-              title="Selesaikan 8 misi lagi hari ini"
-              description="Target harian kamu untuk terus berkembang"
-              icon="🎯"
-              iconBg="from-purple-400 to-purple-600"
-              progress={2}
-              total={10}
-              xp={50}
-              delay={0.1}
-            />
-            
-            <MissionCard
-              title="Dapatkan 10 XP"
-              description="Complete any lesson or exercise"
-              icon="⚡"
-              iconBg="from-yellow-400 to-orange-500"
-              progress={7}
-              total={10}
-              xp={50}
-              delay={0.2}
-            />
-            
-            <MissionCard
-              title="Capai Target Harian"
-              description="Reach 100 points in one day"
-              icon="🎯"
-              iconBg="from-blue-400 to-cyan-500"
-              progress={65}
-              total={100}
-              xp={100}
-              delay={0.3}
-            />
-            
-            <MissionCard
-              title="Jaga Streak-mu"
-              description="Don't break your daily streak"
-              icon="🔥"
-              iconBg="from-orange-400 to-red-500"
-              progress={1}
-              total={1}
-              xp={75}
-              isCompleted
-              delay={0.4}
-            />
+            {loading && (
+              <div className="space-y-3">
+                <div className="h-24 rounded-xl bg-gray-100 animate-pulse" />
+                <div className="h-24 rounded-xl bg-gray-100 animate-pulse" />
+              </div>
+            )}
+            {!loading && dailyMissions.map((m, idx) => (
+              <MissionCard
+                key={`${m.slug}-${idx}`}
+                title={m.title}
+                description={m.description}
+                icon={m.icon}
+                iconBg={m.icon_bg}
+                progress={Number(m.computed_progress) || 0}
+                total={Number(m.target_total)}
+                xp={Number(m.xp_reward)}
+                isCompleted={(Number(m.computed_progress) || 0) >= Number(m.target_total) || !!m.completed_at}
+                delay={0.1 + idx * 0.1}
+                onSolve={async () => {
+                  if (!userId) return;
+                  const today = new Date();
+                  const period_key = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
+                  const next = (Number(m.computed_progress) || 0) + 1;
+                  const { data: up } = await supabase.from("user_mission_progress").upsert({
+                    user_id: userId,
+                    mission_id: m.mission_id,
+                    period_key,
+                    progress: next,
+                    updated_at: new Date().toISOString(),
+                    completed_at: next >= Number(m.target_total) ? new Date().toISOString() : null,
+                  }, { onConflict: "user_id,mission_id,period_key" });
+                  if (up) toast.success("Misi diperbarui");
+                }}
+              />
+            ))}
           </motion.div>
         )}
 
@@ -219,6 +233,7 @@ interface MissionCardProps {
   xp: number;
   isCompleted?: boolean;
   delay: number;
+  onSolve?: () => Promise<void> | void;
 }
 
 function MissionCard({
@@ -231,8 +246,18 @@ function MissionCard({
   xp,
   isCompleted = false,
   delay,
+  onSolve,
 }: MissionCardProps) {
-  const percentage = (progress / total) * 100;
+  const percentage = useMemo(() => (progress / total) * 100, [progress, total]);
+  const [hidden, setHidden] = useState(false);
+  const completeNow = isCompleted && !hidden;
+  useEffect(() => {
+    if (completeNow) {
+      const t = setTimeout(() => setHidden(true), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [completeNow]);
+  if (hidden) return null;
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay }}>
@@ -240,6 +265,7 @@ function MissionCard({
         className={`border-0 shadow-md hover:shadow-xl transition-all cursor-pointer ${
           isCompleted ? "bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-l-green-500" : "bg-white hover:scale-[1.02]"
         }`}
+        onClick={() => { if (onSolve && !isCompleted) onSolve(); }}
       >
         <CardContent className="p-6">
           <div className="flex items-start gap-5">
@@ -272,15 +298,13 @@ function MissionCard({
               {/* Progress Bar */}
               <div className="mt-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-gray-700">
-                    {progress} / {total}
-                  </span>
-                  <span className="text-sm font-semibold text-purple-600">{Math.round(percentage)}%</span>
+                  <span className="text-sm font-bold text-gray-700">{isCompleted && total === 1 ? "1 / 1" : `${progress} / ${total}`}</span>
+                  <span className="text-sm font-semibold text-purple-600">{Math.round(isCompleted && total === 1 ? 100 : percentage)}%</span>
                 </div>
                 <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
-                    animate={{ width: `${percentage}%` }}
+                    animate={{ width: `${isCompleted && total === 1 ? 100 : percentage}%` }}
                     transition={{ duration: 1, delay: delay + 0.2 }}
                     className={`h-full rounded-full ${
                       isCompleted ? "bg-gradient-to-r from-green-400 to-emerald-500" : "bg-gradient-to-r from-purple-500 to-purple-600"

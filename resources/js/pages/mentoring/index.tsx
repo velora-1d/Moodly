@@ -20,17 +20,24 @@ interface Level {
   xpReward: number;
 }
 
-const initialLevels: Level[] = [
-  { id: 1, title: "Mengenal Diri", description: "Memahami emosi dan perasaan diri", icon: Heart, status: "completed", stars: 3, maxStars: 3, xpReward: 50 },
-  { id: 2, title: "Kesadaran Pikiran", description: "Belajar mindfulness dan meditasi", icon: Brain, status: "completed", stars: 2, maxStars: 3, xpReward: 50 },
-  { id: 3, title: "Pagi yang Produktif", description: "Rutinitas pagi untuk kesehatan mental", icon: Sun, status: "current", stars: 0, maxStars: 3, xpReward: 75 },
-];
+const iconMap: Record<string, any> = {
+  heart: Heart,
+  brain: Brain,
+  sun: Sun,
+  moon: Moon,
+  wind: Wind,
+  trophy: Trophy,
+  sparkles: Sparkles,
+  target: Target,
+  award: Award,
+  trendingUp: TrendingUp,
+};
 
 // moved inside component
 
 export default function MentoringPage() {
   const { auth } = usePage<any>().props;
-  const [levels, setLevelState] = useState<Level[]>(initialLevels);
+  const [levels, setLevelState] = useState<Level[]>([]);
   const [selectedLevel, setSelectedLevel] = useState<Level | null>(null);
   const [showAchievement, setShowAchievement] = useState(false);
 
@@ -61,23 +68,34 @@ export default function MentoringPage() {
   ];
 
   useEffect(() => {
-    const loadCompletion = async () => {
+    const load = async () => {
       const userId = auth?.user?.id;
       if (!userId) return;
       const isConfigured = Boolean((import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) && (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY));
       if (!isConfigured) return;
-      const { data } = await supabase
+      const { data: base } = await supabase
+        .from('levels')
+        .select('id,slug,title,description,icon_slug,xp_reward,order_index,active')
+        .eq('active', true)
+        .order('order_index', { ascending: true })
+        .order('id', { ascending: true });
+      const rawLevels = Array.isArray(base) ? base : [];
+      const { data: comps } = await supabase
         .from('level_completions')
         .select('level_id,stars')
         .eq('user_id', userId);
-      const set = new Map<number, number>();
-      if (Array.isArray(data)) data.forEach((r: any) => set.set(r.level_id, r.stars ?? 0));
-      const updated = levels.map((l: Level) => set.has(l.id) ? { ...l, status: 'completed' as const, stars: set.get(l.id) ?? 0 } : l);
-      const firstNot = updated.find((l: Level) => l.status !== 'completed');
-      const final = updated.map((l: Level) => l.id === firstNot?.id ? { ...l, status: 'current' as const } : l.status === 'completed' ? l : { ...l, status: 'locked' as const });
+      const compMap = new Map<number, number>();
+      if (Array.isArray(comps)) comps.forEach((r: any) => compMap.set(r.level_id, Number(r.stars || 0)));
+      const resolved: Level[] = rawLevels.map((l: any) => {
+        const Icon = iconMap[l.icon_slug] ?? Brain;
+        const stars = compMap.get(l.id) ?? 0;
+        const status = stars > 0 ? 'completed' : 'current';
+        return { id: l.id, title: l.title, description: l.description, icon: Icon, status, stars, maxStars: 3, xpReward: Number(l.xp_reward || 0) } as Level;
+      });
+      const final = resolved;
       setLevelState(final);
     };
-    loadCompletion();
+    load();
     return () => {
       if (achievementTimeoutRef.current) clearTimeout(achievementTimeoutRef.current)
     }
@@ -243,8 +261,9 @@ export default function MentoringPage() {
               <div className="relative" style={{ zIndex: 1 }}>
                 {levels.map((level, index) => {
                   const Icon = level.icon;
+                  const pos = positions[index] ?? { top: 100 + index * 150, left: 50 };
                   return (
-                    <motion.div key={level.id} initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: index * 0.1, type: "spring" }} className="absolute -translate-x-1/2" style={{ top: `${positions[index].top}px`, left: `${positions[index].left}%` }}>
+                    <motion.div key={level.id} initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: index * 0.1, type: "spring" }} className="absolute -translate-x-1/2" style={{ top: `${pos.top}px`, left: `${pos.left}%` }}>
                       {level.status !== "locked" && level.stars > 0 && (
                         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="absolute -top-8 left-1/2 -translate-x-1/2 flex gap-0.5">
                           {[...Array(level.stars)].map((_, i) => (
@@ -252,42 +271,34 @@ export default function MentoringPage() {
                           ))}
                         </motion.div>
                       )}
-                      {level.status !== "locked" ? (
-                        <Link href={`/mentoring/level/${level.id}`} className="contents" prefetch aria-label={`Buka level ${level.title}`}>
-                          <motion.div className="relative cursor-pointer group" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-                            {level.status === "current" && (
-                              <motion.div className="absolute -inset-2 rounded-full bg-gradient-to-br from-purple-500 to-pink-500" animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }} transition={{ repeat: Infinity, duration: 2 }} />
-                            )}
-                            <div className={`relative w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-all ${level.status === "current" ? "bg-gradient-to-br from-purple-500 to-pink-500" : "bg-gradient-to-br from-purple-400 to-pink-400"}`}>
-                              <Icon className="w-8 h-8 text-white" />
-                            </div>
-                            {level.status === "completed" && (
-                              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-green-500 flex items-center justify-center shadow-lg border-2 border-white">
-                                <CheckCircle2 className="w-4 h-4 text-white" />
-                              </motion.div>
-                            )}
-                            <div className="absolute top-full mt-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                              <div className="bg-white rounded-lg shadow-xl p-3 w-48 border-2 border-purple-200">
-                                <h4 className="font-bold text-gray-900 text-sm mb-1">{level.title}</h4>
-                                <p className="text-xs text-gray-600 mb-2">{level.description}</p>
-                                <div className="flex items-center justify-between">
-                                  <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
-                                    <Sparkles className="w-3 h-3 mr-1" />
-                                    +{level.xpReward} XP
-                                  </Badge>
-                                  {level.status === "current" && <span className="text-xs font-semibold text-purple-600">Aktif</span>}
-                                </div>
+                      <Link href={`/mentoring/level/${level.id}`} className="contents" prefetch aria-label={`Buka level ${level.title}`}>
+                        <motion.div className="relative cursor-pointer group" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                          {level.status !== "completed" && (
+                            <motion.div className="absolute -inset-2 rounded-full bg-gradient-to-br from-purple-500 to-pink-500" animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }} transition={{ repeat: Infinity, duration: 2 }} />
+                          )}
+                          <div className={`relative w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-all ${level.status !== "completed" ? "bg-gradient-to-br from-purple-500 to-pink-500" : "bg-gradient-to-br from-purple-400 to-pink-400"}`}>
+                            <Icon className="w-8 h-8 text-white" />
+                          </div>
+                          {level.status === "completed" && (
+                            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-green-500 flex items-center justify-center shadow-lg border-2 border-white">
+                              <CheckCircle2 className="w-4 h-4 text-white" />
+                            </motion.div>
+                          )}
+                          <div className="absolute top-full mt-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                            <div className="bg-white rounded-lg shadow-xl p-3 w-48 border-2 border-purple-200">
+                              <h4 className="font-bold text-gray-900 text-sm mb-1">{level.title}</h4>
+                              <p className="text-xs text-gray-600 mb-2">{level.description}</p>
+                              <div className="flex items-center justify-between">
+                                <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+                                  <Sparkles className="w-3 h-3 mr-1" />
+                                  +{level.xpReward} XP
+                                </Badge>
+                                {level.status !== "completed" && <span className="text-xs font-semibold text-purple-600">Aktif</span>}
                               </div>
                             </div>
-                          </motion.div>
-                        </Link>
-                      ) : (
-                        <motion.div className="relative group">
-                          <div className={`relative w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-all bg-gray-300`}>
-                            <Lock className="w-8 h-8 text-gray-600" />
                           </div>
                         </motion.div>
-                      )}
+                      </Link>
                     </motion.div>
                   );
                 })}
