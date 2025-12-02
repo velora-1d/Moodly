@@ -120,6 +120,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         }
         return Inertia::render('mentoring/levels/level-' . $id);
     })->name('mentoring.level.show');
+
+    Route::post('invites', [\App\Http\Controllers\InviteController::class, 'store'])->name('invites.store');
 });
 
 require __DIR__ . '/settings.php';

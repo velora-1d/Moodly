@@ -1,240 +1,237 @@
 "use client";
-import DashboardTopNav from '@/components/dashboard-top-nav';
-import { Head, Link, usePage } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { encrypt, decrypt, makeCsv, type EncPayload } from '@/lib/crypto';
-import { supabase } from '@/lib/supabaseClient';
-import { motion } from 'framer-motion';
-import { Calendar, Heart, Flame, Pen, FileDown, Printer, Sparkles, Smile, Target } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import "./globals.css";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/components/ui/textarea";
+import { ScrollArea } from "@/components/components/ui/scroll-area";
+import { Smile, Meh, Frown, CloudRain, Sun, Moon, Calendar, Trash2, PenLine, Sparkles } from "lucide-react";
+import DashboardTopNav from "@/components/dashboard-top-nav";
+import { supabase } from "@/lib/supabaseClient";
+import { usePage } from "@inertiajs/react";
 
-type SharedProps = { auth: { user: { id: number; name: string; email: string } | null } };
+type Mood = "happy" | "neutral" | "sad" | "calm" | "energetic" | "anxious";
 
-type Entry = { id: string; userId: number; date: string; type: 'morning'|'gratitude'|'goals'; payload: EncPayload };
-
-function ymd(date: Date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
+interface JournalEntry {
+  id: string;
+  content: string;
+  mood: Mood;
+  timestamp: number;
 }
 
-function lsKey(userId: number) { return `journal:${userId}` }
+const moodIcons: Record<Mood, React.ReactNode> = {
+  happy: <Smile className="w-6 h-6" />,
+  neutral: <Meh className="w-6 h-6" />,
+  sad: <Frown className="w-6 h-6" />,
+  calm: <Moon className="w-6 h-6" />,
+  energetic: <Sun className="w-6 h-6" />,
+  anxious: <CloudRain className="w-6 h-6" />,
+};
 
-export default function JournalPage() {
-  const { auth } = usePage<SharedProps>().props;
-  const user = auth?.user;
-  const userId = user?.id ?? 0;
-  const name = user?.name ?? 'Teman';
+const moodColors: Record<Mood, string> = {
+  happy: "bg-yellow-100 text-yellow-600 border-yellow-200",
+  neutral: "bg-gray-100 text-gray-600 border-gray-200",
+  sad: "bg-blue-100 text-blue-600 border-blue-200",
+  calm: "bg-indigo-100 text-indigo-600 border-indigo-200",
+  energetic: "bg-orange-100 text-orange-600 border-orange-200",
+  anxious: "bg-slate-100 text-slate-600 border-slate-200",
+};
 
-  const [passphrase, setPassphrase] = useState<string>('');
-  const [morning, setMorning] = useState<string>('');
-  const [gratitude, setGratitude] = useState<string[]>(['','','']);
-  const [goals, setGoals] = useState<string>('');
-  const [streak, setStreak] = useState<number>(7);
-  const [moodOpen, setMoodOpen] = useState(false);
-  const [selectedMood, setSelectedMood] = useState<string>('');
-  const [recent, setRecent] = useState<Entry[]>([]);
-  const [reminderHour, setReminderHour] = useState<string>(() => localStorage.getItem('journal:reminderHour') || '21');
+const moodLabels: Record<Mood, string> = {
+  happy: "Senang",
+  neutral: "Biasa",
+  sad: "Sedih",
+  calm: "Tenang",
+  energetic: "Berenergi",
+  anxious: "Cemas",
+};
 
-  useEffect(() => { localStorage.setItem('journal:reminderHour', reminderHour) }, [reminderHour]);
+export default function JournalingPage() {
+  const page = usePage<any>();
+  const userId: number | undefined = page?.props?.auth?.user?.id;
+  const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const [currentEntry, setCurrentEntry] = useState("");
+  const [selectedMood, setSelectedMood] = useState<Mood>("calm");
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const load = async () => {
-      const isSupabaseConfigured = Boolean((import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) && (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY));
-      if (userId && isSupabaseConfigured) {
-        const { data } = await supabase.from('journal_entries').select('id,user_id,date,type,payload_json').eq('user_id', userId).order('date', { ascending: false }).limit(7);
-        const rows = Array.isArray(data) ? data : [];
-        setRecent(rows.map((r: any) => ({ id: String(r.id), userId: r.user_id, date: r.date, type: r.type, payload: JSON.parse(r.payload_json) as EncPayload })));
-      } else if (userId) {
+    const isSupabaseConfigured = Boolean((import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) && (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY));
+    if (userId && isSupabaseConfigured) {
+      supabase
+        .from("journal_entries")
+        .select("id, content, mood, created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(50)
+        .then(({ data }) => {
+          if (Array.isArray(data)) {
+            setEntries(
+              data.map((r: any) => ({ id: r.id as string, content: r.content as string, mood: r.mood as Mood, timestamp: new Date(r.created_at as string).getTime() }))
+            );
+          }
+          setIsLoaded(true);
+        });
+    } else {
+      const savedEntries = localStorage.getItem("mindpath_journal_entries");
+      if (savedEntries) {
         try {
-          const raw = localStorage.getItem(lsKey(userId));
-          const rows = raw ? JSON.parse(raw) as Entry[] : [];
-          setRecent(rows.slice().sort((a,b)=>a.date<b.date?1:-1).slice(0,7));
+          setEntries(JSON.parse(savedEntries));
         } catch {}
       }
-    };
-    load();
-  }, [userId]);
-
-  const DAILY_GOAL = 1;
-  const dailyPct = useMemo(() => 0, []);
-
-  async function save(type: Entry['type'], content: string) {
-    if (!userId || !passphrase || !content.trim()) return;
-    const date = ymd(new Date());
-    const payload = await encrypt(content.trim(), passphrase);
-    const entry: Entry = { id: crypto.randomUUID(), userId, date, type, payload };
-    const isSupabaseConfigured = Boolean((import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) && (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY));
-    if (isSupabaseConfigured) {
-      await supabase.from('journal_entries').insert({ id: entry.id, user_id: userId, date, type, payload_json: JSON.stringify(payload), created_at: new Date().toISOString() });
-    } else {
-      const raw = localStorage.getItem(lsKey(userId));
-      const rows = raw ? JSON.parse(raw) as Entry[] : [];
-      const next = [...rows.filter(r => !(r.userId===userId && r.date===date && r.type===type)), entry];
-      localStorage.setItem(lsKey(userId), JSON.stringify(next));
+      setIsLoaded(true);
     }
-    setRecent(prev => [{...entry}, ...prev.filter(r => !(r.userId===userId && r.date===date && r.type===type))].slice(0,7));
-    setStreak(s => Math.max(s, 7));
-  }
-
-  async function exportCsv() {
-    if (!passphrase) return;
-    const rows: Array<{ date: string; type: string; content: string }> = [];
-    for (const e of recent) {
-      try {
-        const plain = await decrypt(e.payload, passphrase);
-        rows.push({ date: e.date, type: e.type, content: plain });
-      } catch {}
-    }
-    const csv = makeCsv(rows);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `journal-${ymd(new Date())}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  function printPdf() {
-    window.print();
-  }
+  }, []);
 
   useEffect(() => {
-    const checkReminder = () => {
-      const h = Number(reminderHour);
-      const now = new Date();
-      if (now.getHours() === h && now.getMinutes() === 0) {
-        const text = 'Saatnya journaling harian kamu';
-        if ('Notification' in window) {
-          if (Notification.permission === 'granted') new Notification(text);
-        }
-      }
-    };
-    const id = setInterval(checkReminder, 60000);
-    return () => clearInterval(id);
-  }, [reminderHour]);
+    if (isLoaded) {
+      localStorage.setItem("mindpath_journal_entries", JSON.stringify(entries));
+    }
+  }, [entries, isLoaded]);
+
+  const handleSave = () => {
+    if (!currentEntry.trim()) return;
+    const isSupabaseConfigured = Boolean((import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) && (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY));
+    if (userId && isSupabaseConfigured) {
+      supabase
+        .from("journal_entries")
+        .insert({ user_id: userId, content: currentEntry.trim(), mood: selectedMood })
+        .select("id, content, mood, created_at")
+        .single()
+        .then(({ data }) => {
+          if (data) {
+            setEntries((prev) => [
+              { id: data.id as string, content: data.content as string, mood: data.mood as Mood, timestamp: new Date(data.created_at as string).getTime() },
+              ...prev,
+            ]);
+          }
+          setCurrentEntry("");
+        });
+    } else {
+      const newEntry: JournalEntry = {
+        id: crypto.randomUUID(),
+        content: currentEntry,
+        mood: selectedMood,
+        timestamp: Date.now(),
+      };
+      setEntries([newEntry, ...entries]);
+      setCurrentEntry("");
+    }
+  };
+
+  const handleDelete = (id: string) => {
+    const isSupabaseConfigured = Boolean((import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) && (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY));
+    if (userId && isSupabaseConfigured) {
+      supabase
+        .from("journal_entries")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", userId)
+        .then(() => setEntries((prev) => prev.filter((e) => e.id !== id)));
+    } else {
+      setEntries(entries.filter((entry) => entry.id !== id));
+    }
+  };
+
+  const formatDate = (timestamp: number) => {
+    return new Intl.DateTimeFormat("id-ID", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(timestamp));
+  };
+
+  const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: 0.8 } } };
+  const itemVariants: any = { hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 100 } } };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-background">
-      <Head title="Daily Journaling" />
+    <div className="min-h-screen w-full bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-slate-950 dark:via-purple-950 dark:to-slate-900 transition-colors duration-500">
       <DashboardTopNav />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2"><Pen className="w-6 h-6 text-orange-600" /> Daily Journaling</h1>
-          <div className="flex items-center gap-2">
-            <Input value={passphrase} onChange={(e)=>setPassphrase(e.target.value)} type="password" placeholder="Passphrase enkripsi" aria-label="Passphrase" className="w-56" />
-            <Button variant="outline" onClick={exportCsv}><FileDown className="w-4 h-4 mr-1" /> Export CSV</Button>
-            <Button onClick={printPdf}><Printer className="w-4 h-4 mr-1" /> Print PDF</Button>
+      <motion.div initial="hidden" animate="visible" variants={containerVariants} className="max-w-4xl mx-auto space-y-6 px-4 md:px-8 py-4 md:py-8 mt-4">
+
+        <div className="grid md:grid-cols-5 gap-5 md:gap-6">
+          <div className="md:col-span-3 space-y-6">
+            <Card className="border-none shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-md overflow-hidden">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl text-primary">
+                  <PenLine className="w-5 h-5" />
+                  Jurnal Hari Ini
+                </CardTitle>
+                <CardDescription>Bagaimana perasaanmu saat ini? Ceritakan harimu.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-muted-foreground">Mood Saya</label>
+                  <div className="flex flex-wrap gap-2.5">
+                    {(Object.keys(moodIcons) as Mood[]).map((mood) => (
+                      <button
+                        key={mood}
+                        onClick={() => setSelectedMood(mood)}
+                        className={`${selectedMood === mood ? `${moodColors[mood]} ring-2 ring-offset-1 ring-offset-white dark:ring-offset-slate-900 shadow-md scale-105` : "bg-white dark:bg-slate-800 text-muted-foreground border-transparent hover:bg-gray-50 dark:hover:bg-slate-700 hover:scale-105"} flex flex-col items-center gap-1 p-3 rounded-2xl transition-all duration-200 border`}
+                        aria-label={`Select mood: ${moodLabels[mood]}`}
+                      >
+                        {moodIcons[mood]}
+                        <span className="text-xs font-medium">{moodLabels[mood]}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-2.5">
+                  <Textarea placeholder="Tulis apa yang ada di pikiranmu..." className="min-h-[200px] resize-none border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-950/50 focus:ring-purple-400 text-lg leading-relaxed" value={currentEntry} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setCurrentEntry(e.target.value)} />
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-end pt-2 pb-6">
+                <Button onClick={handleSave} disabled={!currentEntry.trim()} className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-md transition-all hover:shadow-lg rounded-full px-8">Simpan Jurnal</Button>
+              </CardFooter>
+            </Card>
+          </div>
+
+          <div className="md:col-span-2">
+            <div className="sticky top-8">
+              <div className="flex items-center justify-between mb-4 px-2">
+                <h2 className="text-xl font-semibold text-foreground flex items-center gap-2"><Calendar className="w-5 h-5 text-purple-500" />Riwayat</h2>
+                <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-full">{entries.length} Catatan</span>
+              </div>
+              <ScrollArea className="h-[calc(100vh-200px)] pr-4">
+                <div className="space-y-4 pb-4">
+                  <AnimatePresence mode="popLayout">
+                    {entries.length === 0 ? (
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12 text-muted-foreground bg-white/40 dark:bg-white/5 rounded-xl border border-dashed border-slate-300 dark:border-slate-700">
+                        <p>Belum ada catatan jurnal.</p>
+                        <p className="text-sm mt-1">Mulai menulis cerita pertamamu!</p>
+                      </motion.div>
+                    ) : (
+                      entries.map((entry) => (
+                        <motion.div key={entry.id} layout variants={itemVariants} initial="hidden" animate="visible" exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}>
+                          <Card className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm border-none shadow-sm hover:shadow-md transition-all group overflow-hidden">
+                            <CardContent className="p-4">
+                              <div className="flex justify-between items-start mb-2">
+                                <div className={`px-2 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 ${moodColors[entry.mood]}`}>
+                                  {moodIcons[entry.mood]}
+                                  {moodLabels[entry.mood]}
+                                </div>
+                                <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive" onClick={() => handleDelete(entry.id)}>
+                                  <Trash2 className="h-3 w-3" />
+                                  <span className="sr-only">Delete</span>
+                                </Button>
+                              </div>
+                              <p className="text-sm text-foreground/90 whitespace-pre-wrap line-clamp-4 leading-relaxed">{entry.content}</p>
+                              <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">{formatDate(entry.timestamp)}</div>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      ))
+                    )}
+                  </AnimatePresence>
+                </div>
+              </ScrollArea>
+            </div>
           </div>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-6 space-y-4">
-              <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0">🌅 Morning Reflection</Badge>
-              <div className="text-sm text-gray-600">Bagikan 3 hal: perasaan, fokus hari ini, dan satu niat kebaikan.</div>
-              <textarea value={morning} onChange={(e)=>setMorning(e.target.value)} rows={5} className="w-full rounded-xl border border-gray-200 p-3 focus:outline-none focus:ring-2 focus:ring-orange-500" aria-label="Morning Reflection" />
-              <div className="flex justify-end">
-                <Button onClick={()=>save('morning', morning)} className="bg-orange-600 hover:bg-orange-700 text-white">Simpan</Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-6 space-y-4">
-              <Badge className="bg-gradient-to-r from-pink-500 to-rose-500 text-white border-0">💭 Gratitude Journal</Badge>
-              <div className="grid grid-cols-1 gap-2">
-                {gratitude.map((g,i)=> (
-                  <Input key={i} value={g} onChange={(e)=>setGratitude(prev=>prev.map((v,idx)=>idx===i?e.target.value:v))} placeholder={`Hal yang disyukuri #${i+1}`} aria-label={`Gratitude ${i+1}`} />
-                ))}
-              </div>
-              <div className="flex justify-end">
-                <Button onClick={()=>save('gratitude', gratitude.filter(x=>x.trim()).join('\n'))} className="bg-rose-600 hover:bg-rose-700 text-white">Simpan</Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-6 space-y-4">
-              <Badge className="bg-gradient-to-r from-teal-500 to-green-600 text-white border-0">🎯 Goal Setting</Badge>
-              <Input value={goals} onChange={(e)=>setGoals(e.target.value)} placeholder="Tujuan mingguan" aria-label="Goals" />
-              <div className="flex justify-end">
-                <Button onClick={()=>save('goals', goals)} className="bg-teal-600 hover:bg-teal-700 text-white">Simpan</Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-6 space-y-4">
-              <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 flex items-center gap-2"><Flame className="w-4 h-4" /> Streak Tracker</Badge>
-              <div className="text-2xl font-black">🔥 7 Days Streak!</div>
-              <Progress value={70} className="h-3" />
-              <div className="text-xs text-gray-600">Target harian: {DAILY_GOAL} entri</div>
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-gray-600" />
-                <span className="text-sm font-semibold">Pengingat jam</span>
-                <Input value={reminderHour} onChange={(e)=>setReminderHour(e.target.value)} type="number" min={0} max={23} className="w-20" aria-label="Reminder Hour" />
-                <Button variant="outline" onClick={()=>{ if ('Notification' in window) Notification.requestPermission(); }}>Aktifkan Notifikasi</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2"><Sparkles className="w-5 h-5 text-purple-600" /> Recent Entries</h3>
-              </div>
-              <div className="space-y-3">
-                {recent.map((e)=> (
-                  <motion.div key={e.id} initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} className="flex items-center justify-between rounded-xl border border-gray-200 p-3">
-                    <div className="text-sm font-semibold">{e.date} · {e.type}</div>
-                    <Button variant="outline" onClick={async()=>{ if(!passphrase) return; try{ const t = await decrypt(e.payload, passphrase); alert(t); } catch{} }}>Buka</Button>
-                  </motion.div>
-                ))}
-                {!recent.length && (
-                  <div className="text-sm text-gray-600">Belum ada entri. Mulai journaling hari ini.</div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-6 space-y-4">
-              <div className="flex items-center gap-2"><Smile className="w-5 h-5 text-blue-600" /><h3 className="text-lg font-black">Mood Tracking</h3></div>
-              <div className="grid grid-cols-5 gap-2" role="radiogroup" aria-label="Pilih mood">
-                {["😡","😟","😐","🙂","😄"].map((m)=> (
-                  <button key={m} onClick={()=>setSelectedMood(m)} aria-pressed={selectedMood===m} className={`aspect-square rounded-xl border ${selectedMood===m?"border-blue-600 bg-blue-50":"border-gray-200 hover:bg-gray-50"} text-2xl`}>{m}</button>
-                ))}
-              </div>
-              <div className="flex justify-end">
-                <Button variant="outline" onClick={async()=>{
-                  if (!userId || !selectedMood) return;
-                  const isSupabaseConfigured = Boolean((import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) && (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY));
-                  const today = ymd(new Date());
-                  if (isSupabaseConfigured) {
-                    await supabase.from('mood_logs').insert({ user_id: userId, date: today, created_at: new Date().toISOString(), mood: selectedMood, label: 'journal' });
-                  } else {
-                    const k = `mood:${userId}`;
-                    const raw = localStorage.getItem(k);
-                    const rows = raw ? JSON.parse(raw) as Array<{date:string;mood:string}> : [];
-                    const next = [...rows.filter(r=>r.date!==today), { date: today, mood: selectedMood }];
-                    localStorage.setItem(k, JSON.stringify(next));
-                  }
-                  setMoodOpen(false);
-                }}>Catat Mood</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </main>
+      </motion.div>
     </div>
   );
 }

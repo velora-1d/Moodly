@@ -30,12 +30,13 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Head, Link, usePage } from "@inertiajs/react";
+import { route } from 'ziggy-js';
 import { mentoring, leaderboard, missions, shop, profile } from "@/routes";
 import { journal } from "@/routes";
 import DashboardTopNav from "@/components/dashboard-top-nav";
 import { useAppearance } from "@/hooks/use-appearance";
 import { supabase } from "@/lib/supabaseClient";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 type SharedProps = {
@@ -75,6 +76,8 @@ export default function Dashboard() {
   const [stats, setStats] = useState({ totalPoints: 245, level: 5, badges: 12 });
   const [timeRemaining, setTimeRemaining] = useState(getJakartaRemainingSeconds());
   const [friendEmail, setFriendEmail] = useState("");
+  const [inviteSuccessOpen, setInviteSuccessOpen] = useState(false);
+  const [inviteSentEmail, setInviteSentEmail] = useState("");
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -136,6 +139,21 @@ export default function Dashboard() {
 
   const weekDays = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
   const currentMonthLabel = currentMonthDate.toLocaleString("id-ID", { month: "long", year: "numeric" });
+
+  const [isDetailOpen, setDetailOpen] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
+  const [detailStats, setDetailStats] = useState({
+    totalXP: 0,
+    xpToday: 0,
+    level: 0,
+    badges: 0,
+    missionsCompleted: 0,
+    missionsTotal: 0,
+    weeklyCompleted: 0,
+    weeklyTotal: 0,
+    streakDays: 0,
+  });
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -324,17 +342,119 @@ export default function Dashboard() {
 
   const handleInviteFriend = async (e: React.FormEvent) => {
     e.preventDefault();
-    const userId = auth?.user?.id;
-    if (!userId || !friendEmail) return;
-    const isSupabaseConfigured = Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY);
-    if (!isSupabaseConfigured) return;
-    const now = new Date();
+    if (!friendEmail) return;
+    const token = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null)?.content || '';
     try {
-      await supabase.from("invites").insert({ inviter_user_id: userId, email: friendEmail, created_at: now.toISOString() });
-    } catch {}
-    setFriendEmail("");
-    toast.success("Undangan dikirim");
+      const targetEmail = friendEmail;
+      const res = await fetch(route('invites.store'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': token },
+        body: JSON.stringify({ email: targetEmail }),
+      });
+      const json = await res.json().catch(() => ({}));
+      setFriendEmail('');
+      if (json?.ok) {
+        toast.success('Undangan dikirim');
+        setInviteSentEmail(targetEmail);
+        setInviteSuccessOpen(true);
+      } else {
+        toast.error('Gagal mengirim undangan');
+      }
+    } catch {
+      toast.error('Gagal mengirim undangan');
+    }
   };
+
+  async function loadDetailData() {
+    const userId = auth?.user?.id;
+    setDetailError(null);
+    setDetailLoading(true);
+    if (!userId) {
+      setDetailLoading(false);
+      return;
+    }
+    const isSupabaseConfigured = Boolean(
+      (import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) &&
+      (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY)
+    );
+    if (!isSupabaseConfigured) {
+      setDetailError("Konfigurasi database belum tersedia");
+      setDetailStats({
+        totalXP: stats.totalPoints,
+        xpToday: dailyXP,
+        level: stats.level,
+        badges: stats.badges,
+        missionsCompleted,
+        missionsTotal,
+        weeklyCompleted: weeklyCompletedLessons,
+        weeklyTotal: weeklyTotalLessons,
+        streakDays: streak,
+      });
+      setDetailLoading(false);
+      return;
+    }
+    let totalXP = stats.totalPoints;
+    let level = stats.level;
+    let badges = stats.badges;
+    let missionsC = missionsCompleted;
+    let missionsT = missionsTotal;
+    let weeklyC = weeklyCompletedLessons;
+    let weeklyT = weeklyTotalLessons;
+    let xpToday = dailyXP;
+    try {
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      const { data: xpRows } = await supabase
+        .from("xp_events")
+        .select("points,created_at")
+        .eq("user_id", userId)
+        .gte("created_at", start.toISOString());
+      xpToday = Array.isArray(xpRows) ? xpRows.reduce((acc: number, e: any) => acc + (e.points || 0), 0) : xpToday;
+    } catch {}
+    try {
+      const { data: agg } = await supabase
+        .from("dashboard_user_stats")
+        .select("level,total_points,badges_count")
+        .eq("user_id", userId)
+        .limit(1);
+      const row = Array.isArray(agg) ? agg[0] : null;
+      if (row) {
+        level = row.level ?? level;
+        totalXP = row.total_points ?? totalXP;
+        badges = row.badges_count ?? badges;
+      }
+    } catch {}
+    try {
+      const { data: missions } = await supabase
+        .from("user_daily_missions")
+        .select("computed_progress,target_total")
+        .eq("user_id", userId);
+      const list = Array.isArray(missions) ? missions : [];
+      missionsT = list.length;
+      missionsC = list.filter((m: any) => (Number(m.computed_progress) || 0) >= Number(m.target_total)).length;
+    } catch {}
+    try {
+      const { data: comps } = await supabase
+        .from("level_completions")
+        .select("level_id,stars")
+        .eq("user_id", userId);
+      const list = Array.isArray(comps) ? comps : [];
+      weeklyC = list.filter((r: any) => Number(r.stars || 0) > 0).length;
+      weeklyT = 3;
+    } catch {}
+    setDetailStats({
+      totalXP,
+      xpToday,
+      level,
+      badges,
+      missionsCompleted: missionsC,
+      missionsTotal: missionsT,
+      weeklyCompleted: weeklyC,
+      weeklyTotal: weeklyT,
+      streakDays: streak,
+    });
+    setDetailLoading(false);
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-green-50">
@@ -412,33 +532,87 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-3 mt-5 mb-5">
-                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-3 border border-blue-100">
-                      <Brain className="w-5 h-5 text-blue-600 mb-1" />
-                      <div className="text-lg font-black text-blue-900">8</div>
-                      <div className="text-xs text-blue-700 font-semibold">Mindfulness</div>
-                    </div>
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-3 border border-green-100">
-                      <Activity className="w-5 h-5 text-green-600 mb-1" />
-                      <div className="text-lg font-black text-green-900">5</div>
-                      <div className="text-xs text-green-700 font-semibold">Breathing</div>
-                    </div>
-                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-3 border border-purple-100">
-                      <Heart className="w-5 h-5 text-purple-600 mb-1" />
-                      <div className="text-lg font-black text-purple-900">12</div>
-                      <div className="text-xs text-purple-700 font-semibold">Gratitude</div>
-                    </div>
-                  </div>
+                  
 
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 mt-3">
                     <Link href={mentoring().url} className="flex-1">
                       <Button className="w-full bg-gradient-to-r from-teal-600 via-green-600 to-emerald-600 hover:from-teal-700 hover:via-green-700 hover:to-emerald-700 text-white font-bold shadow-lg h-12 text-base group-hover:scale-[1.02] transition-transform">
                         <Play className="w-5 h-5 mr-2" /> Mulai Latihan
                       </Button>
                     </Link>
-                    <Button variant="outline" className="border-2 border-teal-300 text-teal-700 hover:bg-teal-50 font-bold h-12 px-6">
-                      <Activity className="w-4 h-4 mr-2" /> Lihat Detail
-                    </Button>
+                    <Dialog open={isDetailOpen} onOpenChange={(o)=>{ setDetailOpen(o); if(o) loadDetailData(); }}>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="border-2 border-teal-300 text-teal-700 hover:bg-teal-50 font-bold h-12 px-6"
+                          onClick={() => { setDetailOpen(true); }}
+                        >
+                          <Activity className="w-4 h-4 mr-2" /> Lihat Detail
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-xl">
+                        <DialogHeader>
+                          <DialogTitle className="flex items-center justify-between">
+                            <span>Ringkasan Pelatihan</span>
+                            <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">Level {detailStats.level}</Badge>
+                          </DialogTitle>
+                        </DialogHeader>
+                        {detailLoading ? (
+                          <div className="space-y-3">
+                            <div className="h-4 bg-gray-200 rounded animate-pulse" />
+                            <div className="h-4 bg-gray-200 rounded animate-pulse" />
+                            <div className="h-4 bg-gray-200 rounded animate-pulse" />
+                          </div>
+                        ) : detailError ? (
+                          <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{detailError}</div>
+                        ) : (
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-3">
+                              <Card className="bg-gradient-to-br from-teal-50 to-green-50">
+                                <CardContent className="p-4">
+                                  <div className="text-xs font-semibold text-teal-700">XP Hari Ini</div>
+                                  <div className="text-2xl font-black text-teal-900">{detailStats.xpToday}</div>
+                                </CardContent>
+                              </Card>
+                              <Card className="bg-gradient-to-br from-purple-50 to-pink-50">
+                                <CardContent className="p-4">
+                                  <div className="text-xs font-semibold text-purple-700">Total XP</div>
+                                  <div className="text-2xl font-black text-purple-900">{detailStats.totalXP}</div>
+                                </CardContent>
+                              </Card>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                              <Card className="bg-gradient-to-br from-blue-50 to-cyan-50">
+                                <CardContent className="p-4">
+                                  <div className="text-xs font-semibold text-blue-700">Badges</div>
+                                  <div className="text-2xl font-black text-blue-900">{detailStats.badges}</div>
+                                </CardContent>
+                              </Card>
+                              <Card className="bg-gradient-to-br from-amber-50 to-orange-50">
+                                <CardContent className="p-4">
+                                  <div className="text-xs font-semibold text-orange-700">Streak Mood</div>
+                                  <div className="text-2xl font-black text-orange-900">{detailStats.streakDays} hari</div>
+                                </CardContent>
+                              </Card>
+                            </div>
+                            <div>
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-sm font-semibold text-gray-700">Misi Harian</span>
+                                <span className="text-xs text-gray-600">{detailStats.missionsCompleted} / {detailStats.missionsTotal}</span>
+                              </div>
+                              <Progress value={detailStats.missionsTotal>0?Math.round((detailStats.missionsCompleted/detailStats.missionsTotal)*100):0} className="h-3" />
+                            </div>
+                            <div>
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-sm font-semibold text-gray-700">Kemajuan Minggu Ini</span>
+                                <span className="text-xs text-gray-600">{detailStats.weeklyCompleted} / {detailStats.weeklyTotal}</span>
+                              </div>
+                              <Progress value={detailStats.weeklyTotal>0?Math.round((detailStats.weeklyCompleted/detailStats.weeklyTotal)*100):0} className="h-3" />
+                            </div>
+                          </div>
+                        )}
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </div>
               </CardContent>
@@ -634,6 +808,19 @@ export default function Dashboard() {
                   Kirim Undangan
                 </Button>
               </form>
+              <Dialog open={inviteSuccessOpen} onOpenChange={setInviteSuccessOpen}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Undangan Terkirim</DialogTitle>
+                    <DialogDescription>
+                      Kami telah mengirim undangan ke {inviteSentEmail}. Minta temanmu cek emailnya.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="mt-4">
+                    <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white" onClick={() => setInviteSuccessOpen(false)}>Oke</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </div>

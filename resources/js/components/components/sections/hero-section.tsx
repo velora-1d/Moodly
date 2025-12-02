@@ -6,34 +6,21 @@ import { dashboard } from '@/routes';
 const HeroSection = () => {
     const { auth } = usePage<any>().props;
     return (
-        <main className="relative overflow-hidden bg-gradient-to-br from-white via-purple-50 to-cyan-50">
-            {/* Floating decorative elements - Codedex inspired */}
-            <div className="animate-float absolute top-20 left-10">
+        <main className="relative overflow-hidden bg-gradient-to-br from-white via-purple-50 to-cyan-50 min-h-[calc(100vh-64px)] pt-8 md:pt-12">
+            <ParallaxLayer speed={0.1} className="absolute top-20 left-10 animate-float">
                 <div className="h-8 w-8 rotate-12 rounded-lg bg-yellow-400 opacity-60"></div>
-            </div>
-            <div
-                className="animate-float absolute top-40 right-20"
-                style={{ animationDelay: '1s' }}
-            >
-                <Star
-                    className="h-10 w-10 text-purple-400 opacity-50"
-                    fill="currentColor"
-                />
-            </div>
-            <div
-                className="animate-float absolute bottom-32 left-20"
-                style={{ animationDelay: '2s' }}
-            >
+            </ParallaxLayer>
+            <ParallaxLayer speed={0.06} className="absolute top-40 right-20 animate-float" >
+                <Star className="h-10 w-10 text-purple-400 opacity-50" fill="currentColor" />
+            </ParallaxLayer>
+            <ParallaxLayer speed={0.14} className="absolute bottom-32 left-20 animate-float" >
                 <Sparkles className="h-12 w-12 text-cyan-400 opacity-40" />
-            </div>
-            <div
-                className="animate-float absolute top-60 right-10"
-                style={{ animationDelay: '0.5s' }}
-            >
+            </ParallaxLayer>
+            <ParallaxLayer speed={0.08} className="absolute top-60 right-10 animate-float" >
                 <div className="h-6 w-6 rounded-full bg-pink-400 opacity-50"></div>
-            </div>
+            </ParallaxLayer>
 
-            <div className="relative z-10 mx-auto -mt-6 md:-mt-8 lg:-mt-10 grid max-w-6xl grid-cols-1 items-center gap-y-2 px-5 pt-0 pb-4 md:pb-6 lg:grid-cols-2 lg:gap-x-16 lg:pb-7">
+            <div className="relative z-10 mx-auto grid max-w-6xl grid-cols-1 items-center gap-y-2 px-5 pb-4 md:pb-6 lg:grid-cols-2 lg:gap-x-16 lg:pb-7">
                 {/* Left Column: Image with adventure badges */}
                 <div className="relative flex sm:min-h-80 mt-28 justify-center lg:justify-start lg:ml-32 lg:mt-32">
                     <div className="relative md:mt-20">

@@ -147,54 +147,7 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Social media section */}
-        <div className="border-t border-white/20 pt-8 mb-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div>
-              <h4 className="font-bold text-lg mb-3">Ikuti Kami</h4>
-              <div className="flex gap-4">
-                <a
-                  href="#"
-                  className="w-12 h-12 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition"
-                  aria-label="Instagram"
-                >
-                  <Instagram className="w-6 h-6" />
-                </a>
-                <a
-                  href="#"
-                  className="w-12 h-12 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition"
-                  aria-label="Twitter"
-                >
-                  <Twitter className="w-6 h-6" />
-                </a>
-                <a
-                  href="#"
-                  className="w-12 h-12 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition"
-                  aria-label="YouTube"
-                >
-                  <Youtube className="w-6 h-6" />
-                </a>
-                <a
-                  href="#"
-                  className="w-12 h-12 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition"
-                  aria-label="Facebook"
-                >
-                  <Facebook className="w-6 h-6" />
-                </a>
-              </div>
-            </div>
-
-            {/* Language selector */}
-            <div>
-              <h4 className="font-bold text-lg mb-3">Bahasa</h4>
-              <select className="bg-white/20 text-white px-4 py-2 rounded-xl border border-white/30 font-semibold cursor-pointer hover:bg-white/30 transition">
-                <option value="id" className="bg-green-700">🇮🇩 Indonesia</option>
-                <option value="en" className="bg-green-700">🇬🇧 English</option>
-                <option value="es" className="bg-green-700">🇪🇸 Español</option>
-              </select>
-            </div>
-          </div>
-        </div>
+        
 
         {/* Bottom section */}
         <div className="border-t border-white/20 pt-8 text-center">

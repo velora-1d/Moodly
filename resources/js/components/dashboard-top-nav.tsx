@@ -2,11 +2,11 @@
 import { Link, usePage } from "@inertiajs/react";
 import React from "react";
 import { Menu, Sparkles, Brain, Trophy, Target, ShoppingCart, Award } from "lucide-react";
-import { mentoring, leaderboard, missions, shop, profile } from "@/routes";
+import { mentoring, leaderboard, missions, shop, profile, dashboard } from "@/routes";
 
 type Item = { href: string; label: string; icon: any };
 
-export default function DashboardTopNav({ items }: { items?: Item[] }) {
+export default function DashboardTopNav({ items, fullWidth }: { items?: Item[]; fullWidth?: boolean }) {
   const page = usePage<any>();
   const name: string = page?.props?.auth?.user?.name ?? "Player";
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -39,9 +39,9 @@ export default function DashboardTopNav({ items }: { items?: Item[] }) {
   return (
     <>
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-purple-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className={fullWidth ? "w-full px-0" : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"}>
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-3">
+          <Link href={dashboard().url} className="flex items-center gap-3" prefetch>
             <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
@@ -49,7 +49,7 @@ export default function DashboardTopNav({ items }: { items?: Item[] }) {
               <h1 className="text-xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">MindPath</h1>
               <p className="text-xs text-gray-500">Perjalanan Mental Sehat</p>
             </div>
-          </div>
+          </Link>
 
           <div className="hidden md:flex items-center gap-2">
             {quickActions.map((action, idx) => {
