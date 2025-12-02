@@ -89,9 +89,9 @@ const HeroSection = () => {
                 {/* Right Column: Text & Buttons with adventure theme */}
                 <div className="flex flex-col items-center gap-5 text-center lg:items-start lg:text-left">
                     {/* Adventure subtitle with stars */}
-                    <div className="flex items-center gap-2 text-sm font-bold tracking-wider text-purple-600 uppercase">
+                    <div className="flex items-center gap-2 text-sm font-bold tracking-wider text-black">
                         <Star className="h-4 w-4" fill="currentColor" />
-                        <span>Mulai Perjalanan Mentalmu</span>
+                        <span>Mulai Perjalanan Kesehatan Mental Bersama MindQuest</span>
                         <Star className="h-4 w-4" fill="currentColor" />
                     </div>
 
