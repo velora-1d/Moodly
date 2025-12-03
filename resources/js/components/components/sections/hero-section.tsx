@@ -89,7 +89,7 @@ const HeroSection = () => {
                 {/* Right Column: Text & Buttons with adventure theme */}
                 <div className="flex flex-col items-center gap-5 text-center mt-40 sm:mt-48 md:mt-0 lg:items-start lg:text-left">
                     {/* Adventure subtitle with stars */}
-                    <div className="flex items-center gap-2 text-sm font-bold tracking-wider bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+                    <div className="flex items-center gap-2 hidden sm:flex text-sm font-bold tracking-wider bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
                         <Star className="h-4 w-4 text-indigo-500" fill="currentColor" />
                         <span>Mulai Perjalanan Kesehatan Mental Bersama MindQuest</span>
                         <Star className="h-4 w-4 text-purple-600" fill="currentColor" />
@@ -103,7 +103,7 @@ const HeroSection = () => {
                         untuk Merawat Kesehatan Mentalmu!
                     </h1>
 
-                    <p className="max-w-xl text-base text-gray-600 md:text-lg">
+                    <p className="max-w-xl text-base text-gray-600 md:text-lg hidden sm:flex">
                         Bergabunglah dalam petualangan epik kesehatan mental!
                         Kumpulkan poin wellness, raih achievement badges, dan
                         unlock level ketenangan baru setiap hari. 🧠✨
