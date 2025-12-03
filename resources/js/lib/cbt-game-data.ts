@@ -46,9 +46,9 @@ export const LEVELS: Level[] = [
     playerThought: "Aku tidak akan pernah bisa menyelesaikan proyek ini. Semua orang akan menganggapku gagal dan aku akan kehilangan pekerjaanku.",
     background: GAME_ASSETS.background,
     choices: [
-      { id: "c1", text: "Terima pikiran itu sebagai kebenaran dan menyerah.", type: "unhealthy", feedback: "Bayangan itu membesar. Kamu merasa terkuras. Menyerah memperkuat keyakinan negatif itu.", healthChange: -20, scoreChange: 0 },
-      { id: "c2", text: "Katakan pada dirimu: 'Berhenti memikirkannya!' dan coba abaikan.", type: "neutral", feedback: "Bayangan itu berkedip tapi tetap ada. Menekan pikiran seringkali membuatnya kembali lebih kuat nanti.", healthChange: -5, scoreChange: 5 },
-      { id: "c3", text: "Tantang pikiran itu: 'Aku pernah menangani proyek sulit sebelumnya. Aku bisa memecahnya menjadi langkah-langkah kecil.'", type: "healthy", feedback: "Bayangan itu menyusut drastis! Menggunakan bukti untuk menantang pikiran negatif melemahkan kekuatannya.", healthChange: 20, scoreChange: 50 }
+      { id: "c1", text: "Terima pikiran itu sebagai kebenaran dan menyerah.", type: "unhealthy", feedback: "Bayangan itu membesar dan menelan jalan di depan. Dada terasa berat dan langkahmu berhenti. Menyerah membuat pikiran negatif semakin kuat dan kesempatan kecil yang mungkin ada pun hilang.", healthChange: -20, scoreChange: 0 },
+      { id: "c2", text: "Katakan pada dirimu: 'Berhenti memikirkannya!' dan coba abaikan.", type: "neutral", feedback: "Bayangan itu sempat memudar lalu kembali menekan dari segala arah. Mengusir pikiran tanpa memprosesnya hanya menunda kecemasan—ia muncul lagi lebih kuat saat kamu lelah.", healthChange: -5, scoreChange: 5 },
+      { id: "c3", text: "Tantang pikiran itu: 'Aku pernah menangani proyek sulit sebelumnya. Aku bisa memecahnya menjadi langkah-langkah kecil.'", type: "healthy", feedback: "Bayangan menyusut ketika kamu memecah tugas menjadi langkah-langkah kecil. Kamu menuliskan langkah pertama yang realistis, menandai kemajuan, dan perspektifmu jernih kembali.", healthChange: 20, scoreChange: 50 }
     ]
   },
   {
@@ -63,9 +63,9 @@ export const LEVELS: Level[] = [
     playerThought: "Jika aku membuat satu kesalahan dalam ujian ini, aku benar-benar bodoh dan tidak berharga.",
     background: GAME_ASSETS.background,
     choices: [
-      { id: "c1", text: "Setuju dengan Golem. Kesempurnaan adalah satu-satunya hasil yang dapat diterima.", type: "unhealthy", feedback: "Hawa dingin semakin menusuk. Menetapkan standar mustahil membuatmu cemas dan rentan gagal.", healthChange: -25, scoreChange: 0 },
-      { id: "c2", text: "Ingatkan diri: 'Kesalahan adalah bagian dari belajar. Satu kesalahan tidak menentukan harga diriku.'", type: "healthy", feedback: "Es mulai retak dan mencair! Mengakui nuansa abu-abu memungkinkan pertumbuhan dan kasih sayang pada diri sendiri.", healthChange: 25, scoreChange: 60 },
-      { id: "c3", text: "Salahkan guru karena membuat ujian terlalu sulit.", type: "neutral", feedback: "Golem tetap berdiri tegak. Menyalahkan orang lain tidak membantumu mengatasi kecemasanmu.", healthChange: -10, scoreChange: 10 }
+      { id: "c1", text: "Setuju dengan Golem. Kesempurnaan adalah satu-satunya hasil yang dapat diterima.", type: "unhealthy", feedback: "Hawa dingin menusuk hingga membuat gerakmu kaku. Standar mustahil membekukan keberanian dan setiap kekeliruan terasa seperti bencana.", healthChange: -25, scoreChange: 0 },
+      { id: "c2", text: "Ingatkan diri: 'Kesalahan adalah bagian dari belajar. Satu kesalahan tidak menentukan harga diriku.'", type: "healthy", feedback: "Es mulai retak saat kamu mengakui ruang abu-abu. Kamu menuliskan hal yang sudah benar, memberi ruang untuk belajar, dan hangat kepercayaan diri perlahan kembali.", healthChange: 25, scoreChange: 60 },
+      { id: "c3", text: "Salahkan guru karena membuat ujian terlalu sulit.", type: "neutral", feedback: "Golem tetap tak bergeming. Menyalahkan pihak luar tidak mengubah keyakinanmu—kamu tetap berdiri di tempat sementara rasa cemas tidak berkurang.", healthChange: -10, scoreChange: 10 }
     ]
   },
   {
@@ -80,9 +80,9 @@ export const LEVELS: Level[] = [
     playerThought: "Bagaimana jika aku membuat keputusan yang salah? Semuanya akan hancur dan aku tidak akan pernah bahagia.",
     background: GAME_ASSETS.background,
     choices: [
-      { id: "c1", text: "Hindari membuat keputusan sama sekali dan bersembunyi di dalam kabut.", type: "unhealthy", feedback: "Kabut semakin tebal. Menghindar hanya memperpanjang kecemasan dan membuatmu terjebak.", healthChange: -20, scoreChange: 0 },
-      { id: "c2", text: "Coba alihkan perhatian dengan bermain ponsel untuk melupakan masalah.", type: "neutral", feedback: "Kabut tidak pergi. Pengalihan hanya bekerja sementara, masalah tetap menunggu.", healthChange: -5, scoreChange: 5 },
-      { id: "c3", text: "Tantang pikiran: 'Aku tak bisa memprediksi masa depan, tapi aku bisa hadapi apa pun yang terjadi. Salah itu wajar.'", type: "healthy", feedback: "Kabut menipis, jalan terlihat kembali! Menerima ketidakpastian mengurangi kekuatannya.", healthChange: 20, scoreChange: 70 }
+      { id: "c1", text: "Hindari membuat keputusan sama sekali dan bersembunyi di dalam kabut.", type: "unhealthy", feedback: "Kabut menebal dan jarak pandang menghilang. Menghindari keputusan membuatmu terjebak; peluang kecil berlalu tanpa kamu sadari.", healthChange: -20, scoreChange: 0 },
+      { id: "c2", text: "Coba alihkan perhatian dengan bermain ponsel untuk melupakan masalah.", type: "neutral", feedback: "Pengalihan memberi jeda singkat, tetapi kabut kembali menyelimuti. Masalah asli tetap menunggu saat notifikasi berhenti.", healthChange: -5, scoreChange: 5 },
+      { id: "c3", text: "Tantang pikiran: 'Aku tak bisa memprediksi masa depan, tapi aku bisa hadapi apa pun yang terjadi. Salah itu wajar.'", type: "healthy", feedback: "Kabut menipis ketika kamu menerima ketidakpastian. Kamu memilih satu langkah kecil, menyiapkan rencana cadangan, dan percaya bahwa dirimu mampu menghadapi hasil apa pun.", healthChange: 20, scoreChange: 70 }
     ]
   },
   {
@@ -97,9 +97,9 @@ export const LEVELS: Level[] = [
     playerThought: "Aku seharusnya tahu lebih baik dulu. Aku orang jahat karena kesalahan itu.",
     background: GAME_ASSETS.background,
     choices: [
-      { id: "c1", text: "Hukum diri sendiri dan percaya bahwa kamu tidak pantas bahagia.", type: "unhealthy", feedback: "Rantai semakin berat. Menyalahkan diri sendiri secara berlebihan melumpuhkanmu dari masa depan.", healthChange: -30, scoreChange: 0 },
-      { id: "c2", text: "Berjanji untuk menjadi sempurna mulai sekarang.", type: "neutral", feedback: "Raksasa itu tertawa. Menjanjikan kesempurnaan hanyalah jebakan lain yang akan mengecewakanmu.", healthChange: -10, scoreChange: 10 },
-      { id: "c3", text: "Ubah perspektif: 'Aku melakukan yang terbaik saat itu. Aku sudah belajar dan tumbuh dari pengalaman itu.'", type: "healthy", feedback: "Rantai-rantai itu hancur! Memaafkan diri sendiri membebaskanmu dari beban masa lalu.", healthChange: 30, scoreChange: 80 }
+      { id: "c1", text: "Hukum diri sendiri dan percaya bahwa kamu tidak pantas bahagia.", type: "unhealthy", feedback: "Rantai bertambah berat dan setiap langkah terasa mustahil. Menghukum diri membuat luka lama membuka kembali dan mengikatmu pada label yang tidak adil.", healthChange: -30, scoreChange: 0 },
+      { id: "c2", text: "Berjanji untuk menjadi sempurna mulai sekarang.", type: "neutral", feedback: "Janji untuk menjadi sempurna menambah satu rantai baru bernama 'sempurna'. Target yang tak realistis berubah menjadi sumber kekecewaan berikutnya.", healthChange: -10, scoreChange: 10 },
+      { id: "c3", text: "Ubah perspektif: 'Aku melakukan yang terbaik saat itu. Aku sudah belajar dan tumbuh dari pengalaman itu.'", type: "healthy", feedback: "Rantai-rantai itu pecah saat kamu memberi diri sendiri pengampunan. Kamu mengakui pelajaran yang didapat, memperbaiki langkah, dan bergerak tanpa beban.", healthChange: 30, scoreChange: 80 }
     ]
   }
 ];

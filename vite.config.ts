@@ -7,7 +7,7 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import viteCompression from 'vite-plugin-compression';
 import path from 'node:path';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
     define: {
         'import.meta.env.SUPABASE_URL': process.env.SUPABASE_URL,
         'import.meta.env.SUPABASE_ANON_KEY': process.env.SUPABASE_ANON_KEY,
@@ -20,9 +20,14 @@ export default defineConfig({
         }),
         react(),
         tailwindcss(),
-        wayfinder({
-            formVariants: true,
-        }),
+        ...(command === 'serve'
+            ? [
+                wayfinder({
+                    formVariants: true,
+                    command: 'php artisan wayfinder:generate --with-form',
+                }),
+              ]
+            : []),
         visualizer({
             filename: 'bundle-visualizer.html',
             template: 'treemap',
@@ -93,4 +98,4 @@ export default defineConfig({
             },
         },
     },
-});
+}));
