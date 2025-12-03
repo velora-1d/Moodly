@@ -1,9 +1,10 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAppearance } from '@/hooks/use-appearance';
+import { supabase } from '@/lib/supabaseClient';
 import {
   Heart,
   Sparkles,
@@ -33,18 +34,7 @@ type SharedProps = {
 
 type Entry = { rank: number; name: string; statusIcon: string; wellnessPoints: number; trend: number };
 // Adapt existing dummy entries to new schema (keep visual identical to reference)
-const entries: Entry[] = [
-  { rank: 1, name: 'Jesse', statusIcon: 'flame', wellnessPoints: 2300, trend: 1 },
-  { rank: 2, name: 'laichandra', statusIcon: 'star', wellnessPoints: 1800, trend: -1 },
-  { rank: 3, name: 'clay', statusIcon: 'gem', wellnessPoints: 1600, trend: 1 },
-  { rank: 4, name: 'Schot', statusIcon: 'zap', wellnessPoints: 1200, trend: -1 },
-  { rank: 5, name: 'Silent', statusIcon: 'wind', wellnessPoints: 1100, trend: 1 },
-  { rank: 6, name: 'Player M', statusIcon: 'moon', wellnessPoints: 900, trend: 1 },
-  { rank: 7, name: 'Zoe', statusIcon: 'sun', wellnessPoints: 800, trend: -1 },
-  { rank: 8, name: 'Ray', statusIcon: 'coffee', wellnessPoints: 700, trend: -1 },
-  { rank: 9, name: 'Yun', statusIcon: 'book', wellnessPoints: 600, trend: 1 },
-  { rank: 10, name: 'Koa', statusIcon: 'music', wellnessPoints: 500, trend: -1 },
-];
+type LBRow = { user_id: string; name: string; totalExp: number; status?: string; lastRank?: number };
 
 const statusIcons = {
   flame: <Flame className="w-5 h-5 text-orange-500" />,
@@ -58,15 +48,108 @@ const statusIcons = {
   coffee: <Coffee className="w-5 h-5 text-brown-500" />,
   book: <Book className="w-5 h-5 text-violet-500" />,
   music: <Music className="w-5 h-5 text-pink-500" />,
+  '🙂': <span className="text-xl">🙂</span>,
+  '😎': <span className="text-xl">😎</span>,
+  '🧠': <span className="text-xl">🧠</span>,
+  '🛡️': <span className="text-xl">🛡️</span>,
+  '⚡': <span className="text-xl">⚡</span>,
+  '🔥': <span className="text-xl">🔥</span>,
+  '💤': <span className="text-xl">💤</span>,
+  '🎯': <span className="text-xl">🎯</span>,
+  '🎮': <span className="text-xl">🎮</span>,
+  '👾': <span className="text-xl">👾</span>,
+  '⭐': <span className="text-xl">⭐</span>,
+  '💎': <span className="text-xl">💎</span>,
 } as const;
 
 export default function Leaderboard() {
+  const { auth } = usePage<SharedProps>().props;
   const { updateAppearance } = useAppearance();
+  const [rows, setRows] = useState<LBRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [myStats, setMyStats] = useState({ streak: 0, badges: 0, points: 0 });
+
+  useEffect(() => {
+    const loadStats = async () => {
+      const userId = auth?.user?.id;
+      if (!userId) return;
+      
+      // Streak
+      try {
+        const { data: moods } = await supabase.from("mood_logs").select("date").eq("user_id", userId);
+        const dates = new Set((moods ?? []).map(m => m.date));
+        let s = 0;
+        let d = new Date();
+        while (true) {
+          const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+          if (dates.has(k)) { s++; d.setDate(d.getDate()-1); }
+          else break;
+        }
+        setMyStats(prev => ({ ...prev, streak: s }));
+      } catch {}
+
+      // Stats
+      try {
+        const { data: agg } = await supabase.from("dashboard_user_stats").select("total_points,badges_count").eq("user_id", userId).maybeSingle();
+        if (agg) {
+          setMyStats(prev => ({ ...prev, points: agg.total_points ?? 0, badges: agg.badges_count ?? 0 }));
+        }
+      } catch {}
+    };
+    loadStats();
+  }, [auth?.user?.id]);
+
+  const daysLeft = useMemo(() => {
+    const now = new Date();
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const diff = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return diff;
+  }, []);
 
   useEffect(() => {
     // Force light theme to replicate reference visuals exactly
     updateAppearance('light');
   }, [updateAppearance]);
+
+  useEffect(() => {
+    const fetchLB = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch('/api/leaderboard?period=lifetime', { headers: { 'Accept': 'application/json' } });
+        const json = await res.json();
+        const data: LBRow[] = (json?.data ?? []).map((r: any) => ({
+          user_id: String(r.user_id),
+          name: String(r.name ?? String(r.user_id).slice(0, 6)),
+          totalExp: Number(r.totalExp ?? 0),
+          status: r.status ?? undefined,
+        }));
+        const now = new Date();
+        const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2,'0')}-01`;
+        const { data: snapshots } = await supabase
+          .from('leaderboard_rank_snapshot')
+          .select('user_id, last_rank, month')
+          .eq('month', monthStr);
+        const snapshotMap = new Map<string, number>((snapshots ?? []).map(s => [String(s.user_id), Number(s.last_rank)]));
+        const merged = data.map(r => ({ ...r, lastRank: snapshotMap.get(r.user_id) ?? undefined }));
+        const ids = merged.map(r => r.user_id);
+        const { data: statusRows } = await supabase
+          .from('leaderboard_status')
+          .select('user_id,status')
+          .in('user_id', ids.map(id => Number(id)));
+        const statusMapClient = new Map<string, string>((statusRows ?? []).map(s => [String(s.user_id), String(s.status)]));
+        const mergedWithStatus = merged.map(r => ({ ...r, status: r.status ?? statusMapClient.get(r.user_id) ?? undefined }));
+        setRows(mergedWithStatus);
+        const upserts = mergedWithStatus.map((r, i) => ({ user_id: r.user_id, month: monthStr, last_rank: i + 1, updated_at: new Date().toISOString() }));
+        if (upserts.length) supabase.from('leaderboard_rank_snapshot').upsert(upserts, { onConflict: 'user_id,month' });
+      } catch (e) {
+        console.error('Leaderboard API failed', e);
+        setRows([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLB();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -88,10 +171,10 @@ export default function Leaderboard() {
                   </div>
                   <p className="text-sm text-muted-foreground">Top 15 will advance to the Harmony League</p>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Clock className="w-4 h-4" />
-                  <span>5 days left</span>
-                </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Clock className="w-4 h-4" />
+                <span>{daysLeft} days left</span>
+              </div>
               </div>
 
               {/* Activity Filters */}
@@ -126,10 +209,16 @@ export default function Leaderboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {entries.map((entry) => (
-                      <tr key={entry.rank} className="border-b border-border">
+                    {loading && (
+                      <tr><td colSpan={5} className="py-6 text-center text-muted-foreground">Loading leaderboard…</td></tr>
+                    )}
+                    {!loading && rows.length === 0 && (
+                      <tr><td colSpan={5} className="py-6 text-center text-muted-foreground">Belum ada data EXP</td></tr>
+                    )}
+                    {!loading && rows.map((entry, idx) => (
+                      <tr key={entry.user_id} className="border-b border-border">
                         <td className="py-4 px-4">
-                          <span className="font-medium text-muted-foreground">{entry.rank}</span>
+                          <span className="font-medium text-muted-foreground">{idx + 1}</span>
                         </td>
                         <td className="py-4 px-4">
                           <div className="flex items-center gap-3">
@@ -141,26 +230,26 @@ export default function Leaderboard() {
                         </td>
                         <td className="py-4 px-4">
                           <div className="flex justify-center">
-                            {statusIcons[entry.statusIcon as keyof typeof statusIcons]}
+                            {entry.status ? statusIcons[entry.status as keyof typeof statusIcons] : <Sparkles className="w-5 h-5 text-muted-foreground" />}
                           </div>
                         </td>
                         <td className="py-4 px-4 text-right">
-                          <span className="font-semibold">{entry.wellnessPoints.toLocaleString()}</span>
+                          <span className="font-semibold">{entry.totalExp.toLocaleString()}</span>
                           <span className="text-sm text-muted-foreground ml-1">WP</span>
                         </td>
                         <td className="py-4 px-4 text-right">
                           <div className="inline-flex items-center gap-1">
-                            {entry.trend > 0 ? (
+                            {entry.lastRank !== undefined && entry.lastRank > idx + 1 ? (
                               <>
                                 <TrendingUp className="w-4 h-4 text-emerald-500" />
-                                <span className="text-emerald-500 text-sm font-medium">+{entry.trend}</span>
+                                <span className="text-emerald-500 text-sm font-medium">+{entry.lastRank - (idx + 1)}</span>
                               </>
-                            ) : (
+                            ) : entry.lastRank !== undefined && entry.lastRank < idx + 1 ? (
                               <>
                                 <TrendingDown className="w-4 h-4 text-red-500" />
-                                <span className="text-red-500 text-sm font-medium">{entry.trend}</span>
+                                <span className="text-red-500 text-sm font-medium">-{(idx + 1) - entry.lastRank}</span>
                               </>
-                            )}
+                            ) : <span className="text-muted-foreground text-sm">—</span>}
                           </div>
                         </td>
                       </tr>
@@ -198,6 +287,38 @@ export default function Leaderboard() {
                       mood.color,
                     )}
                     title={mood.emoji}
+                    onClick={async () => {
+          console.log('Emoji button clicked!');
+          const me = auth.user?.id;
+          const meName = auth.user?.name;
+          if (!me) return;
+                      const statusKey = mood.emoji;
+                      const csrf = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '';
+                      const resp = await fetch('/api/leaderboard/status', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                        body: JSON.stringify({ status: statusKey }),
+          });
+          console.log('Fetch response:', resp);
+          if (resp.ok) {
+             // Trigger a refresh or optimistic update
+          }
+          let updated = false;
+                      const newRows = rows.map(r => {
+                        if (r.user_id === String(me)) {
+                          updated = true;
+                          return { ...r, status: statusKey, name: meName ?? r.name };
+                        }
+                        return r;
+                      });
+                      const finalRows = updated
+                        ? newRows
+                        : [
+                            ...newRows,
+                            { user_id: String(me), name: String(meName ?? String(me).slice(0,6)), totalExp: 0, status: statusKey },
+                          ].sort((a,b) => (b.totalExp ?? 0) - (a.totalExp ?? 0));
+                      setRows(finalRows);
+                    }}
                   >
                     {mood.emoji}
                   </button>
@@ -237,21 +358,21 @@ export default function Leaderboard() {
                   <span className="text-sm text-muted-foreground">Daily Streak</span>
                   <Badge variant="secondary" className="font-semibold">
                     <Flame className="w-3 h-3 mr-1" />
-                    12 days
+                    {myStats.streak} days
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Total Badges</span>
                   <Badge variant="secondary" className="font-semibold">
                     <Star className="w-3 h-3 mr-1" />
-                    8
+                    {myStats.badges}
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Wellness Points</span>
                   <Badge variant="secondary" className="font-semibold">
                     <Trophy className="w-3 h-3 mr-1" />
-                    4,560 WP
+                    {myStats.points.toLocaleString()} WP
                   </Badge>
                 </div>
               </div>

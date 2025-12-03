@@ -92,6 +92,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('leaderboard', function () {
         return Inertia::render('leaderboard/index');
     })->name('leaderboard');
+    Route::get('api/leaderboard', [\App\Http\Controllers\LeaderboardController::class, 'index'])->name('api.leaderboard');
+    Route::post('api/leaderboard/status', [\App\Http\Controllers\LeaderboardController::class, 'storeStatus'])->name('api.leaderboard.status');
     
     Route::get('journal', function () {
         return Inertia::render('journal/index');

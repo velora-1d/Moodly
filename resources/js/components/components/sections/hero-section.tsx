@@ -26,7 +26,7 @@ const HeroSection = () => {
                     <div className="relative md:mt-20">
                         <div className="absolute -top-10 left-0 right-0 h-16 bg-white/70 rounded-b-[2rem]" />
                         <ParallaxLayer speed={0.22}>
-                            <div className="flex justify-center absolute -top-10 -left-10 z-10 rounded-3xl border-2 border-purple-100 bg-white/70 shadow-xl backdrop-blur-sm px-4 py-5">
+                            <div className="flex justify-center absolute -top-10 left-1/2 -translate-x-1/2 md:-left-10 md:translate-x-0 z-10 rounded-3xl border-2 border-purple-100 bg-white/70 shadow-xl backdrop-blur-sm px-4 py-5">
                                 <div className="absolute -top-5 -right-3 h-6 w-6 rounded-full bg-pink-300/60" />
                                 <div className="absolute -bottom-3 -left-3 h-6 w-6 rounded-lg bg-cyan-300/60 rotate-12" />
                                 <div className="absolute inset-0 rounded-3xl ring-1 ring-white/60" />
@@ -44,8 +44,8 @@ const HeroSection = () => {
                         
                         
                         <ParallaxLayer speed={0.26}>
-                            <div className="absolute -top-26 md:-top-32 left-2 z-10">
-                                <div className="relative rounded-3xl bg-gradient-to-br from-rose-100 via-purple-100 to-cyan-100 p-1 shadow-2xl">
+                            <div className="absolute -top-24 md:-top-32 left-1/2 -translate-x-1/2 md:left-2 md:translate-x-0 z-10">
+                                <div className="relative mx-auto max-w-[340px] sm:max-w-[380px] rounded-3xl bg-gradient-to-br from-rose-100 via-purple-100 to-cyan-100 p-1 shadow-2xl">
                                     <div className="rounded-[22px] bg-white p-5">
                                         <div className="flex items-center gap-2">
                                             <div className="rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-1.5 text-sm font-bold shadow">
@@ -67,13 +67,13 @@ const HeroSection = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className=" md:block animate-float absolute -top-8 -left-10 -rotate-6 z-30 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 px-3 py-2 text-white shadow-lg" style={{ animationDelay: '0.4s' }}>
+                                    <div className=" md:block animate-float absolute -top-8 left-1/2 -translate-x-1/2 md:-left-10 md:translate-x-0 -rotate-6 z-30 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 px-3 py-2 text-white shadow-lg" style={{ animationDelay: '0.4s' }}>
                                         <div className="flex items-center gap-1">
                                             <Brain className="h-4 w-4" />
                                             <span className="text-sm font-bold">Mental Warrior</span>
                                         </div>
                                     </div>
-                                    <div className=" md:block animate-float absolute -bottom-14 left-10 rotate-12 z-20 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-500 px-4 py-2 text-white shadow-lg" style={{ animationDelay: '1s' }}>
+                                    <div className=" md:block animate-float absolute -bottom-14 left-1/2 -translate-x-1/2 md:left-10 md:translate-x-0 rotate-12 z-20 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-500 px-4 py-2 text-white shadow-lg" style={{ animationDelay: '1s' }}>
                                         <div className="flex items-center gap-1.5">
                                             <Heart className="h-5 w-5" fill="currentColor" />
                                             <span className="text-lg font-bold">+10 Poin</span>
@@ -87,12 +87,12 @@ const HeroSection = () => {
                 </div>
 
                 {/* Right Column: Text & Buttons with adventure theme */}
-                <div className="flex flex-col items-center gap-5 text-center lg:items-start lg:text-left">
+                <div className="flex flex-col items-center gap-5 text-center mt-40 sm:mt-48 md:mt-0 lg:items-start lg:text-left">
                     {/* Adventure subtitle with stars */}
-                    <div className="flex items-center gap-2 text-sm font-bold tracking-wider text-black">
-                        <Star className="h-4 w-4" fill="currentColor" />
+                    <div className="flex items-center gap-2 text-sm font-bold tracking-wider bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+                        <Star className="h-4 w-4 text-indigo-500" fill="currentColor" />
                         <span>Mulai Perjalanan Kesehatan Mental Bersama MindQuest</span>
-                        <Star className="h-4 w-4" fill="currentColor" />
+                        <Star className="h-4 w-4 text-purple-600" fill="currentColor" />
                     </div>
 
                     <h1 className="text-3xl leading-[1.1] font-bold text-[#131f40] md:text-[38px] lg:text-[44px]">
