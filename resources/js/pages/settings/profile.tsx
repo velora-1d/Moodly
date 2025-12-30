@@ -88,7 +88,7 @@ export default function Profile({
                     </CardHeader>
                     <CardContent>
                         <Form
-                            {...ProfileController.update.form()}
+                            {...ProfileController.update()}
                             options={{ preserveScroll: true }}
                             className="space-y-6"
                         >

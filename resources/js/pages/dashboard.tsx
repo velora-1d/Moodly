@@ -35,7 +35,6 @@ import { mentoring, leaderboard, missions, shop, profile } from "@/routes";
 import { journal } from "@/routes";
 import DashboardTopNav from "@/components/dashboard-top-nav";
 import { useAppearance } from "@/hooks/use-appearance";
-import { supabase } from "@/lib/supabaseClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
@@ -73,7 +72,7 @@ export default function Dashboard() {
   const { updateAppearance } = useAppearance();
 
   const [currentStreak, setCurrentStreak] = useState(3);
-  const [stats, setStats] = useState({ totalPoints: 245, level: 5, badges: 12 });
+  const [stats, setStats] = useState({ totalPoints: 0, level: 1, badges: 12 });
   const [timeRemaining, setTimeRemaining] = useState(getJakartaRemainingSeconds());
   const [friendEmail, setFriendEmail] = useState("");
   const [inviteSuccessOpen, setInviteSuccessOpen] = useState(false);
@@ -91,7 +90,7 @@ export default function Dashboard() {
     updateAppearance("light");
   }, [updateAppearance]);
 
-  
+
 
   const DAILY_GOAL_XP = 10;
   const [dailyXP, setDailyXP] = useState(0);
@@ -161,89 +160,28 @@ export default function Dashboard() {
       setLoading(true);
       const userId = auth?.user?.id;
       if (!userId) return;
-      const isSupabaseConfigured = Boolean(
-        (import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) &&
-        (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY)
-      );
-      if (!isSupabaseConfigured) return;
+
       try {
-        const { data: moods } = await supabase
-          .from("mood_logs")
-          .select("date,created_at,mood,label")
-          .eq("user_id", userId)
-          .order("created_at", { ascending: true });
-      const map: Record<string, { emoji: string; label?: string }> = {};
-      if (Array.isArray(moods)) {
-        for (const log of moods) {
-          const key = typeof log.date === "string" && log.date.length >= 10
-            ? log.date
-            : (()=>{ const d = new Date(log.created_at); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` })();
-          map[key] = { emoji: log.mood as string, label: (log.label as string | undefined) };
-        }
-      }
-      setMoodHistory(map);
-      const s = (() => {
-        let c = 0;
-        let date = new Date();
-        while (true) {
-          const key = ymd(date);
-          if (map[key]) {
-            c++;
-            date = new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1);
-          } else {
-            break;
-          }
-        }
-        return c;
-      })();
-      setStreak(s);
-      setCurrentStreak(s);
+        const res = await fetch(route('api.dashboard.data'));
+        if (!res.ok) throw new Error('Failed to fetch data');
+        const data = await res.json();
+
+        setMoodHistory(data.moodHistory || {});
+        setStreak(data.stats.streak || 0);
+        setCurrentStreak(data.stats.streak || 0); // Sync
+        setDailyXP(data.dailyXP || 0);
+        setStats(prev => ({
+          ...prev,
+          totalPoints: data.stats.total_xp, // Map API total_xp to local totalPoints
+          level: data.stats.level,
+          streak: data.stats.streak
+        }));
+        setMissionsTotal(data.missionsTotal || 0);
+        setMissionsCompleted(data.missionsCompleted || 0);
       } catch (e) {
-        setLoadError("Gagal memuat mood");
+        console.error(e);
+        // setLoadError("Gagal memuat data dashboard"); // Silently fail to not annoy user
       }
-      const start = new Date();
-      start.setHours(0, 0, 0, 0);
-      try {
-        const { data: xpToday } = await supabase
-          .from("xp_events")
-          .select("points,created_at")
-          .eq("user_id", userId)
-          .gte("created_at", start.toISOString());
-        const sum = Array.isArray(xpToday) ? xpToday.reduce((acc, e) => acc + (e.points || 0), 0) : 0;
-        setDailyXP(sum);
-      } catch {}
-
-      try {
-        const { data: agg } = await supabase
-          .from("dashboard_user_stats")
-          .select("level,total_points,badges_count")
-          .eq("user_id", userId)
-          .limit(1);
-        const row = Array.isArray(agg) ? agg[0] : null;
-        if (row) setStats({ level: row.level ?? stats.level, totalPoints: row.total_points ?? stats.totalPoints, badges: row.badges_count ?? stats.badges });
-      } catch {}
-
-      try {
-        const { data: missions } = await supabase
-          .from("user_daily_missions")
-          .select("computed_progress,target_total")
-          .eq("user_id", userId);
-        const list = Array.isArray(missions) ? missions : [];
-        const total = list.length;
-        const done = list.filter((m: any) => (Number(m.computed_progress) || 0) >= Number(m.target_total)).length;
-        setMissionsTotal(total);
-        setMissionsCompleted(done);
-      } catch {}
-      try {
-        const { data: comps } = await supabase
-          .from("level_completions")
-          .select("level_id,stars")
-          .eq("user_id", userId);
-        const list = Array.isArray(comps) ? comps : [];
-        const completed = list.filter((r: any) => Number(r.stars || 0) > 0).length;
-        setWeeklyCompletedLessons(completed);
-        setWeeklyTotalLessons(3);
-      } catch {}
       setLoading(false);
     };
     loadDashboardData();
@@ -252,70 +190,51 @@ export default function Dashboard() {
   async function saveMoodQuick() {
     const userId = auth?.user?.id;
     if (!userId) return;
-    const isSupabaseConfigured = Boolean(
-      (import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) &&
-      (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY)
-    );
-    if (!isSupabaseConfigured) return;
+
     const now = new Date();
     const today = ymd(now);
     const mood = selectedMood || "🙂";
     const label = note || "";
-    const hadMoodBefore = !!moodHistory[today];
-    let existingRows: any[] | null = null;
+    const token = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null)?.content || '';
+
     try {
-      const res = await supabase
-        .from("mood_logs")
-        .select("id")
-        .eq("user_id", userId)
-        .eq("date", today)
-        .limit(1);
-      existingRows = res.data as any[] | null;
-    } catch {
-      existingRows = null;
-    }
-    const existingId = existingRows?.[0]?.id as number | undefined;
-    try {
-      if (existingId) {
-        await supabase
-          .from("mood_logs")
-          .update({ mood, label, updated_at: now.toISOString() })
-          .eq("id", existingId);
+      const res = await fetch(route('api.moods.store'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': token,
+        },
+        body: JSON.stringify({
+          date: today,
+          mood: mood,
+          label: label
+        })
+      });
+
+      if (res.ok) {
+        // Optimistic update
+        const hadMoodBefore = !!moodHistory[today];
+        setMoodHistory((prev) => ({ ...prev, [today]: { emoji: mood, label } }));
+        if (!hadMoodBefore) {
+          setDailyXP((v) => v + 2);
+          setStreak((s) => s + 1);
+        }
+        toast.success(hadMoodBefore ? "Mood diperbarui" : "Mood dicatat");
       } else {
-        await supabase
-          .from("mood_logs")
-          .insert({ user_id: userId, date: today, created_at: now.toISOString(), mood, label });
+        toast.error("Gagal menyimpan mood");
       }
-    } catch {
-      toast.error("Gagal mencatat mood");
-      return;
+    } catch (e) {
+      toast.error("Terjadi kesalahan saat menyimpan mood");
     }
-    setMoodHistory((prev) => ({ ...prev, [today]: { emoji: mood, label } }));
-    if (!hadMoodBefore) {
-      try {
-        await supabase.from("user_xp_events").insert({ user_id: userId, amount: 2, source: "mood_quick", occurred_at: now.toISOString(), created_at: now.toISOString() });
-      } catch {}
-      setDailyXP((v) => v + 2);
-      setStreak((s) => s + 1);
-    }
+
     setMoodOpen(false);
     setSelectedMood("");
     setNote("");
-    toast.success(hadMoodBefore ? "Mood diperbarui" : "Mood dicatat");
   }
 
   async function addDailyXP(points: number) {
     const userId = auth?.user?.id;
     if (!userId) return;
-    const isSupabaseConfigured = Boolean(
-      (import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) &&
-      (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY)
-    );
-    if (!isSupabaseConfigured) return;
-    const now = new Date();
-    try {
-      await supabase.from("user_xp_events").insert({ user_id: userId, amount: points, source: "daily_task", occurred_at: now.toISOString(), created_at: now.toISOString() });
-    } catch {}
     setDailyXP((v) => Math.min(DAILY_GOAL_XP, v + points));
   }
 
@@ -373,84 +292,17 @@ export default function Dashboard() {
       setDetailLoading(false);
       return;
     }
-    const isSupabaseConfigured = Boolean(
-      (import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) &&
-      (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY)
-    );
-    if (!isSupabaseConfigured) {
-      setDetailError("Konfigurasi database belum tersedia");
-      setDetailStats({
-        totalXP: stats.totalPoints,
-        xpToday: dailyXP,
-        level: stats.level,
-        badges: stats.badges,
-        missionsCompleted,
-        missionsTotal,
-        weeklyCompleted: weeklyCompletedLessons,
-        weeklyTotal: weeklyTotalLessons,
-        streakDays: streak,
-      });
-      setDetailLoading(false);
-      return;
-    }
-    let totalXP = stats.totalPoints;
-    let level = stats.level;
-    let badges = stats.badges;
-    let missionsC = missionsCompleted;
-    let missionsT = missionsTotal;
-    let weeklyC = weeklyCompletedLessons;
-    let weeklyT = weeklyTotalLessons;
-    let xpToday = dailyXP;
-    try {
-      const start = new Date();
-      start.setHours(0, 0, 0, 0);
-      const { data: xpRows } = await supabase
-        .from("xp_events")
-        .select("points,created_at")
-        .eq("user_id", userId)
-        .gte("created_at", start.toISOString());
-      xpToday = Array.isArray(xpRows) ? xpRows.reduce((acc: number, e: any) => acc + (e.points || 0), 0) : xpToday;
-    } catch {}
-    try {
-      const { data: agg } = await supabase
-        .from("dashboard_user_stats")
-        .select("level,total_points,badges_count")
-        .eq("user_id", userId)
-        .limit(1);
-      const row = Array.isArray(agg) ? agg[0] : null;
-      if (row) {
-        level = row.level ?? level;
-        totalXP = row.total_points ?? totalXP;
-        badges = row.badges_count ?? badges;
-      }
-    } catch {}
-    try {
-      const { data: missions } = await supabase
-        .from("user_daily_missions")
-        .select("computed_progress,target_total")
-        .eq("user_id", userId);
-      const list = Array.isArray(missions) ? missions : [];
-      missionsT = list.length;
-      missionsC = list.filter((m: any) => (Number(m.computed_progress) || 0) >= Number(m.target_total)).length;
-    } catch {}
-    try {
-      const { data: comps } = await supabase
-        .from("level_completions")
-        .select("level_id,stars")
-        .eq("user_id", userId);
-      const list = Array.isArray(comps) ? comps : [];
-      weeklyC = list.filter((r: any) => Number(r.stars || 0) > 0).length;
-      weeklyT = 3;
-    } catch {}
+
+    // Mock detail stats
     setDetailStats({
-      totalXP,
-      xpToday,
-      level,
-      badges,
-      missionsCompleted: missionsC,
-      missionsTotal: missionsT,
-      weeklyCompleted: weeklyC,
-      weeklyTotal: weeklyT,
+      totalXP: stats.totalPoints,
+      xpToday: dailyXP,
+      level: stats.level,
+      badges: stats.badges,
+      missionsCompleted: missionsCompleted,
+      missionsTotal: missionsTotal,
+      weeklyCompleted: weeklyCompletedLessons,
+      weeklyTotal: weeklyTotalLessons,
       streakDays: streak,
     });
     setDetailLoading(false);
@@ -532,7 +384,7 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  
+
 
                   <div className="flex gap-3 mt-3">
                     <Link href={mentoring().url} className="flex-1">
@@ -540,7 +392,7 @@ export default function Dashboard() {
                         <Play className="w-5 h-5 mr-2" /> Mulai Latihan
                       </Button>
                     </Link>
-                    <Dialog open={isDetailOpen} onOpenChange={(o)=>{ setDetailOpen(o); if(o) loadDetailData(); }}>
+                    <Dialog open={isDetailOpen} onOpenChange={(o) => { setDetailOpen(o); if (o) loadDetailData(); }}>
                       <DialogTrigger asChild>
                         <Button
                           variant="outline"
@@ -600,14 +452,14 @@ export default function Dashboard() {
                                 <span className="text-sm font-semibold text-gray-700">Misi Harian</span>
                                 <span className="text-xs text-gray-600">{detailStats.missionsCompleted} / {detailStats.missionsTotal}</span>
                               </div>
-                              <Progress value={detailStats.missionsTotal>0?Math.round((detailStats.missionsCompleted/detailStats.missionsTotal)*100):0} className="h-3" />
+                              <Progress value={detailStats.missionsTotal > 0 ? Math.round((detailStats.missionsCompleted / detailStats.missionsTotal) * 100) : 0} className="h-3" />
                             </div>
                             <div>
                               <div className="flex items-center justify-between mb-1">
                                 <span className="text-sm font-semibold text-gray-700">Kemajuan Minggu Ini</span>
                                 <span className="text-xs text-gray-600">{detailStats.weeklyCompleted} / {detailStats.weeklyTotal}</span>
                               </div>
-                              <Progress value={detailStats.weeklyTotal>0?Math.round((detailStats.weeklyCompleted/detailStats.weeklyTotal)*100):0} className="h-3" />
+                              <Progress value={detailStats.weeklyTotal > 0 ? Math.round((detailStats.weeklyCompleted / detailStats.weeklyTotal) * 100) : 0} className="h-3" />
                             </div>
                           </div>
                         )}
@@ -728,12 +580,12 @@ export default function Dashboard() {
                       <DialogTitle>Pilih Mood Hari Ini</DialogTitle>
                     </DialogHeader>
                     <div className="grid grid-cols-5 gap-2">
-                      {["😡","😟","😐","🙂","😄"].map((m) => (
-                        <button key={m} onClick={() => setSelectedMood(m)} className={`aspect-square rounded-xl border ${selectedMood===m?"border-purple-600 bg-purple-50":"border-gray-200 hover:bg-gray-50"} text-2xl flex items-center justify-center`}>{m}</button>
+                      {["😡", "😟", "😐", "🙂", "😄"].map((m) => (
+                        <button key={m} onClick={() => setSelectedMood(m)} className={`aspect-square rounded-xl border ${selectedMood === m ? "border-purple-600 bg-purple-50" : "border-gray-200 hover:bg-gray-50"} text-2xl flex items-center justify-center`}>{m}</button>
                       ))}
                     </div>
                     <div className="mt-3">
-                      <textarea value={note} onChange={(e)=>setNote(e.target.value)} placeholder="Catatan singkat (opsional)" className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-purple-500" rows={3} />
+                      <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Catatan singkat (opsional)" className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-purple-500" rows={3} />
                     </div>
                     <div className="mt-4">
                       <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white" onClick={saveMoodQuick} disabled={!selectedMood}>Simpan</Button>
@@ -764,13 +616,12 @@ export default function Dashboard() {
                     {calendarDays.map((item, idx) => (
                       <div
                         key={idx}
-                        className={`aspect-square flex items-center justify-center text-sm font-semibold rounded-lg transition-all ${
-                          item.day === null
-                            ? "invisible"
-                            : item.highlighted
+                        className={`aspect-square flex items-center justify-center text-sm font-semibold rounded-lg transition-all ${item.day === null
+                          ? "invisible"
+                          : item.highlighted
                             ? "bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-lg scale-110"
                             : "bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer"
-                        }`}
+                          }`}
                       >
                         {item.highlighted && item.emoji ? (
                           <span className="text-xl">{item.emoji}</span>

@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useEffect, useMemo, useState } from 'react';
 import { useAppearance } from '@/hooks/use-appearance';
-import { supabase } from '@/lib/supabaseClient';
 import {
   Heart,
   Sparkles,
@@ -28,7 +27,13 @@ import DashboardTopNav from '@/components/dashboard-top-nav';
 
 type SharedProps = {
   auth: {
-    user: { id: number; name: string; email: string } | null;
+    user: {
+      id: number;
+      name: string;
+      email: string;
+      total_xp: number;
+      level: number;
+    } | null;
   };
 };
 
@@ -70,33 +75,10 @@ export default function Leaderboard() {
   const [myStats, setMyStats] = useState({ streak: 0, badges: 0, points: 0 });
 
   useEffect(() => {
-    const loadStats = async () => {
-      const userId = auth?.user?.id;
-      if (!userId) return;
-      
-      // Streak
-      try {
-        const { data: moods } = await supabase.from("mood_logs").select("date").eq("user_id", userId);
-        const dates = new Set((moods ?? []).map(m => m.date));
-        let s = 0;
-        let d = new Date();
-        while (true) {
-          const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-          if (dates.has(k)) { s++; d.setDate(d.getDate()-1); }
-          else break;
-        }
-        setMyStats(prev => ({ ...prev, streak: s }));
-      } catch {}
-
-      // Stats
-      try {
-        const { data: agg } = await supabase.from("dashboard_user_stats").select("total_points,badges_count").eq("user_id", userId).maybeSingle();
-        if (agg) {
-          setMyStats(prev => ({ ...prev, points: agg.total_points ?? 0, badges: agg.badges_count ?? 0 }));
-        }
-      } catch {}
-    };
-    loadStats();
+    // Mock stats since Supabase is removed
+    const userId = auth?.user?.id;
+    if (!userId) return;
+    setMyStats({ streak: 0, badges: 0, points: 0 });
   }, [auth?.user?.id]);
 
   const daysLeft = useMemo(() => {
@@ -116,31 +98,18 @@ export default function Leaderboard() {
       setLoading(true);
       try {
         const res = await fetch('/api/leaderboard?period=lifetime', { headers: { 'Accept': 'application/json' } });
-        const json = await res.json();
-        const data: LBRow[] = (json?.data ?? []).map((r: any) => ({
-          user_id: String(r.user_id),
-          name: String(r.name ?? String(r.user_id).slice(0, 6)),
-          totalExp: Number(r.totalExp ?? 0),
-          status: r.status ?? undefined,
-        }));
-        const now = new Date();
-        const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2,'0')}-01`;
-        const { data: snapshots } = await supabase
-          .from('leaderboard_rank_snapshot')
-          .select('user_id, last_rank, month')
-          .eq('month', monthStr);
-        const snapshotMap = new Map<string, number>((snapshots ?? []).map(s => [String(s.user_id), Number(s.last_rank)]));
-        const merged = data.map(r => ({ ...r, lastRank: snapshotMap.get(r.user_id) ?? undefined }));
-        const ids = merged.map(r => r.user_id);
-        const { data: statusRows } = await supabase
-          .from('leaderboard_status')
-          .select('user_id,status')
-          .in('user_id', ids.map(id => Number(id)));
-        const statusMapClient = new Map<string, string>((statusRows ?? []).map(s => [String(s.user_id), String(s.status)]));
-        const mergedWithStatus = merged.map(r => ({ ...r, status: r.status ?? statusMapClient.get(r.user_id) ?? undefined }));
-        setRows(mergedWithStatus);
-        const upserts = mergedWithStatus.map((r, i) => ({ user_id: r.user_id, month: monthStr, last_rank: i + 1, updated_at: new Date().toISOString() }));
-        if (upserts.length) supabase.from('leaderboard_rank_snapshot').upsert(upserts, { onConflict: 'user_id,month' });
+        if (res.ok) {
+          const json = await res.json();
+          const data: LBRow[] = (json?.data ?? []).map((r: any) => ({
+            user_id: String(r.user_id),
+            name: String(r.name ?? String(r.user_id).slice(0, 6)),
+            totalExp: Number(r.total_xp ?? 0),
+            status: r.status ?? undefined,
+          }));
+          setRows(data);
+        } else {
+          setRows([]);
+        }
       } catch (e) {
         console.error('Leaderboard API failed', e);
         setRows([]);
@@ -171,10 +140,10 @@ export default function Leaderboard() {
                   </div>
                   <p className="text-sm text-muted-foreground">Top 15 will advance to the Harmony League</p>
                 </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Clock className="w-4 h-4" />
-                <span>{daysLeft} days left</span>
-              </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Clock className="w-4 h-4" />
+                  <span>{daysLeft} days left</span>
+                </div>
               </div>
 
               {/* Activity Filters */}
@@ -288,22 +257,24 @@ export default function Leaderboard() {
                     )}
                     title={mood.emoji}
                     onClick={async () => {
-          console.log('Emoji button clicked!');
-          const me = auth.user?.id;
-          const meName = auth.user?.name;
-          if (!me) return;
+                      console.log('Emoji button clicked!');
+                      const me = auth.user?.id;
+                      const meName = auth.user?.name;
+                      if (!me) return;
                       const statusKey = mood.emoji;
                       const csrf = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '';
-                      const resp = await fetch('/api/leaderboard/status', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
-                        body: JSON.stringify({ status: statusKey }),
-          });
-          console.log('Fetch response:', resp);
-          if (resp.ok) {
-             // Trigger a refresh or optimistic update
-          }
-          let updated = false;
+                      try {
+                        const resp = await fetch('/api/leaderboard/status', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                          body: JSON.stringify({ status: statusKey }),
+                        });
+                        console.log('Fetch response:', resp);
+                      } catch (e) {
+                        console.error("Failed to update status", e);
+                      }
+
+                      let updated = false;
                       const newRows = rows.map(r => {
                         if (r.user_id === String(me)) {
                           updated = true;
@@ -314,9 +285,9 @@ export default function Leaderboard() {
                       const finalRows = updated
                         ? newRows
                         : [
-                            ...newRows,
-                            { user_id: String(me), name: String(meName ?? String(me).slice(0,6)), totalExp: 0, status: statusKey },
-                          ].sort((a,b) => (b.totalExp ?? 0) - (a.totalExp ?? 0));
+                          ...newRows,
+                          { user_id: String(me), name: String(meName ?? String(me).slice(0, 6)), totalExp: 0, status: statusKey },
+                        ].sort((a, b) => (b.totalExp ?? 0) - (a.totalExp ?? 0));
                       setRows(finalRows);
                     }}
                   >
@@ -372,7 +343,7 @@ export default function Leaderboard() {
                   <span className="text-sm text-muted-foreground">Wellness Points</span>
                   <Badge variant="secondary" className="font-semibold">
                     <Trophy className="w-3 h-3 mr-1" />
-                    {myStats.points.toLocaleString()} WP
+                    {(auth.user?.total_xp ?? 0).toLocaleString()} XP
                   </Badge>
                 </div>
               </div>

@@ -89,6 +89,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('shop/index');
     })->name('shop');
 
+    Route::get('achievements', [\App\Http\Controllers\AchievementsController::class, 'index'])->name('achievements.index');
+
+
     Route::get('leaderboard', function () {
         return Inertia::render('leaderboard/index');
     })->name('leaderboard');
@@ -116,7 +119,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('api.mental-health-chat');
 
     Route::get('mentoring/level/{id}', function ($id) {
-        $allowed = [1, 2, 3];
+        $allowed = [1, 2, 3, 4, 5, 6];
         if (!in_array((int)$id, $allowed, true)) {
             abort(404);
         }
@@ -124,6 +127,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('mentoring.level.show');
 
     Route::post('invites', [\App\Http\Controllers\InviteController::class, 'store'])->name('invites.store');
+
+    // MindWay API Routes
+    Route::prefix('api')->name('api.')->group(function () {
+        // Dashboard
+        Route::get('dashboard', [\App\Http\Controllers\Api\DashboardController::class, 'index'])->name('dashboard.data');
+        Route::post('moods', [\App\Http\Controllers\Api\DashboardController::class, 'storeMood'])->name('moods.store');
+        
+        // Missions
+        Route::get('missions', [\App\Http\Controllers\Api\MissionController::class, 'index'])->name('missions.index');
+        Route::patch('missions/{id}', [\App\Http\Controllers\Api\MissionController::class, 'update'])->name('missions.update');
+
+        // Levels
+        Route::get('levels', [\App\Http\Controllers\Api\LevelController::class, 'index'])->name('levels.index');
+        Route::patch('levels/{id}', [\App\Http\Controllers\Api\LevelController::class, 'update'])->name('levels.update');
+
+        // Chat
+        Route::get('chat/sessions', [\App\Http\Controllers\Api\ChatController::class, 'index'])->name('chat.sessions');
+        Route::post('chat/sessions', [\App\Http\Controllers\Api\ChatController::class, 'store'])->name('chat.sessions.store');
+        Route::get('chat/sessions/{id}', [\App\Http\Controllers\Api\ChatController::class, 'show'])->name('chat.sessions.show');
+        Route::post('chat/sessions/{id}/messages', [\App\Http\Controllers\Api\ChatController::class, 'sendMessage'])->name('chat.messages.store');
+    });
 });
 
 require __DIR__ . '/settings.php';

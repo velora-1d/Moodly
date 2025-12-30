@@ -35,7 +35,7 @@ export default function Register() {
                         <CardDescription className="text-slate-500 text-base">Enter your details to get started</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Form {...RegisteredUserController.store.form()} resetOnSuccess={["password", "password_confirmation"]} disableWhileProcessing className="space-y-4">
+                        <Form {...RegisteredUserController.store()} resetOnSuccess={["password", "password_confirmation"]} disableWhileProcessing className="space-y-4">
                             {({ processing, errors }) => (
                                 <>
                                     <div className="space-y-2">
@@ -45,7 +45,7 @@ export default function Register() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="email" className="text-slate-600 font-medium pl-1">Email</Label>
-                                        <Input id="email" type="email" required autoComplete="email" name="email" placeholder="hello@mindpath.com" className="bg-white/95 dark:bg-white/90 border-slate-200 focus:border-purple-300 focus:ring-purple-100 transition-all h-12" />
+                                        <Input id="email" type="email" required autoComplete="email" name="email" placeholder="hello@mindway.com" className="bg-white/95 dark:bg-white/90 border-slate-200 focus:border-purple-300 focus:ring-purple-100 transition-all h-12" />
                                         <InputError message={errors.email} />
                                     </div>
                                     <div className="space-y-2">

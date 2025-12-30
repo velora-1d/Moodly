@@ -20,7 +20,7 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({ onSelect }) => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
         {AVATARS.map((avatar) => {
-          const Icon = avatar.class === 'Warrior' ? Sword : avatar.class === 'Mage' ? Sparkles : Heart;
+          const Icon = avatar.class === 'Ksatria' ? Sword : avatar.class === 'Penyihir' ? Sparkles : Heart;
           return (
             <motion.div
               key={avatar.id}
@@ -38,9 +38,9 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({ onSelect }) => {
                 </CardHeader>
                 <CardContent className="text-center">
                   <p className="text-sm text-muted-foreground mb-4">
-                    {avatar.class === 'Warrior' && "Specializes in directly challenging negative thoughts."}
-                    {avatar.class === 'Mage' && "Uses wisdom to uncover the truth behind distortions."}
-                    {avatar.class === 'Healer' && "Focuses on self-compassion and emotional regulation."}
+                    {avatar.class === 'Ksatria' && "Specializes in directly challenging negative thoughts."}
+                    {avatar.class === 'Penyihir' && "Uses wisdom to uncover the truth behind distortions."}
+                    {avatar.class === 'Penyembuh' && "Focuses on self-compassion and emotional regulation."}
                   </p>
                   <Button className="w/full">Select</Button>
                 </CardContent>

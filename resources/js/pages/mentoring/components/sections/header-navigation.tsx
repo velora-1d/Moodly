@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import { Link } from '@inertiajs/react';
 import { ChevronDown, Menu, Moon, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -24,12 +23,11 @@ const HeaderNavigation = () => {
         <div className="container mx-auto hidden h-16 items-center justify-between px-6 lg:flex">
           <div className="flex items-center gap-10">
             <Link href="/" className="flex shrink-0 items-center gap-3">
-              <Image
+              <img
                 src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/07bb7f59-e82e-4ee8-afb9-85b4bbefdb2e-codedex-io/assets/icons/coin-cropped-1.png"
                 alt="Codédex coin logo"
                 width={25}
                 height={28}
-                priority
               />
               <span className="font-accent text-xl text-white">Codédex</span>
             </Link>
@@ -67,12 +65,11 @@ const HeaderNavigation = () => {
         {/* Mobile Header */}
         <div className="flex h-16 items-center justify-between px-4 lg:hidden">
           <Link href="/" className="flex items-center gap-2">
-            <Image
+            <img
               src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/07bb7f59-e82e-4ee8-afb9-85b4bbefdb2e-codedex-io/assets/icons/coin-cropped-1.png"
               alt="Codédex coin logo"
               width={25}
               height={28}
-              priority
             />
             <span className="font-accent text-xl text-white">Codédex</span>
           </Link>

@@ -1,4 +1,4 @@
-import Image from "next/image";
+
 
 type Logo = {
   src: string;
@@ -83,7 +83,7 @@ const TrustedLogos = () => {
                 key={logo.alt}
                 className="flex flex-col items-center justify-center gap-3 text-center"
               >
-                <Image
+                <img
                   src={logo.src}
                   alt={logo.alt}
                   width={logo.width}
@@ -95,7 +95,7 @@ const TrustedLogos = () => {
                 </p>
               </div>
             ) : (
-              <Image
+              <img
                 key={logo.alt}
                 className="col-span-2 max-h-12 w-full object-contain sm:col-start-2 lg:col-span-1"
                 src={logo.src}

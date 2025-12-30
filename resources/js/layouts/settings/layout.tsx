@@ -8,11 +8,10 @@ import { type SharedData } from '@/types';
 function NavTab({ icon, label, active = false }: { icon: React.ReactNode; label: string; active?: boolean }) {
     return (
         <button
-            className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-colors ${
-                active
+            className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-colors ${active
                     ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/30'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
+                }`}
         >
             {icon}
             <span className="text-sm">{label}</span>
@@ -39,7 +38,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                                 <Star className="w-6 h-6 text-white fill-white" />
                             </div>
                             <div>
-                                <h1 className="font-bold text-lg">MindPath</h1>
+                                <h1 className="font-bold text-lg">MindWay</h1>
                                 <p className="text-xs text-gray-500">Perjalanan Mental Sehat</p>
                             </div>
                         </div>

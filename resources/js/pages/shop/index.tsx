@@ -51,21 +51,22 @@ export default function ShopPage() {
   const [cart, setCart] = useState<CartItem[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua")
   const [isCartOpen, setIsCartOpen] = useState(false)
-  
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false)
+
 
   const addToCart = (productId: number) => {
     const existingItem = cart.find(item => item.productId === productId)
-    
+
     if (existingItem) {
-      setCart(cart.map(item => 
-        item.productId === productId 
+      setCart(cart.map(item =>
+        item.productId === productId
           ? { ...item, quantity: item.quantity + 1 }
           : item
       ))
     } else {
       setCart([...cart, { productId, quantity: 1 }])
     }
-    
+
     const product = products.find(p => p.id === productId)
     toast.success(`${product?.name} ditambahkan ke keranjang!`, {
       duration: 2000,
@@ -94,8 +95,8 @@ export default function ShopPage() {
     }).filter(item => item.quantity > 0))
   }
 
-  const filteredProducts = selectedCategory === "Semua" 
-    ? products 
+  const filteredProducts = selectedCategory === "Semua"
+    ? products
     : products.filter(p => p.category === selectedCategory)
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
@@ -112,7 +113,7 @@ export default function ShopPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Title Section */}
-        <motion.div 
+        <motion.div
           className="mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -127,7 +128,7 @@ export default function ShopPage() {
         </motion.div>
 
         {/* Filters */}
-        <motion.div 
+        <motion.div
           className="mb-6 flex flex-wrap items-center gap-3"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -143,12 +144,11 @@ export default function ShopPage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Badge 
-                  className={`cursor-pointer px-4 py-2 transition-all ${
-                    selectedCategory === category 
-                      ? "bg-purple-600 hover:bg-purple-700 text-white" 
-                      : "bg-white hover:bg-gray-50 border-gray-200 text-gray-700"
-                  }`}
+                <Badge
+                  className={`cursor-pointer px-4 py-2 transition-all ${selectedCategory === category
+                    ? "bg-purple-600 hover:bg-purple-700 text-white"
+                    : "bg-white hover:bg-gray-50 border-gray-200 text-gray-700"
+                    }`}
                   variant={selectedCategory === category ? "default" : "outline"}
                   onClick={() => setSelectedCategory(category)}
                 >
@@ -160,7 +160,7 @@ export default function ShopPage() {
         </motion.div>
 
         {/* Product Grid */}
-        <motion.div 
+        <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12"
           layout
         >
@@ -180,7 +180,7 @@ export default function ShopPage() {
                   <Card className="bg-white border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all">
                     <CardHeader className="pb-4">
                       <div className="flex items-start gap-4">
-                        <motion.div 
+                        <motion.div
                           className={`w-12 h-12 rounded-xl ${product.color} flex items-center justify-center flex-shrink-0`}
                           whileHover={{ rotate: 360, scale: 1.1 }}
                           transition={{ duration: 0.6 }}
@@ -201,15 +201,13 @@ export default function ShopPage() {
                       <div className="text-xl font-bold text-gray-900">
                         Rp {product.price.toLocaleString('id-ID')}
                       </div>
-                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Button 
-                          onClick={() => addToCart(product.id)}
-                          size="sm"
-                          className="bg-purple-600 hover:bg-purple-700 text-white"
-                        >
-                          Beli
-                        </Button>
-                      </motion.div>
+                      <Button
+                        onClick={() => addToCart(product.id)}
+                        size="sm"
+                        className="bg-purple-600 hover:bg-purple-700 text-white transition-transform active:scale-95 shadow-md hover:shadow-lg"
+                      >
+                        Beli
+                      </Button>
                     </CardFooter>
                   </Card>
                 </motion.div>
@@ -219,7 +217,7 @@ export default function ShopPage() {
         </motion.div>
 
         {/* Additional Products Section */}
-        <motion.div 
+        <motion.div
           className="mt-12"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -230,13 +228,13 @@ export default function ShopPage() {
             <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
               <Card className="border-dashed border-2 border-gray-300 bg-white">
                 <CardContent className="text-center py-12">
-                  <motion.div 
+                  <motion.div
                     className="mb-3 text-4xl"
-                    animate={{ 
+                    animate={{
                       rotate: [0, 10, -10, 10, 0],
                       scale: [1, 1.1, 1]
                     }}
-                    transition={{ 
+                    transition={{
                       duration: 2,
                       repeat: Infinity,
                       repeatDelay: 1
@@ -296,18 +294,18 @@ export default function ShopPage() {
               {/* Cart Items */}
               <div className="flex-1 overflow-y-auto p-6">
                 {cart.length === 0 ? (
-                  <motion.div 
+                  <motion.div
                     className="flex flex-col items-center justify-center h-full text-center"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.4 }}
                   >
-                    <motion.div 
+                    <motion.div
                       className="text-6xl mb-4"
-                      animate={{ 
+                      animate={{
                         y: [0, -10, 0],
                       }}
-                      transition={{ 
+                      transition={{
                         duration: 2,
                         repeat: Infinity,
                         ease: "easeInOut"
@@ -319,7 +317,7 @@ export default function ShopPage() {
                     <p className="text-gray-400 text-sm mt-2">Yuk mulai belanja produk kesehatan mental!</p>
                   </motion.div>
                 ) : (
-                  <motion.div 
+                  <motion.div
                     className="space-y-4"
                     layout
                   >
@@ -339,7 +337,7 @@ export default function ShopPage() {
                             transition={{ delay: index * 0.1 }}
                             className="bg-gray-50 rounded-xl p-4 flex gap-4 border border-gray-200"
                           >
-                            <motion.div 
+                            <motion.div
                               className={`w-16 h-16 rounded-lg ${product.color} flex items-center justify-center flex-shrink-0`}
                               whileHover={{ rotate: 360 }}
                               transition={{ duration: 0.6 }}
@@ -359,7 +357,7 @@ export default function ShopPage() {
                                   >
                                     <Minus className="h-3 w-3" />
                                   </motion.button>
-                                  <motion.span 
+                                  <motion.span
                                     key={item.quantity}
                                     initial={{ scale: 1.5 }}
                                     animate={{ scale: 1 }}
@@ -399,7 +397,7 @@ export default function ShopPage() {
 
               {/* Cart Footer */}
               {cart.length > 0 && (
-                <motion.div 
+                <motion.div
                   className="border-t border-gray-200 p-6 bg-white"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -414,7 +412,7 @@ export default function ShopPage() {
                     </div>
                     <div className="flex items-center justify-between text-lg font-bold">
                       <span className="text-gray-900">Total</span>
-                      <motion.span 
+                      <motion.span
                         className="text-purple-600"
                         key={totalPrice}
                         initial={{ scale: 1.2 }}
@@ -425,14 +423,14 @@ export default function ShopPage() {
                     </div>
                   </div>
                   <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Button 
+                    <Button
                       className="w-full bg-purple-600 hover:bg-purple-700 text-white py-6 text-base font-semibold"
                       onClick={() => {
-                        toast.success("Checkout berhasil! Terima kasih sudah berbelanja", {
-                          duration: 3000,
-                        })
-                        setCart([])
                         setIsCartOpen(false)
+                        setTimeout(() => {
+                          setIsSuccessOpen(true)
+                          setCart([])
+                        }, 300)
                       }}
                     >
                       Checkout Sekarang
@@ -445,11 +443,74 @@ export default function ShopPage() {
         )}
       </AnimatePresence>
 
+      {/* Checkout Success Modal */}
+      <AnimatePresence>
+        {isSuccessOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl relative overflow-hidden"
+            >
+              {/* Confetti / Decor */}
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500" />
+
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1, rotate: [0, 10, -10, 0] }}
+                transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
+                className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
+              >
+                <div className="text-5xl">🎉</div>
+              </motion.div>
+
+              <h3 className="text-2xl font-black text-gray-900 mb-2">Pembayaran Berhasil!</h3>
+              <p className="text-gray-600 mb-8">
+                Terima kasih! Item kamu sedang diproses dan akan segera masuk ke inventaris.
+              </p>
+
+              <Button
+                onClick={() => setIsSuccessOpen(false)}
+                className="w-full bg-gray-900 text-white hover:bg-gray-800 py-6 rounded-xl font-bold text-lg shadow-xl shadow-gray-200"
+              >
+                Kembali Belanja
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Cart Button */}
+      <AnimatePresence>
+        {cart.length > 0 && !isCartOpen && (
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsCartOpen(true)}
+            className="fixed bottom-8 right-8 z-40 bg-purple-600 text-white p-4 rounded-full shadow-2xl hover:bg-purple-700 flex items-center justify-center"
+          >
+            <ShoppingCart className="w-6 h-6" />
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-white">
+              {totalItems}
+            </span>
+          </motion.button>
+        )}
+      </AnimatePresence>
+
       {/* Footer */}
       <footer className="mt-20 bg-white border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <p className="text-center text-gray-600 text-sm">
-            © 2024 MindPath Mental Health Shop. Semua hak dilindungi.
+            © 2024 MindWay Mental Health Shop. Semua hak dilindungi.
           </p>
         </div>
       </footer>

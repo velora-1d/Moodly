@@ -13,8 +13,6 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Validation\ValidationException;
-use App\Http\Controllers\Auth\SupabaseAuthService;
 
 class RegisteredUserController extends Controller
 {
@@ -39,21 +37,12 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $service = new SupabaseAuthService();
-        $signUp = $service->signUp($request->email, $request->password, $request->name);
-        if ($signUp === false) {
-            throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
-            ]);
-        }
-
-        // Compose a supabase-like user payload for syncing
-        $supabaseUser = $signUp['user'] ?? [
+        // Create user in MySQL database
+        $user = User::create([
+            'name' => $request->name,
             'email' => $request->email,
-            'user_metadata' => ['name' => $request->name],
-        ];
-
-        $user = $service->syncLocalUser($supabaseUser, $request->password);
+            'password' => bcrypt($request->password),
+        ]);
 
         event(new Registered($user));
 
@@ -105,14 +94,6 @@ class RegisteredUserController extends Controller
             }
         } catch (\Throwable $e) {
             // silently ignore bootstrap errors to not block registration
-        }
-
-        // Store tokens if Supabase returned a session
-        if (!empty($signUp['access_token'])) {
-            $request->session()->put('supabase.access_token', $signUp['access_token']);
-        }
-        if (!empty($signUp['refresh_token'])) {
-            $request->session()->put('supabase.refresh_token', $signUp['refresh_token']);
         }
 
         $request->session()->regenerate();

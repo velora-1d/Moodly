@@ -1,8 +1,8 @@
 "use client"
 
 import LevelLayout from "./LevelLayout"
-import { supabase } from "@/lib/supabaseClient"
 import { usePage } from "@inertiajs/react"
+import { endSession } from "./useLevelState"
 import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
@@ -67,7 +67,7 @@ export default function Level2() {
   const [swapInterval, setSwapInterval] = useState<number>(3000)
   const [lastSwapTime, setLastSwapTime] = useState<number>(Date.now())
 
-  const avgReactionTime = reactionTime.length > 0 
+  const avgReactionTime = reactionTime.length > 0
     ? Math.round(reactionTime.reduce((a, b) => a + b, 0) / reactionTime.length)
     : 0
 
@@ -166,7 +166,7 @@ export default function Level2() {
       setTimeout(() => {
         setGameState("completed")
         if (score === totalRounds * 10) {
-          setAchievements(prev => prev.map(ach => 
+          setAchievements(prev => prev.map(ach =>
             ach.id === "perfectionist" ? { ...ach, unlocked: true } : ach
           ))
         }
@@ -196,19 +196,13 @@ export default function Level2() {
     if (gameState !== "completed" || reportedComplete) return
     const userId = auth?.user?.id
     if (!userId) return
-    const isConfigured = Boolean((import.meta as any).env.VITE_SUPABASE_URL || (import.meta as any).env.SUPABASE_URL)
-    if (!isConfigured) return
+
+    setReportedComplete(true)
     const stars = accuracy >= 90 ? 3 : accuracy >= 70 ? 2 : 1
-    const now = new Date().toISOString()
-    ;(async () => {
-      try {
-        await supabase
-          .from("level_completions")
-          .upsert({ user_id: userId, level_id: 2, stars, completed_at: now, updated_at: now }, { onConflict: "user_id,level_id" })
-        setReportedComplete(true)
-      } catch {}
-    })()
-  }, [gameState, reportedComplete, auth?.user?.id, accuracy])
+
+    // Call our backend API
+    endSession(userId, 2, { score, accuracy, bestStreak, avgReactionTime }, 0);
+  }, [gameState, reportedComplete, auth?.user?.id, accuracy, score, bestStreak, avgReactionTime])
 
   return (
     <LevelLayout title="Level 2 · Mindfulness">
@@ -284,12 +278,12 @@ export default function Level2() {
                     className="aspect-square rounded-3xl bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 flex items-center justify-center text-9xl hover:scale-105 transition-transform border-4 border-transparent hover:border-purple-400"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    animate={{ 
+                    animate={{
                       scale: [1, 1.02, 1],
                       transition: { duration: 0.5 }
                     }}
                   >
-                    {currentObject.position === "left" 
+                    {currentObject.position === "left"
                       ? POSITIVE_EMOJIS[round % POSITIVE_EMOJIS.length]
                       : NEGATIVE_EMOJIS[round % NEGATIVE_EMOJIS.length]
                     }
@@ -301,12 +295,12 @@ export default function Level2() {
                     className="aspect-square rounded-3xl bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 flex items-center justify-center text-9xl hover:scale-105 transition-transform border-4 border-transparent hover:border-blue-400"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    animate={{ 
+                    animate={{
                       scale: [1, 1.02, 1],
                       transition: { duration: 0.5 }
                     }}
                   >
-                    {currentObject.position === "right" 
+                    {currentObject.position === "right"
                       ? POSITIVE_EMOJIS[round % POSITIVE_EMOJIS.length]
                       : NEGATIVE_EMOJIS[round % NEGATIVE_EMOJIS.length]
                     }
@@ -450,11 +444,10 @@ export default function Level2() {
                 {achievements.map(ach => (
                   <div
                     key={ach.id}
-                    className={`p-4 rounded-lg border-2 transition-all ${
-                      ach.unlocked 
-                        ? "bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-300 dark:border-yellow-700" 
-                        : "bg-muted/50 border-muted-foreground/20 opacity-60"
-                    }`}
+                    className={`p-4 rounded-lg border-2 transition-all ${ach.unlocked
+                      ? "bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-300 dark:border-yellow-700"
+                      : "bg-muted/50 border-muted-foreground/20 opacity-60"
+                      }`}
                   >
                     <div className="flex items-start gap-3">
                       <div className="text-2xl">{ach.unlocked ? "🏆" : "🔒"}</div>

@@ -1,5 +1,4 @@
-import Image from "next/image";
-import Link from "next/link";
+import { Link } from '@inertiajs/react';
 import { BookOpen, Heart, Award } from "lucide-react";
 
 const benefits = [
@@ -56,12 +55,11 @@ const ClubMembershipCta = () => {
           </div>
 
           <div className="flex justify-center lg:justify-end">
-            <Image
+            <img
               src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/07bb7f59-e82e-4ee8-afb9-85b4bbefdb2e-codedex-io/assets/images/final-1-3.gif"
               alt="Pixel art illustration of characters on a vehicle"
               width={292}
               height={248}
-              unoptimized
               className="max-w-xs sm:max-w-sm"
             />
           </div>

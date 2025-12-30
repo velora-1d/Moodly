@@ -4,11 +4,10 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/components/ui/textarea";
-import { ScrollArea } from "@/components/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Smile, Meh, Frown, CloudRain, Sun, Moon, Calendar, Trash2, PenLine, Sparkles } from "lucide-react";
 import DashboardTopNav from "@/components/dashboard-top-nav";
-import { supabase } from "@/lib/supabaseClient";
 import { usePage } from "@inertiajs/react";
 
 type Mood = "happy" | "neutral" | "sad" | "calm" | "energetic" | "anxious";
@@ -56,31 +55,13 @@ export default function JournalingPage() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const isSupabaseConfigured = Boolean((import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) && (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY));
-    if (userId && isSupabaseConfigured) {
-      supabase
-        .from("journal_entries")
-        .select("id, content, mood, created_at")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(50)
-        .then(({ data }) => {
-          if (Array.isArray(data)) {
-            setEntries(
-              data.map((r: any) => ({ id: r.id as string, content: r.content as string, mood: r.mood as Mood, timestamp: new Date(r.created_at as string).getTime() }))
-            );
-          }
-          setIsLoaded(true);
-        });
-    } else {
-      const savedEntries = localStorage.getItem("mindpath_journal_entries");
-      if (savedEntries) {
-        try {
-          setEntries(JSON.parse(savedEntries));
-        } catch {}
-      }
-      setIsLoaded(true);
+    const savedEntries = localStorage.getItem("mindpath_journal_entries");
+    if (savedEntries) {
+      try {
+        setEntries(JSON.parse(savedEntries));
+      } catch { }
     }
+    setIsLoaded(true);
   }, []);
 
   useEffect(() => {
@@ -91,46 +72,19 @@ export default function JournalingPage() {
 
   const handleSave = () => {
     if (!currentEntry.trim()) return;
-    const isSupabaseConfigured = Boolean((import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) && (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY));
-    if (userId && isSupabaseConfigured) {
-      supabase
-        .from("journal_entries")
-        .insert({ user_id: userId, content: currentEntry.trim(), mood: selectedMood })
-        .select("id, content, mood, created_at")
-        .single()
-        .then(({ data }) => {
-          if (data) {
-            setEntries((prev) => [
-              { id: data.id as string, content: data.content as string, mood: data.mood as Mood, timestamp: new Date(data.created_at as string).getTime() },
-              ...prev,
-            ]);
-          }
-          setCurrentEntry("");
-        });
-    } else {
-      const newEntry: JournalEntry = {
-        id: crypto.randomUUID(),
-        content: currentEntry,
-        mood: selectedMood,
-        timestamp: Date.now(),
-      };
-      setEntries([newEntry, ...entries]);
-      setCurrentEntry("");
-    }
+
+    const newEntry: JournalEntry = {
+      id: crypto.randomUUID(),
+      content: currentEntry,
+      mood: selectedMood,
+      timestamp: Date.now(),
+    };
+    setEntries([newEntry, ...entries]);
+    setCurrentEntry("");
   };
 
   const handleDelete = (id: string) => {
-    const isSupabaseConfigured = Boolean((import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) && (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY));
-    if (userId && isSupabaseConfigured) {
-      supabase
-        .from("journal_entries")
-        .delete()
-        .eq("id", id)
-        .eq("user_id", userId)
-        .then(() => setEntries((prev) => prev.filter((e) => e.id !== id)));
-    } else {
-      setEntries(entries.filter((entry) => entry.id !== id));
-    }
+    setEntries(entries.filter((entry) => entry.id !== id));
   };
 
   const formatDate = (timestamp: number) => {

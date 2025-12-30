@@ -1,37 +1,38 @@
-import { supabase } from '@/lib/supabaseClient'
-
-function isConfigured() {
-  return Boolean((import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) && (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY))
-}
+import { route } from 'ziggy-js';
 
 export async function getCompletion(userId: number, levelId: number) {
-  if (!isConfigured()) return null
-  const { data } = await supabase.from('level_completions').select('level_id,stars,completed_at,xp_awarded').eq('user_id', userId).eq('level_id', levelId).limit(1)
-  return Array.isArray(data) && data[0] ? data[0] : null
+  return null
 }
 
 export async function getSessionHistory(userId: number, levelId: number) {
-  if (!isConfigured()) return []
-  const { data } = await supabase.from('level_sessions').select('started_at,ended_at,duration_ms').eq('user_id', userId).eq('level_id', levelId).order('started_at', { ascending: false }).limit(10)
-  return Array.isArray(data) ? data : []
+  return []
 }
 
 export async function startSession(userId: number, levelId: number) {
-  if (!isConfigured()) return
-  const now = new Date().toISOString()
-  await supabase.from('level_sessions').insert({ user_id: userId, level_id: levelId, started_at: now })
+  // no-op
 }
 
 export async function endSession(userId: number, levelId: number, payload: any, durationMs: number) {
-  if (!isConfigured()) return
-  const now = new Date().toISOString()
-  await supabase.from('level_sessions').insert({ user_id: userId, level_id: levelId, ended_at: now, duration_ms: durationMs, payload })
-  await supabase.from('xp_events').insert({ user_id: userId, points: Math.max(1, Math.floor(durationMs / 60000)), type: 'level_session', created_at: now })
+  try {
+    const token = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null)?.content || '';
+    await fetch(route('api.levels.update', { id: levelId }), {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': token
+      },
+      body: JSON.stringify({
+        status: 'completed',
+        // metadata: payload // Optional: if we want to store detailed stats in the future
+      })
+    });
+    return true;
+  } catch (error) {
+    console.error('Failed to save level progress:', error);
+    return false;
+  }
 }
 
 export async function complete(userId: number, levelId: number, stars: number, xp: number) {
-  if (!isConfigured()) return
-  const now = new Date().toISOString()
-  await supabase.from('level_completions').insert({ user_id: userId, level_id: levelId, completed_at: now, stars, xp_awarded: xp })
-  await supabase.from('xp_events').insert({ user_id: userId, points: xp, type: 'level_complete', created_at: now })
+  return endSession(userId, levelId, {}, 0);
 }

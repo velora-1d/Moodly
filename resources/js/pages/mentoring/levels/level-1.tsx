@@ -5,7 +5,6 @@ import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Star } from 'lucide-react'
-import { supabase } from '@/lib/supabaseClient'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePage } from '@inertiajs/react'
@@ -113,14 +112,14 @@ export default function Level1() {
       g.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.01)
       o.start()
       o.stop(ctx.currentTime + 0.12)
-    } catch {}
+    } catch { }
   }
 
   useEffect(() => {
     return () => {
       try {
         audioCtxRef.current?.close()
-      } catch {}
+      } catch { }
       audioCtxRef.current = null
     }
   }, [])
@@ -172,23 +171,10 @@ export default function Level1() {
     const durationMs = elapsed * 1000
     const stars = bestStreak >= 4 ? 3 : 2
     endSession(auth.user.id, levelId, { breaths, targetBreaths, bestStreak, paceSec, autoGuide }, durationMs)
-    ;(async () => {
-      const uid = auth.user!.id
-      const now = new Date().toISOString()
-      const existing = await getCompletion(uid, levelId)
-      if (!existing) {
-        await supabase.from('level_completions').upsert({ user_id: uid, level_id: levelId, stars, xp_awarded: 50, completed_at: now }, { onConflict: 'user_id,level_id' })
-        await supabase.from('xp_events').insert({ user_id: uid, points: 50, type: 'level_complete', created_at: now })
-      } else {
-        const prevStars = Number(existing.stars || 0)
-        const prevXp = Number((existing as any).xp_awarded || 0)
-        if (stars > prevStars) await supabase.from('level_completions').update({ stars }).eq('user_id', uid).eq('level_id', levelId)
-        if (!prevXp || prevXp <= 0) {
-          await supabase.from('level_completions').update({ xp_awarded: 50, completed_at: existing.completed_at ?? now }).eq('user_id', uid).eq('level_id', levelId)
-          await supabase.from('xp_events').insert({ user_id: uid, points: 50, type: 'level_complete', created_at: now })
-        }
-      }
-    })()
+      ; (async () => {
+        // Supabase logic removed
+        // Simulate saving progress locally if needed
+      })()
     setSummary({ breaths, targetBreaths, bestStreak, duration: elapsed, stars })
     setShowSummary(true)
   }, [completed, hasCompleted, auth?.user?.id, elapsed, bestStreak, breaths, targetBreaths, paceSec, autoGuide])
@@ -234,14 +220,14 @@ export default function Level1() {
         if (p.paceSec) setPaceSec(p.paceSec)
         setAudioEnabled(!!p.audioEnabled)
       }
-    } catch {}
+    } catch { }
   }, [auth?.user?.id])
 
   useEffect(() => {
     const key = `level1:${auth?.user?.id ?? 'anon'}`
     try {
       localStorage.setItem(key, JSON.stringify({ pet, targetBreaths, paceSec, audioEnabled }))
-    } catch {}
+    } catch { }
   }, [pet, targetBreaths, paceSec, audioEnabled, auth?.user?.id])
 
   useEffect(() => {
@@ -324,20 +310,20 @@ export default function Level1() {
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">Pace</span>
-                <input type="range" min={3} max={6} value={paceSec} onChange={(e)=>setPaceSec(Number(e.target.value))} className="h-2 w-40 rounded-lg accent-purple-600" />
+                <input type="range" min={3} max={6} value={paceSec} onChange={(e) => setPaceSec(Number(e.target.value))} className="h-2 w-40 rounded-lg accent-purple-600" />
                 <span className="text-xs">{paceSec}s</span>
               </div>
               <div className="flex items-center gap-2">
-                <input type="checkbox" checked={autoGuide} onChange={(e)=>setAutoGuide(e.target.checked)} />
+                <input type="checkbox" checked={autoGuide} onChange={(e) => setAutoGuide(e.target.checked)} />
                 <span className="text-xs">Auto-Guide</span>
               </div>
               <div className="flex items-center gap-2">
-                <input type="checkbox" checked={audioEnabled} onChange={(e)=>setAudioEnabled(e.target.checked)} />
+                <input type="checkbox" checked={audioEnabled} onChange={(e) => setAudioEnabled(e.target.checked)} />
                 <span className="text-xs">Audio</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">Target</span>
-                <input type="number" min={4} max={16} value={targetBreaths} onChange={(e)=>setTargetBreaths(Math.max(4, Math.min(16, Number(e.target.value))))} className="h-8 w-16 rounded-md border border-gray-300 px-2" />
+                <input type="number" min={4} max={16} value={targetBreaths} onChange={(e) => setTargetBreaths(Math.max(4, Math.min(16, Number(e.target.value))))} className="h-8 w-16 rounded-md border border-gray-300 px-2" />
               </div>
             </div>
             {completed && (
@@ -359,7 +345,7 @@ export default function Level1() {
           {summary && (
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-1">
-                {[0,1,2].map((i)=> (
+                {[0, 1, 2].map((i) => (
                   <Star key={i} className={`w-7 h-7 ${i < summary.stars ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-300'}`} />
                 ))}
               </div>

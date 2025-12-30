@@ -35,16 +35,16 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                         <div className="w-12 h-12 bg-gradient-to-tr from-purple-400 to-pink-400 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg shadow-purple-200">
                             <Sparkles className="w-6 h-6 text-white" />
                         </div>
-                        <CardTitle className="text-2xl font-bold tracking-tight text-slate-800">Welcome to MindPath</CardTitle>
+                        <CardTitle className="text-2xl font-bold tracking-tight text-slate-800">Welcome to MindWay</CardTitle>
                         <CardDescription className="text-slate-500 text-base">Your journey to clarity begins here</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Form {...AuthenticatedSessionController.store.form()} resetOnSuccess={["password"]} className="space-y-4">
+                        <Form {...AuthenticatedSessionController.store()} resetOnSuccess={["password"]} className="space-y-4">
                             {({ processing, errors }) => (
                                 <>
                                     <div className="space-y-2">
                                         <Label htmlFor="email" className="text-slate-600 font-medium pl-1">Email</Label>
-                                        <Input id="email" type="email" name="email" required autoFocus autoComplete="email" placeholder="hello@mindpath.com" className="bg-white/95 dark:bg-white/90 border-slate-200 focus:border-purple-300 focus:ring-purple-100 transition-all h-12" />
+                                        <Input id="email" type="email" name="email" required autoFocus autoComplete="email" placeholder="hello@mindway.com" className="bg-white/95 dark:bg-white/90 border-slate-200 focus:border-purple-300 focus:ring-purple-100 transition-all h-12" />
                                         <InputError message={errors.email} />
                                     </div>
                                     <div className="space-y-2">

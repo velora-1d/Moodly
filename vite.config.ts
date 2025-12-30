@@ -8,10 +8,6 @@ import viteCompression from 'vite-plugin-compression';
 import path from 'node:path';
 
 export default defineConfig(({ command }) => ({
-    define: {
-        'import.meta.env.SUPABASE_URL': process.env.SUPABASE_URL,
-        'import.meta.env.SUPABASE_ANON_KEY': process.env.SUPABASE_ANON_KEY,
-    },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
@@ -26,7 +22,7 @@ export default defineConfig(({ command }) => ({
                     formVariants: true,
                     command: 'php artisan wayfinder:generate --with-form',
                 }),
-              ]
+            ]
             : []),
         visualizer({
             filename: 'bundle-visualizer.html',
@@ -92,7 +88,6 @@ export default defineConfig(({ command }) => ({
                         '@radix-ui/react-dropdown-menu',
                         '@radix-ui/react-accordion',
                     ],
-                    supabase: ['@supabase/supabase-js'],
                     lucide: ['lucide-react'],
                 },
             },

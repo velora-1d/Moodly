@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
+
 import { Link } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
 
@@ -24,14 +24,10 @@ const HeroBanner = () => {
     <section className="relative flex h-[480px] w-full items-center justify-center overflow-hidden bg-background md:h-[520px]">
       {/* Layer 1: Parallax Background */}
       <div className="absolute inset-0 z-0" style={backgroundStyle}>
-        <Image
+        <img
           src="/images/mentoring/chapter_1/cobaBanner.jpg"
           alt="Python course pixel banner"
-          layout="fill"
-          objectFit="cover"
-          quality={100}
-          priority
-          unoptimized
+          className="w-full h-full object-cover"
         />
       </div>
 

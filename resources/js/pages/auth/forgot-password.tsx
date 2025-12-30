@@ -36,12 +36,12 @@ export default function ForgotPassword({ status }: { status?: string }) {
                         {status && (
                             <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>
                         )}
-                        <Form {...PasswordResetLinkController.store.form()}>
+                        <Form {...PasswordResetLinkController.store()}>
                             {({ processing, errors }) => (
                                 <>
                                     <div className="space-y-2">
                                         <Label htmlFor="email" className="text-slate-600 font-medium pl-1">Email</Label>
-                                        <Input id="email" type="email" name="email" autoComplete="off" autoFocus placeholder="hello@mindpath.com" className="bg-white/95 dark:bg-white/90 border-slate-200 focus:border-purple-300 focus:ring-purple-100 transition-all h-12" />
+                                        <Input id="email" type="email" name="email" autoComplete="off" autoFocus placeholder="hello@mindway.com" className="bg-white/95 dark:bg-white/90 border-slate-200 focus:border-purple-300 focus:ring-purple-100 transition-all h-12" />
                                         <InputError message={errors.email} />
                                     </div>
                                     <Button className="w-full h-12 mt-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg shadow-purple-200 border-0 text-base font-semibold transition-all" disabled={processing} data-test="email-password-reset-link-button">

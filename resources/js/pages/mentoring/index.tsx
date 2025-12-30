@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
+import { route } from 'ziggy-js';
 import DashboardTopNav from "@/components/dashboard-top-nav";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, Lock, Trophy, Sparkles, Heart, Brain, Sun, Moon, Wind, Zap, CheckCircle2, Target, Award, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, usePage } from "@inertiajs/react";
-import { supabase } from "@/lib/supabaseClient";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -71,29 +71,43 @@ export default function MentoringPage() {
     const load = async () => {
       const userId = auth?.user?.id;
       if (!userId) return;
-      const isConfigured = Boolean((import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL) && (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY));
-      if (!isConfigured) return;
-      const { data: base } = await supabase
-        .from('levels')
-        .select('id,slug,title,description,icon_slug,xp_reward,order_index,active')
-        .eq('active', true)
-        .order('order_index', { ascending: true })
-        .order('id', { ascending: true });
-      const rawLevels = Array.isArray(base) ? base : [];
-      const { data: comps } = await supabase
-        .from('level_completions')
-        .select('level_id,stars')
-        .eq('user_id', userId);
-      const compMap = new Map<number, number>();
-      if (Array.isArray(comps)) comps.forEach((r: any) => compMap.set(r.level_id, Number(r.stars || 0)));
-      const resolved: Level[] = rawLevels.map((l: any) => {
-        const Icon = iconMap[l.icon_slug] ?? Brain;
-        const stars = compMap.get(l.id) ?? 0;
-        const status = stars > 0 ? 'completed' : 'current';
-        return { id: l.id, title: l.title, description: l.description, icon: Icon, status, stars, maxStars: 3, xpReward: Number(l.xp_reward || 0) } as Level;
-      });
-      const final = resolved;
-      setLevelState(final);
+
+      try {
+        const res = await fetch(route('api.levels.index'));
+        if (res.ok) {
+          const data: any[] = await res.json();
+          // Map API data to Level interface
+          // We need to merge with static definitions of Title/Desc/Icon based on ID
+          // Because DB only stores status/progress
+
+          const staticDefs: Record<number, any> = {
+            1: { title: 'Latihan Pernapasan', description: 'Teknik dasar pernapasan untuk relaksasi.', icon_slug: 'wind', xp: 50 },
+            2: { title: 'Mindfulness', description: 'Latihan fokus dan kesadaran diri.', icon_slug: 'brain', xp: 75 },
+            3: { title: 'CBT Game', description: 'Kenali pola pikir negatifmu.', icon_slug: 'sparkles', xp: 100 },
+            4: { title: 'Meditasi Jalan', description: 'Sadari langkahmu.', icon_slug: 'sun', xp: 120 },
+            5: { title: 'Body Scan', description: 'Rasakan tubuhmu.', icon_slug: 'heart', xp: 150 },
+            6: { title: 'Visualisasi', description: 'Bayangkan kesuksesan.', icon_slug: 'trophy', xp: 200 },
+          };
+
+          const resolved: Level[] = data.map((l: any) => {
+            const def = staticDefs[l.level_id] || { title: `Level ${l.level_id}`, description: 'Lanjutan...', icon_slug: 'star', xp: 100 };
+            const Icon = iconMap[def.icon_slug] ?? Brain;
+            return {
+              id: l.level_id,
+              title: def.title,
+              description: def.description,
+              icon: Icon,
+              status: l.status, // locked/active/completed
+              stars: l.status === 'completed' ? 3 : 0, // Simplified star logic
+              maxStars: 3,
+              xpReward: def.xp
+            } as Level;
+          });
+          setLevelState(resolved);
+        }
+      } catch (e) {
+        console.error("Failed to load levels", e);
+      }
     };
     load();
     return () => {
@@ -132,11 +146,11 @@ export default function MentoringPage() {
             <div className="flex items-center gap-4">
               <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-center">
                 <p className="text-xs text-purple-100">Level</p>
-                <p className="text-2xl font-bold">5</p>
+                <p className="text-2xl font-bold">{auth?.user?.level ?? 1}</p>
               </div>
               <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-center">
                 <p className="text-xs text-purple-100">Total XP</p>
-                <p className="text-2xl font-bold">{totalXP}</p>
+                <p className="text-2xl font-bold">{auth?.user?.total_xp ?? 0}</p>
               </div>
               <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 flex items-center gap-2">
                 <Trophy className="w-6 h-6 text-yellow-300" />
@@ -196,7 +210,7 @@ export default function MentoringPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {(() => {
+                  {(() => {
                     const currentLevel = levels.find((l) => l.status === "current")!;
                     const Icon = currentLevel.icon;
                     return (

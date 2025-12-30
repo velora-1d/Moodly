@@ -1,6 +1,6 @@
 "use client";
 
-import { Head, Link, usePage } from "@inertiajs/react";
+import { Head, Link, usePage, router } from "@inertiajs/react";
 import DashboardTopNav from "@/components/dashboard-top-nav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { mentoring, leaderboard as leaderboardRoute, missions as missionsRoute, 
 import { useAppearance } from "@/hooks/use-appearance";
 import { motion } from "framer-motion";
 import { useEffect, useState, useMemo } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { route } from 'ziggy-js';
 import { toast } from "sonner";
 import {
   Trophy,
@@ -43,22 +43,34 @@ export default function MissionsPage() {
     updateAppearance("light");
   }, [updateAppearance]);
 
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(route('api.missions.index'));
+      if (res.ok) {
+        const data = await res.json();
+        const mapped = data.map((m: any) => ({
+          id: m.id,
+          slug: m.key,
+          title: m.title,
+          description: `Selesaikan ${m.target} kali`,
+          icon: m.key === 'gratitude-journal' ? '✍️' : m.key === 'breathing-exercise' ? '🧘' : '⚡',
+          icon_bg: m.key === 'gratitude-journal' ? 'from-amber-400 to-orange-500' : 'from-blue-400 to-indigo-600',
+          target_total: m.target,
+          xp_reward: m.xp_reward,
+          computed_progress: m.progress,
+          is_completed: m.is_completed
+        }));
+        setDailyMissions(mapped);
+      }
+    } catch (e) {
+      console.error("Failed to load missions", e);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const isSupabaseConfigured = Boolean(
-      (import.meta as any).env.VITE_SUPABASE_URL || (import.meta as any).env.SUPABASE_URL
-    );
-    if (!userId || !isSupabaseConfigured) return;
-    const load = async () => {
-      setLoading(true);
-      const { data } = await supabase
-        .from("user_daily_missions")
-        .select("mission_id,slug,title,description,icon,icon_bg,target_total,xp_reward,order_index,computed_progress,completed_at,user_id")
-        .eq("user_id", userId)
-        .order("order_index", { ascending: true });
-      setDailyMissions(Array.isArray(data) ? data : []);
-      setLoading(false);
-    };
-    load();
+    if (userId) load();
   }, [userId]);
 
   return (
@@ -79,11 +91,10 @@ export default function MissionsPage() {
         <div className="flex items-center gap-3 mb-8">
           <button
             onClick={() => setActiveTab("daily")}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
-              activeTab === "daily"
-                ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg"
-                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
-            }`}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${activeTab === "daily"
+              ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg"
+              : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+              }`}
           >
             <Clock className="w-4 h-4" />
             Misi Harian
@@ -93,14 +104,13 @@ export default function MissionsPage() {
               </Badge>
             )}
           </button>
-          
+
           <button
             onClick={() => setActiveTab("weekly")}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
-              activeTab === "weekly"
-                ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg"
-                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
-            }`}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${activeTab === "weekly"
+              ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg"
+              : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+              }`}
           >
             <Calendar className="w-4 h-4" />
             Misi Mingguan
@@ -143,22 +153,30 @@ export default function MissionsPage() {
                 progress={Number(m.computed_progress) || 0}
                 total={Number(m.target_total)}
                 xp={Number(m.xp_reward)}
-                isCompleted={(Number(m.computed_progress) || 0) >= Number(m.target_total) || !!m.completed_at}
+                isCompleted={Boolean(m.is_completed)}
+                isReady={!Boolean(m.is_completed) && (Number(m.computed_progress) || 0) >= Number(m.target_total)}
                 delay={0.1 + idx * 0.1}
                 onSolve={async () => {
-                  if (!userId) return;
-                  const today = new Date();
-                  const period_key = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
-                  const next = (Number(m.computed_progress) || 0) + 1;
-                  const { data: up } = await supabase.from("user_mission_progress").upsert({
-                    user_id: userId,
-                    mission_id: m.mission_id,
-                    period_key,
-                    progress: next,
-                    updated_at: new Date().toISOString(),
-                    completed_at: next >= Number(m.target_total) ? new Date().toISOString() : null,
-                  }, { onConflict: "user_id,mission_id,period_key" });
-                  if (up) toast.success("Misi diperbarui");
+                  if (!userId || m.is_completed) return;
+                  try {
+                    const token = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null)?.content || '';
+                    const res = await fetch(route('api.missions.update', { id: m.id }), {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': token },
+                      body: JSON.stringify({
+                        progress: m.computed_progress < m.target_total ? m.computed_progress + 1 : m.computed_progress,
+                        is_completed: true
+                      })
+                    });
+
+                    if (res.ok) {
+                      toast.success("Misi selesai! XP telah ditambahkan.");
+                      router.reload({ only: ['auth'] });
+                      load();
+                    }
+                  } catch (e) {
+                    toast.error("Gagal update misi");
+                  }
                 }}
               />
             ))}
@@ -190,7 +208,7 @@ export default function MissionsPage() {
               xp={500}
               delay={0.1}
             />
-            
+
             <MissionCard
               title="Master Class"
               description="Get grade A in 10 different lessons"
@@ -211,11 +229,10 @@ export default function MissionsPage() {
 function NavTab({ icon, label, active = false }: { icon: React.ReactNode; label: string; active?: boolean }) {
   return (
     <button
-      className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-colors ${
-        active
-          ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/30"
-          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-      }`}
+      className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-colors ${active
+        ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/30"
+        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+        }`}
     >
       {icon}
       <span className="text-sm">{label}</span>
@@ -232,6 +249,7 @@ interface MissionCardProps {
   total: number;
   xp: number;
   isCompleted?: boolean;
+  isReady?: boolean;
   delay: number;
   onSolve?: () => Promise<void> | void;
 }
@@ -245,27 +263,21 @@ function MissionCard({
   total,
   xp,
   isCompleted = false,
+  isReady = false,
   delay,
   onSolve,
 }: MissionCardProps) {
   const percentage = useMemo(() => (progress / total) * 100, [progress, total]);
-  const [hidden, setHidden] = useState(false);
-  const completeNow = isCompleted && !hidden;
-  useEffect(() => {
-    if (completeNow) {
-      const t = setTimeout(() => setHidden(true), 2000);
-      return () => clearTimeout(t);
-    }
-  }, [completeNow]);
-  if (hidden) return null;
+
+  console.log(`Rendering Mission: ${title}, Progress: ${progress}/${total}, Completed: ${isCompleted}, Ready: ${isReady}`);
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay }}>
       <Card
-        className={`border-0 shadow-md hover:shadow-xl transition-all cursor-pointer ${
-          isCompleted ? "bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-l-green-500" : "bg-white hover:scale-[1.02]"
-        }`}
-        onClick={() => { if (onSolve && !isCompleted) onSolve(); }}
+        className={`border-0 shadow-md transition-all ${isCompleted
+          ? "bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-l-green-500 opacity-90"
+          : "bg-white hover:shadow-xl hover:scale-[1.01]"
+          }`}
       >
         <CardContent className="p-6">
           <div className="flex items-start gap-5">
@@ -276,39 +288,52 @@ function MissionCard({
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="font-bold text-lg mb-1 text-gray-900">{title}</h3>
-                  <p className="text-sm text-gray-600">{description}</p>
+              <div className="flex items-start justify-between mb-3 leading-tight">
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg mb-0.5 text-gray-900 line-clamp-1">{title}</h3>
+                  <p className="text-sm text-gray-500 line-clamp-1">{description}</p>
                 </div>
-                
-                {isCompleted ? (
-                  <Badge className="bg-green-500 hover:bg-green-500 text-white ml-3 shadow-md">
-                    <CheckCircle2 className="w-3 h-3 mr-1" />
-                    Selesai
-                  </Badge>
-                ) : (
-                  <div className="flex items-center gap-1.5 bg-purple-100 text-purple-700 font-bold px-3 py-1.5 rounded-full ml-3">
-                    <Zap className="w-4 h-4 fill-current" />
-                    <span className="text-sm">+{xp} XP</span>
-                  </div>
-                )}
+
+                <div className="flex flex-col items-end gap-2 shrink-0">
+                  {isCompleted ? (
+                    <Badge className="bg-green-500 hover:bg-green-600 text-white shadow-sm border-0 px-3">
+                      <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
+                      Selesai
+                    </Badge>
+                  ) : isReady ? (
+                    <Button
+                      size="sm"
+                      onClick={(e) => { e.stopPropagation(); if (onSolve) onSolve(); }}
+                      className="bg-orange-500 hover:bg-orange-600 text-white font-bold h-9 px-4 rounded-xl shadow-lg animate-pulse"
+                    >
+                      Klaim XP! 🚀
+                    </Button>
+                  ) : (
+                    <div className="flex items-center gap-1.5 bg-purple-100 text-purple-700 font-bold px-3 py-1.5 rounded-full">
+                      <Zap className="w-4 h-4 fill-current" />
+                      <span className="text-sm">+{xp} XP</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Progress Bar */}
               <div className="mt-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-gray-700">{isCompleted && total === 1 ? "1 / 1" : `${progress} / ${total}`}</span>
-                  <span className="text-sm font-semibold text-purple-600">{Math.round(isCompleted && total === 1 ? 100 : percentage)}%</span>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                    Progress
+                  </span>
+                  <span className="text-sm font-bold text-gray-900">
+                    {progress} / {total}
+                  </span>
                 </div>
-                <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
-                    animate={{ width: `${isCompleted && total === 1 ? 100 : percentage}%` }}
+                    animate={{ width: `${Math.min(percentage, 100)}%` }}
                     transition={{ duration: 1, delay: delay + 0.2 }}
-                    className={`h-full rounded-full ${
-                      isCompleted ? "bg-gradient-to-r from-green-400 to-emerald-500" : "bg-gradient-to-r from-purple-500 to-purple-600"
-                    }`}
+                    className={`h-full rounded-full ${isCompleted ? "bg-gradient-to-r from-green-400 to-emerald-500" : "bg-gradient-to-r from-purple-500 to-indigo-600"
+                      }`}
                   />
                 </div>
               </div>

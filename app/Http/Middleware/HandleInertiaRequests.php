@@ -43,7 +43,17 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user() ? [
+                    'id' => $request->user()->id,
+                    'name' => $request->user()->name,
+                    'email' => $request->user()->email,
+                    'avatar' => $request->user()->avatar_url, // If exists
+                    'total_xp' => (int)($request->user()->profile?->total_xp ?? 0),
+                    'level' => floor(($request->user()->profile?->total_xp ?? 0) / 100) + 1,
+                    'day_streak' => (int)($request->user()->profile?->day_streak ?? 0),
+                    'current_league' => $request->user()->profile?->current_league ?? 'Bronze',
+                    'top3_finishes' => (int)($request->user()->profile?->top3_finishes ?? 0),
+                ] : null,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

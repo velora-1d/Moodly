@@ -7,7 +7,7 @@ type UseParallaxOptions = {
 };
 
 export function useParallax(
-  el: React.RefObject<HTMLElement>,
+  el: React.RefObject<HTMLElement | null>,
   { speed = 0.15, axis = 'y', mobileFactor = 0.6 }: UseParallaxOptions = {}
 ) {
   useEffect(() => {
