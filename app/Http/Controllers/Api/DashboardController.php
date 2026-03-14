@@ -56,6 +56,8 @@ class DashboardController extends Controller
                 'level' => floor($profile->total_xp / 100) + 1,
                 'total_xp' => $profile->total_xp,
                 'streak' => $profile->day_streak,
+                'league' => $profile->current_league ?? 'Bronze',
+                'top3_finishes' => $profile->top3_finishes ?? 0,
                 'badges' => 12, // Still mock for now
             ],
             'moodHistory' => $moods,

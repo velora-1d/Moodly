@@ -23,7 +23,7 @@ export async function endSession(userId: number, levelId: number, payload: any, 
       },
       body: JSON.stringify({
         status: 'completed',
-        // metadata: payload // Optional: if we want to store detailed stats in the future
+        metadata: payload
       })
     });
     return true;

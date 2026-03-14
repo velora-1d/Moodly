@@ -201,7 +201,7 @@ export default function Level2() {
     const stars = accuracy >= 90 ? 3 : accuracy >= 70 ? 2 : 1
 
     // Call our backend API
-    endSession(userId, 2, { score, accuracy, bestStreak, avgReactionTime }, 0);
+    endSession(userId, 2, { score, accuracy, bestStreak, avgReactionTime, stars }, 0);
   }, [gameState, reportedComplete, auth?.user?.id, accuracy, score, bestStreak, avgReactionTime])
 
   return (

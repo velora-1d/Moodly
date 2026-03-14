@@ -41,20 +41,55 @@ class LevelController extends Controller
 
         // If completed for the first time, award XP and unlock next level
         if ($request->input('status') === 'completed' && !$wasAlreadyCompleted) {
-            // Award XP (e.g., 50 XP per level completion)
-            $xpToAdd = 50;
+            $metadata = $request->input('metadata', []);
+            $stars = $metadata['stars'] ?? 0;
+            $bestStreak = $metadata['bestStreak'] ?? 0;
+
+            // Award XP calculation: dynamic based on performance
+            $baseXp = 50;
+            $starBonus = $stars * 10;
+            $streakBonus = $bestStreak * 2;
+            $xpToAdd = $baseXp + $starBonus + $streakBonus;
+
+            // Update xp_earned in the level record
+            $record->update(['xp_earned' => $xpToAdd]);
+
             $profile = $user->profile()->firstOrCreate(
                 ['user_id' => $user->id],
                 ['username' => $user->name . '_' . $user->id]
             );
-            $profile->increment('total_xp', $xpToAdd);
 
-            // Track XP Event
+            // 1. Update Streak and Activity
+            $profile->recordActivity();
+            
+            // 2. Add XP
+            $profile->total_xp += $xpToAdd;
+
+            // 3. Update League Logic (Basic Progression)
+            $xp = $profile->total_xp;
+            $league = 'Bronze';
+            if ($xp > 5000) $league = 'Diamond';
+            elseif ($xp > 3000) $league = 'Platinum';
+            elseif ($xp > 1500) $league = 'Gold';
+            elseif ($xp > 500) $league = 'Silver';
+            
+            $profile->current_league = $league;
+            $profile->save();
+
+            // Track XP Event (Adjusted to match migration schema: source, amount, meta, occurred_at)
             \Illuminate\Support\Facades\DB::table('user_xp_events')->insert([
                 'user_id' => $user->id,
+                'source' => 'level_completed',
                 'amount' => $xpToAdd,
-                'event_type' => 'level_completed',
-                'description' => 'Selesai Level: ' . $levelId,
+                'meta' => json_encode([
+                    'level_id' => $levelId,
+                    'stars' => $stars,
+                    'best_streak' => $bestStreak,
+                    'base_xp' => $baseXp,
+                    'star_bonus' => $starBonus,
+                    'streak_bonus' => $streakBonus
+                ]),
+                'occurred_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

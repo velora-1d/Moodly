@@ -21,7 +21,7 @@ export default function Level3() {
     const stars = payload.score >= 90 ? 3 : payload.score >= 60 ? 2 : 1;
 
     // Call our backend API
-    await endSession(userId, levelId, payload, 0);
+    await endSession(userId, levelId, { ...payload, stars }, 0);
   }
 
   return (

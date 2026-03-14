@@ -170,7 +170,7 @@ export default function Level1() {
     setHasCompleted(true)
     const durationMs = elapsed * 1000
     const stars = bestStreak >= 4 ? 3 : 2
-    endSession(auth.user.id, levelId, { breaths, targetBreaths, bestStreak, paceSec, autoGuide }, durationMs)
+    endSession(auth.user.id, levelId, { breaths, targetBreaths, bestStreak, paceSec, autoGuide, stars }, durationMs)
       ; (async () => {
         // Supabase logic removed
         // Simulate saving progress locally if needed

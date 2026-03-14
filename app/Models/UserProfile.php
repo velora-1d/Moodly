@@ -37,4 +37,25 @@ class UserProfile extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Record user activity and update streak accordingly.
+     */
+    public function recordActivity()
+    {
+        $today = \Carbon\Carbon::today();
+        $lastActive = $this->last_active_at ? \Carbon\Carbon::parse($this->last_active_at)->startOfDay() : null;
+
+        if (!$lastActive) {
+            $this->day_streak = 1;
+        } elseif ($lastActive->copy()->addDay()->equalTo($today)) {
+            $this->day_streak += 1;
+        } elseif ($lastActive->lessThan($today)) {
+            $this->day_streak = 1;
+        }
+        // If already active today, streak stays the same
+
+        $this->last_active_at = now();
+        $this->save();
+    }
 }

@@ -20,9 +20,8 @@ export default function Level6() {
     const payload={g1,g2,g3,af}
     const count=[g1,g2,g3,af].filter(v=>v.trim().length>0).length
     if (auth?.user?.id){
-      await endSession(auth.user.id, levelId, payload, 0)
       const stars = count>=4 ? 3 : count>=3 ? 2 : 1
-      await complete(auth.user.id, levelId, stars, 70)
+      await endSession(auth.user.id, levelId, { ...payload, stars }, 0)
     }
   }
 

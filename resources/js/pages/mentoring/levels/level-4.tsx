@@ -27,7 +27,7 @@ export default function Level4() {
 
     async function finish() {
         if (auth?.user?.id) {
-            await endSession(auth.user.id, levelId, { steps }, 0)
+            await endSession(auth.user.id, levelId, { steps, stars: 3 }, 0)
             setIsCompleted(true)
         }
     }
