@@ -80,8 +80,16 @@ sed -i "s/__PORT__/${PORT}/g" /etc/nginx/http.d/default.conf
 echo "=== Menjalankan migrasi ==="
 php artisan migrate --force 2>&1 || echo "Migration skipped atau gagal"
 
-echo "=== Moodly siap dijalankan di port ${PORT} ==="
+# Jika port tidak ditentukan Railway, gunakan 8080 sebagai default
+if [ -z "${PORT}" ]; then
+  PORT=8080
+fi
 
-# Sesuai saran user: gunakan php artisan serve untuk fiksasi port
-# Ini akan berjalan di foreground dan Railway akan memetakan $PORT ke sini
-exec php artisan serve --host=0.0.0.0 --port="${PORT}"
+echo "=== Konfigurasi Nginx di port ${PORT} ==="
+# Ganti placeholder port di konfigurasi nginx
+sed -i "s/__PORT__/${PORT}/g" /etc/nginx/http.d/default.conf
+
+echo "=== Moodly siap dijalankan via Nginx + PHP-FPM ==="
+
+# Jalankan supervisor (nginx + php-fpm)
+exec /usr/bin/supervisord -c /etc/supervisord.conf
