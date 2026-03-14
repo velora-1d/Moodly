@@ -71,20 +71,8 @@ php artisan config:cache 2>/dev/null || echo "Config cache gagal, lanjut..."
 php artisan route:cache 2>/dev/null || echo "Route cache gagal, lanjut..."
 php artisan view:cache 2>/dev/null || echo "View cache gagal, lanjut..."
 
-# --- PORT CONFIGURATION ---
-# Railway menyuntikkan $PORT secara dinamis, tapi kita kunci ke 8080 sementara untuk stabilitas
-PORT="${PORT:-8080}"
-echo "=== Mengonfigurasi Nginx di port ${PORT} ==="
-# Ganti placeholder port di konfigurasi nginx
-# Pastikan file config ada sebelum di-sed
-if [ -f /etc/nginx/http.d/default.conf ]; then
-  sed -i "s/__PORT__/${PORT}/g" /etc/nginx/http.d/default.conf
-  echo "--- DEBUG: Nginx Config ---"
-  cat /etc/nginx/http.d/default.conf | grep listen
-  echo "--------------------------"
-fi
-
-echo "=== Moodly siap dijalankan via Nginx + PHP-FPM ==="
+# --- STARTING MOODLY ---
+echo "=== Moodly siap dijalankan via Nginx + PHP-FPM (Port 8080) ==="
 
 # Jalankan supervisor (nginx + php-fpm)
 exec /usr/bin/supervisord -c /etc/supervisord.conf
