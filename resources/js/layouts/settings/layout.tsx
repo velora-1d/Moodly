@@ -2,6 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { type PropsWithChildren, useEffect } from 'react';
 import { Target, Trophy, Award, ShoppingCart, User, MoreHorizontal, Star } from 'lucide-react';
 import { mentoring, leaderboard as leaderboardRoute, missions as missionsRoute, shop, profile as profileRoute } from '@/routes';
+import AppLogoIcon from '@/components/app-logo-icon';
 import { useAppearance } from '@/hooks/use-appearance';
 import { type SharedData } from '@/types';
 
@@ -34,9 +35,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16">
                         <div className="flex items-center gap-2">
-                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center">
-                                <Star className="w-6 h-6 text-white fill-white" />
-                            </div>
+                            <AppLogoIcon />
                             <div>
                                 <h1 className="font-bold text-lg">Moodly</h1>
                                 <p className="text-xs text-gray-500">Perjalanan Mental Sehat</p>
