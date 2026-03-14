@@ -242,134 +242,280 @@ export default function Level1() {
     return () => window.removeEventListener('keydown', handler)
   }, [])
 
-  return (
+    return (
     <LevelLayout title="Level 1 · Latihan Pernapasan">
-      <Card className="relative overflow-hidden">
-        <motion.div aria-hidden className="absolute inset-0 -z-10" variants={bgVariants} animate={phase} transition={{ duration: 0.6 }} />
-        <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <CardTitle className="text-xl">Level 1 · Latihan Pernapasan</CardTitle>
-            <CardDescription>
-              Tekan Inhale saat menarik napas, Exhale saat menghembuskan. Ritme pelan dan stabil.
+      <div className="relative min-h-[600px] flex items-center justify-center p-4">
+        {/* Animated Background Layers */}
+        <motion.div 
+          aria-hidden 
+          className="absolute inset-0 -z-20 overflow-hidden rounded-3xl" 
+          animate={{
+            background: phase === 'inhale' 
+              ? 'radial-gradient(circle at 50% 50%, rgba(147, 197, 253, 0.4) 0%, rgba(147, 197, 253, 0.1) 100%)' 
+              : phase === 'exhale'
+              ? 'radial-gradient(circle at 50% 50%, rgba(167, 243, 208, 0.4) 0%, rgba(167, 243, 208, 0.1) 100%)'
+              : 'radial-gradient(circle at 50% 50%, rgba(199, 210, 254, 0.2) 0%, rgba(199, 210, 254, 0.05) 100%)'
+          }}
+          transition={{ duration: 1.5 }}
+        />
+
+        <Card className="w-full max-w-2xl bg-white/40 backdrop-blur-xl border-white/40 shadow-2xl relative z-10 overflow-hidden rounded-3xl">
+          <CardHeader className="text-center pb-2">
+            <div className="flex justify-center gap-2 mb-4">
+              <Badge variant="outline" className="bg-white/50 backdrop-blur-sm border-white/60 text-purple-700 px-3 py-1 text-xs">⏱ {formatTime(elapsed)}</Badge>
+              <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 px-3 py-1 text-xs">🔥 Streak x{streak}</Badge>
+            </div>
+            <CardTitle className="text-2xl font-black bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-transparent">
+              {headline}
+            </CardTitle>
+            <CardDescription className="text-gray-600 font-medium max-w-sm mx-auto">
+              {message}
             </CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary">{headline}</Badge>
-            <Badge>⏱ {formatTime(elapsed)}</Badge>
-            <Badge variant={streak >= 3 ? 'default' : 'secondary'}>🔥 Combo x{streak}</Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-6">
-            <div className="relative mx-auto grid size-[220px] place-items-center sm:size-[260px]">
-              <motion.div className="relative grid size-[160px] place-items-center rounded-full border-2" style={{ borderColor: guideColor, boxShadow: guideGlow }} animate={{ scale: guideScale }} transition={{ type: 'spring', stiffness: 120, damping: 12 }}>
-                <span className="text-sm text-muted-foreground">{message}</span>
-              </motion.div>
-              <motion.div className="absolute bottom-4 left-1/2 -translate-x-1/2" animate={{ y: boatY, rotate: phase === 'inhale' ? -2 : phase === 'exhale' ? 2 : 0 }} transition={{ type: 'spring', stiffness: 100, damping: 12 }}>
-                <div className="relative">
-                  {pet === 'boat' && (
-                    <>
-                      <div className="absolute -bottom-1 left-1/2 h-2 w-16 -translate-x-1/2 rounded-full bg-gradient-to-r from-sky-200/70 via-sky-300/70 to-sky-200/70 blur-[1px]" />
-                      <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-gradient-to-b from-rose-200 to-pink-200 shadow-md"><span className="text-lg">⛵</span></div>
-                    </>
-                  )}
-                  {pet === 'balloon' && (
-                    <>
-                      <div className="absolute -bottom-3 left-1/2 h-4 w-[2px] -translate-x-1/2 bg-rose-300/70" />
-                      <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-gradient-to-b from-rose-300 to-pink-200 shadow-md"><span className="text-lg">🎈</span></div>
-                    </>
-                  )}
-                  {pet === 'cat' && (<div className="mx-auto flex size-12 items-center justify-center rounded-full bg-gradient-to-b from-amber-200 to-yellow-200 shadow-md"><span className="text-lg">🐱</span></div>)}
-                </div>
-              </motion.div>
+          </CardHeader>
+
+          <CardContent className="space-y-12 pb-10">
+            {/* Main Interactive Circle */}
+            <div className="relative flex justify-center py-10">
+              {/* Outer Glow Ring */}
               <AnimatePresence>
-                <motion.span key={exhaleFx} className="absolute bottom-8 left-1/2 text-xl" initial={{ opacity: 0, x: -8, y: 0 }} animate={{ opacity: 0.8, x: 40, y: -30 }} exit={{ opacity: 0 }} transition={{ duration: 0.8, ease: 'easeOut' }}>
-                  {phase === 'exhale' ? '💨' : null}
-                </motion.span>
+                {phase === 'inhale' && (
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1.4, opacity: 0.3 }}
+                    exit={{ scale: 1.6, opacity: 0 }}
+                    transition={{ duration: paceSec, ease: "linear" }}
+                    className="absolute size-[180px] sm:size-[220px] rounded-full bg-blue-400 blur-3xl"
+                  />
+                )}
+                {phase === 'exhale' && (
+                  <motion.div
+                    initial={{ scale: 1.2, opacity: 0.3 }}
+                    animate={{ scale: 0.8, opacity: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: paceSec, ease: "linear" }}
+                    className="absolute size-[180px] sm:size-[220px] rounded-full bg-emerald-400 blur-3xl"
+                  />
+                )}
               </AnimatePresence>
-              <AnimatePresence mode="popLayout">
-                <ParticleBurst keySeed={burst} />
-              </AnimatePresence>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm text-muted-foreground"><span>Napas selesai / Breaths completed</span><span>{breaths} / {targetBreaths}</span></div>
-              <Progress value={progress} />
-              <div className="flex items-center justify-between text-xs text-muted-foreground"><span>Best Combo: {bestStreak}</span><span className="italic">Tip: Tarik 4 hitungan, hembuskan 6.</span></div>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <Button onClick={onInhale} aria-label="Inhale" className="min-w-24">Inhale</Button>
-              <Button onClick={onExhale} aria-label="Exhale" variant="secondary" className="min-w-24">Exhale</Button>
-              <Button onClick={onReset} aria-label="Reset" variant="outline">Reset</Button>
-              <div className="ml-auto flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Buddy:</span>
-                <Button size="sm" variant={pet === 'boat' ? 'default' : 'outline'} onClick={() => setPet('boat')}>⛵</Button>
-                <Button size="sm" variant={pet === 'balloon' ? 'default' : 'outline'} onClick={() => setPet('balloon')}>🎈</Button>
-                <Button size="sm" variant={pet === 'cat' ? 'default' : 'outline'} onClick={() => setPet('cat')}>🐱</Button>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Pace</span>
-                <input type="range" min={3} max={6} value={paceSec} onChange={(e) => setPaceSec(Number(e.target.value))} className="h-2 w-40 rounded-lg accent-purple-600" />
-                <span className="text-xs">{paceSec}s</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <input type="checkbox" checked={autoGuide} onChange={(e) => setAutoGuide(e.target.checked)} />
-                <span className="text-xs">Auto-Guide</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <input type="checkbox" checked={audioEnabled} onChange={(e) => setAudioEnabled(e.target.checked)} />
-                <span className="text-xs">Audio</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Target</span>
-                <input type="number" min={4} max={16} value={targetBreaths} onChange={(e) => setTargetBreaths(Math.max(4, Math.min(16, Number(e.target.value))))} className="h-8 w-16 rounded-md border border-gray-300 px-2" />
-              </div>
-            </div>
-            {completed && (
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-lg border bg-secondary/50 p-3 text-center text-sm">
-                Sesi selesai! Nafasmu lebih tenang.
+
+              {/* Breathing Guide Circle */}
+              <motion.div 
+                className="relative size-[180px] sm:size-[220px] grid place-items-center rounded-full bg-white/60 backdrop-blur-md border border-white/80 shadow-inner overflow-hidden"
+                animate={{ 
+                  scale: phase === 'inhale' ? 1.3 : phase === 'exhale' ? 0.9 : 1,
+                  boxShadow: streak >= 3 ? "0 0 40px rgba(168, 85, 247, 0.4)" : "0 10px 25px -5px rgba(0, 0, 0, 0.1)"
+                }}
+                transition={{ duration: paceSec, ease: "easeInOut" }}
+              >
+                {/* Visual Pet Companion */}
+                <motion.div 
+                  className="z-20 text-5xl"
+                  animate={{ 
+                    y: phase === 'inhale' ? -20 : phase === 'exhale' ? 20 : 0,
+                    rotate: phase === 'inhale' ? -5 : phase === 'exhale' ? 5 : 0,
+                    scale: phase === 'inhale' ? 1.1 : 1
+                  }}
+                  transition={{ duration: paceSec, ease: "easeInOut" }}
+                >
+                  {pet === 'boat' ? '⛵' : pet === 'balloon' ? '🎈' : '🐱'}
+                </motion.div>
+
+                {/* Progress Wave Overlay */}
+                <motion.div 
+                  className="absolute bottom-0 left-0 right-0 bg-blue-500/10 pointer-events-none"
+                  animate={{ height: `${progress}%` }}
+                  transition={{ duration: 0.5 }}
+                />
               </motion.div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+
+              <AnimatePresence>
+                {phase === 'exhale' && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 0, scale: 0.5 }}
+                    animate={{ opacity: [0, 1, 0], y: 100, scale: 2, filter: 'blur(10px)' }}
+                    transition={{ duration: 1.5 }}
+                    className="absolute pointer-events-none text-4xl"
+                  >
+                    💨
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <ParticleBurst keySeed={burst} />
+            </div>
+
+            {/* Controls and Feedback */}
+            <div className="space-y-8 px-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-gray-400">
+                  <span>Proses Sesi</span>
+                  <span>{breaths} / {targetBreaths}</span>
+                </div>
+                <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden border border-gray-200">
+                  <motion.div 
+                    className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ duration: 1 }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={onInhale} 
+                    className="flex-1 sm:flex-none h-14 w-full sm:w-32 bg-white hover:bg-white/90 text-gray-900 border-b-4 border-gray-200 hover:border-gray-300 transition-all rounded-2xl font-bold shadow-lg shadow-gray-200/50"
+                  >
+                    Tarik Napas
+                  </Button>
+                  <Button 
+                    onClick={onExhale} 
+                    variant="secondary"
+                    className="flex-1 sm:flex-none h-14 w-full sm:w-32 bg-gray-900 hover:bg-gray-800 text-white border-b-4 border-black transition-all rounded-2xl font-bold shadow-lg shadow-gray-900/20"
+                  >
+                    Hembuskan
+                  </Button>
+                </div>
+                
+                <div className="flex items-center justify-center gap-2 bg-white/60 p-2 rounded-2xl backdrop-blur-sm border border-white/80 shadow-sm">
+                  <span className="text-[10px] font-black uppercase text-gray-400 px-2">Teman:</span>
+                  <div className="flex gap-1">
+                    {['boat', 'balloon', 'cat'].map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => setPet(p as Pet)}
+                        className={`size-10 rounded-xl transition-all flex items-center justify-center text-xl ${pet === p ? 'bg-purple-100 border-2 border-purple-400 scale-110' : 'bg-transparent hover:bg-white border-2 border-transparent'}`}
+                      >
+                        {p === 'boat' ? '⛵' : p === 'balloon' ? '🎈' : '🐱'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Advanced Settings Glass Sheet */}
+              <div className="bg-gray-900/5 p-6 rounded-3xl border border-white/40 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-tighter">Kecepatan</label>
+                      <span className="text-xs font-bold text-purple-600 bg-purple-50 px-2 rounded-md">{paceSec} Detik</span>
+                    </div>
+                    <input 
+                      type="range" 
+                      min={3} 
+                      max={6} 
+                      value={paceSec} 
+                      onChange={(e) => setPaceSec(Number(e.target.value))} 
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600" 
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap gap-4 items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="checkbox" 
+                          id="auto"
+                          checked={autoGuide} 
+                          onChange={(e) => setAutoGuide(e.target.checked)} 
+                          className="size-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                        />
+                        <label htmlFor="auto" className="text-xs font-bold text-gray-600">Otomatis</label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="checkbox" 
+                          id="audio"
+                          checked={audioEnabled} 
+                          onChange={(e) => setAudioEnabled(e.target.checked)} 
+                          className="size-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                        />
+                        <label htmlFor="audio" className="text-xs font-bold text-gray-600">Suara</label>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs font-bold text-gray-500">Target</label>
+                      <input 
+                        type="number" 
+                        min={4} 
+                        max={16} 
+                        value={targetBreaths} 
+                        onChange={(e) => setTargetBreaths(Math.max(4, Math.min(16, Number(e.target.value))))} 
+                        className="h-8 w-12 rounded-lg bg-white border border-gray-200 text-center text-xs font-bold focus:ring-2 focus:ring-purple-500" 
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+          
+          <Button 
+            onClick={onReset} 
+            variant="ghost" 
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 hover:bg-white/40"
+          >
+            Reset
+          </Button>
+        </Card>
+      </div>
+
       <Dialog open={showSummary} onOpenChange={setShowSummary}>
-        <DialogContent className="rounded-2xl border-2 border-purple-200">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent font-black">Sesi Selesai</span>
-              <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">+50 XP</Badge>
+        <DialogContent className="rounded-[40px] border-white/60 bg-white/90 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] p-8 max-w-sm sm:max-w-md mx-auto">
+          <DialogHeader className="text-center">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", duration: 0.8 }}
+              className="mx-auto size-24 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-[30px] shadow-xl shadow-purple-200 flex items-center justify-center mb-6"
+            >
+              <Star className="size-12 text-white fill-white" />
+            </motion.div>
+            <DialogTitle className="text-3xl font-black text-gray-900 tracking-tight">
+              Sesi Hebat!
             </DialogTitle>
+            <p className="text-gray-500 font-medium">Kamu semakin tenang hari ini.</p>
           </DialogHeader>
+          
           {summary && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-center gap-1">
-                {[0, 1, 2].map((i) => (
-                  <Star key={i} className={`w-7 h-7 ${i < summary.stars ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-300'}`} />
-                ))}
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl bg-purple-50 p-3 border border-purple-200">
-                  <div className="text-xs text-purple-700">Breaths</div>
-                  <div className="text-lg font-bold text-purple-900">{summary.breaths}/{summary.targetBreaths}</div>
+            <div className="mt-8 space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50/80 rounded-3xl p-5 border border-white text-center">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Pernapasan</p>
+                  <p className="text-2xl font-black text-gray-900">{summary.breaths}/{summary.targetBreaths}</p>
                 </div>
-                <div className="rounded-xl bg-pink-50 p-3 border border-pink-200">
-                  <div className="text-xs text-pink-700">Best Streak</div>
-                  <div className="text-lg font-bold text-pink-900">{summary.bestStreak}</div>
-                </div>
-                <div className="rounded-xl bg-indigo-50 p-3 border border-indigo-200">
-                  <div className="text-xs text-indigo-700">Durasi</div>
-                  <div className="text-lg font-bold text-indigo-900">{formatTime(summary.duration)}</div>
-                </div>
-                <div className="rounded-xl bg-teal-50 p-3 border border-teal-200">
-                  <div className="text-xs text-teal-700">Bintang</div>
-                  <div className="text-lg font-bold text-teal-900">{summary.stars} / 3</div>
+                <div className="bg-gray-50/80 rounded-3xl p-5 border border-white text-center">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Durasi</p>
+                  <p className="text-2xl font-black text-gray-900">{formatTime(summary.duration)}</p>
                 </div>
               </div>
+              
+              <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-3xl p-6 text-white flex items-center gap-6 shadow-xl shadow-indigo-100">
+                <div className="flex flex-col flex-1">
+                  <p className="text-indigo-200 text-xs font-bold uppercase tracking-widest mb-1">Best Streak</p>
+                  <p className="text-4xl font-black">{summary.bestStreak}</p>
+                </div>
+                <div className="bg-white/20 backdrop-blur-md rounded-2xl px-4 py-2 text-sm font-bold">
+                  +50 XP
+                </div>
+              </div>
+
               <div className="flex gap-3">
-                <Button className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white" onClick={onReset}>Ulangi</Button>
-                <a href="/mentoring" className="flex-1 inline-flex items-center justify-center rounded-md border px-4 py-2">Tutup</a>
+                <Button 
+                  className="flex-1 h-14 bg-gray-900 hover:bg-gray-800 text-white rounded-2xl font-black shadow-lg shadow-gray-200"
+                  onClick={onReset}
+                >
+                  Ulangi
+                </Button>
+                <a 
+                  href="/mentoring" 
+                  className="flex-1 h-14 bg-white hover:bg-gray-50 text-gray-600 border border-gray-100 rounded-2xl font-bold flex items-center justify-center shadow-sm"
+                >
+                  Selesai
+                </a>
               </div>
             </div>
           )}

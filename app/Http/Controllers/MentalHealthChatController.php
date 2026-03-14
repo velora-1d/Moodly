@@ -97,35 +97,51 @@ class MentalHealthChatController extends Controller
             
             Ingat, kamu sedang mengobrol santai dengan teman yang butuh dukungan, bukan memberikan konsultasi formal.";
 
-            // Menyiapkan pesan untuk API Gemini sesuai format yang benar
+            // Menyiapkan pesan untuk API Gemini/OpenAI sesuai format yang benar
             $contents = [];
             
-            // Menambahkan system prompt sebagai bagian dari pesan pertama
-            $contents[] = [
-                'role' => 'user',
-                'parts' => [
-                    ['text' => $systemPrompt]
-                ]
-            ];
-            
-            // Menambahkan riwayat percakapan dengan format yang benar
-            foreach ($history as $msg) {
-                $role = $msg['role'] === 'user' ? 'user' : 'model';
+            // Konfigurasi untuk AI API
+            $aiApiKey = env('AI_API_KEY');
+            $aiBaseUrl = env('AI_BASE_URL');
+            $aiModel = env('AI_MODEL');
+
+            if ($aiApiKey && $aiBaseUrl) {
+                // Format OpenAI/Sumopod
                 $contents[] = [
-                    'role' => $role,
-                    'parts' => [
-                        ['text' => $msg['content']]
-                    ]
+                    'role' => 'system',
+                    'content' => $systemPrompt
+                ];
+                
+                foreach ($history as $msg) {
+                    $contents[] = [
+                        'role' => $msg['role'] === 'user' ? 'user' : 'assistant',
+                        'content' => $msg['content']
+                    ];
+                }
+                
+                $contents[] = [
+                    'role' => 'user',
+                    'content' => $message
+                ];
+            } else {
+                // Format Gemini
+                $contents[] = [
+                    'role' => 'user',
+                    'parts' => [['text' => $systemPrompt]]
+                ];
+                
+                foreach ($history as $msg) {
+                    $contents[] = [
+                        'role' => $msg['role'] === 'user' ? 'user' : 'model',
+                        'parts' => [['text' => $msg['content']]]
+                    ];
+                }
+                
+                $contents[] = [
+                    'role' => 'user',
+                    'parts' => [['text' => $message]]
                 ];
             }
-            
-            // Menambahkan pesan pengguna terbaru
-            $contents[] = [
-                'role' => 'user',
-                'parts' => [
-                    ['text' => $message]
-                ]
-            ];
 
             // 130: Konfigurasi untuk AI API
             $aiApiKey = env('AI_API_KEY');
@@ -172,7 +188,14 @@ class MentalHealthChatController extends Controller
 
             if ($response->successful()) {
                 $responseData = $response->json();
-                $aiResponse = $responseData['candidates'][0]['content']['parts'][0]['text'] ?? 'Maaf, saya tidak dapat memproses respons saat ini.';
+                
+                if ($aiApiKey && $aiBaseUrl) {
+                    // Parsing format OpenAI
+                    $aiResponse = $responseData['choices'][0]['message']['content'] ?? 'Maaf, saya tidak dapat memproses respons saat ini.';
+                } else {
+                    // Parsing format Gemini
+                    $aiResponse = $responseData['candidates'][0]['content']['parts'][0]['text'] ?? 'Maaf, saya tidak dapat memproses respons saat ini.';
+                }
                 
                 return response()->json([
                     'response' => $aiResponse
