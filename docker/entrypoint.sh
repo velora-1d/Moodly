@@ -71,23 +71,15 @@ php artisan config:cache 2>/dev/null || echo "Config cache gagal, lanjut..."
 php artisan route:cache 2>/dev/null || echo "Route cache gagal, lanjut..."
 php artisan view:cache 2>/dev/null || echo "View cache gagal, lanjut..."
 
-# --- DYNAMIC PORT CONFIGURATION ---
-# Railway menyuntikkan $PORT secara dinamis, pastikan Nginx menggunakan $PORT
+# --- PORT CONFIGURATION ---
+# Railway menyuntikkan $PORT secara dinamis, tapi kita kunci ke 8080 sementara untuk stabilitas
 PORT="${PORT:-8080}"
-sed -i "s/__PORT__/${PORT}/g" /etc/nginx/http.d/default.conf
-
-# Jalankan migrasi database
-echo "=== Menjalankan migrasi ==="
-php artisan migrate --force 2>&1 || echo "Migration skipped atau gagal"
-
-# Jika port tidak ditentukan Railway, gunakan 8080 sebagai default
-if [ -z "${PORT}" ]; then
-  PORT=8080
-fi
-
-echo "=== Konfigurasi Nginx di port ${PORT} ==="
+echo "=== Mengonfigurasi Nginx di port ${PORT} ==="
 # Ganti placeholder port di konfigurasi nginx
-sed -i "s/__PORT__/${PORT}/g" /etc/nginx/http.d/default.conf
+# Pastikan file config ada sebelum di-sed
+if [ -f /etc/nginx/http.d/default.conf ]; then
+  sed -i "s/__PORT__/${PORT}/g" /etc/nginx/http.d/default.conf
+fi
 
 echo "=== Moodly siap dijalankan via Nginx + PHP-FPM ==="
 
