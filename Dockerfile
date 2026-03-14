@@ -64,7 +64,12 @@ RUN mkdir -p storage/logs storage/framework/sessions storage/framework/views sto
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Salin konfigurasi nginx
+# Salin konfigurasi PHP
+COPY docker/php.ini /usr/local/etc/php/conf.d/99-custom.ini
+COPY docker/php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
+
+# Salin konfigurasi nginx — hapus default dulu
+RUN rm -f /etc/nginx/http.d/default.conf
 COPY docker/nginx.conf /etc/nginx/http.d/default.conf
 
 # Salin konfigurasi supervisor
