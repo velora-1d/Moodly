@@ -79,6 +79,9 @@ echo "=== Mengonfigurasi Nginx di port ${PORT} ==="
 # Pastikan file config ada sebelum di-sed
 if [ -f /etc/nginx/http.d/default.conf ]; then
   sed -i "s/__PORT__/${PORT}/g" /etc/nginx/http.d/default.conf
+  echo "--- DEBUG: Nginx Config ---"
+  cat /etc/nginx/http.d/default.conf | grep listen
+  echo "--------------------------"
 fi
 
 echo "=== Moodly siap dijalankan via Nginx + PHP-FPM ==="
