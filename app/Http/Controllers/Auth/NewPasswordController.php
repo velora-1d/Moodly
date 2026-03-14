@@ -13,7 +13,6 @@ use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Http\Controllers\Auth\SupabaseAuthService;
 
 class NewPasswordController extends Controller
 {
@@ -37,19 +36,24 @@ class NewPasswordController extends Controller
     {
         $request->validate([
             'token' => 'required',
-            'email' => 'nullable|email',
+            'email' => 'required|email',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $service = new SupabaseAuthService();
-        $updated = $service->updatePassword($request->token, $request->password);
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => \Illuminate\Support\Facades\Hash::make($password),
+                    'remember_token' => Str::random(60),
+                ])->save();
 
-        if ($updated) {
-            return to_route('login')->with('status', __('passwords.reset'));
-        }
+                event(new PasswordReset($user));
+            }
+        );
 
-        throw ValidationException::withMessages([
-            'email' => [__('passwords.token')],
-        ]);
+        return $status == Password::PASSWORD_RESET
+                    ? redirect()->route('login')->with('status', __($status))
+                    : back()->withErrors(['email' => [__($status)]]);
     }
 }

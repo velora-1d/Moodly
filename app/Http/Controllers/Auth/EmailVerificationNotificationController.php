@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Auth\SupabaseAuthService;
 
 class EmailVerificationNotificationController extends Controller
 {
@@ -14,14 +13,12 @@ class EmailVerificationNotificationController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $service = new SupabaseAuthService();
-
-        if (($request->user() && $request->user()->hasVerifiedEmail()) || $service->isVerifiedFromSession()) {
+        if ($request->user()->hasVerifiedEmail()) {
             return redirect()->intended(route('dashboard', absolute: false));
         }
 
-        $sent = $service->resendEmailVerification($request->user()->email);
+        $request->user()->sendEmailVerificationNotification();
 
-        return back()->with('status', $sent ? 'verification-link-sent' : 'verification-link-failed');
+        return back()->with('status', 'verification-link-sent');
     }
 }

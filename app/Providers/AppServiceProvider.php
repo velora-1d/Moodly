@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
-use App\Http\Controllers\Auth\SupabaseAuthService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -37,28 +36,10 @@ class AppServiceProvider extends ServiceProvider
                     ];
                 }
 
-                $name = $user->name;
-
-                // Prefer Supabase user metadata name when available
-                $accessToken = request()->session()->get('supabase.access_token');
-                if ($accessToken) {
-                    $service = new SupabaseAuthService();
-                    $supabaseUser = $service->getUser($accessToken);
-
-                    if (is_array($supabaseUser)) {
-                        $metaName = $supabaseUser['user_metadata']['name']
-                            ?? ($supabaseUser['user_metadata']['full_name'] ?? null);
-
-                        if (! empty($metaName)) {
-                            $name = $metaName;
-                        }
-                    }
-                }
-
                 return [
                     'user' => [
                         'id'    => $user->id,
-                        'name'  => $name,
+                        'name'  => $user->name,
                         'email' => $user->email,
                     ],
                 ];

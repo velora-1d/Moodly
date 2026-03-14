@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\RedirectResponse;
-use App\Http\Controllers\Auth\SupabaseAuthService;
 
 class VerifyEmailController extends Controller
 {
@@ -14,16 +13,14 @@ class VerifyEmailController extends Controller
      */
     public function __invoke(EmailVerificationRequest $request): RedirectResponse
     {
-        $service = new SupabaseAuthService();
-
-        if (($request->user() && $request->user()->hasVerifiedEmail()) || $service->isVerifiedFromSession()) {
-            if ($request->user() && !$request->user()->hasVerifiedEmail()) {
-                $request->fulfill();
-            }
-
+        if ($request->user()->hasVerifiedEmail()) {
             return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
         }
 
-        return redirect()->route('verification.notice')->with('status', 'verification-pending');
+        if ($request->user()->markEmailAsVerified()) {
+            event(new \Illuminate\Auth\Events\Verified($request->user()));
+        }
+
+        return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
     }
 }
