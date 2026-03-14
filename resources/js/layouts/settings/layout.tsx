@@ -38,7 +38,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                                 <Star className="w-6 h-6 text-white fill-white" />
                             </div>
                             <div>
-                                <h1 className="font-bold text-lg">MindWay</h1>
+                                <h1 className="font-bold text-lg">Moodly</h1>
                                 <p className="text-xs text-gray-500">Perjalanan Mental Sehat</p>
                             </div>
                         </div>

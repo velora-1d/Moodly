@@ -13,7 +13,7 @@ const ProductsAbc = () => {
             </div>
 
             <h2 className="font-extrabold text-[#58cc02] text-[2rem] lg:text-[2.5rem] leading-[1.2] tracking-[-0.5px] mb-6">
-              MindWay sleep
+              Moodly sleep
             </h2>
             
             <p className="text-lg text-[#777777] leading-[1.6] mb-8 max-w-lg mx-auto lg:mx-0">

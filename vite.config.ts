@@ -47,7 +47,7 @@ export default defineConfig(({ command }) => ({
             '@': path.resolve(__dirname, 'resources/js'),
             'next/image': path.resolve(__dirname, 'resources/js/lib/next-image-shim.tsx'),
             'next/link': path.resolve(__dirname, 'resources/js/lib/next-link-shim.tsx'),
-            'next/navigation': path.resolve(__dirname, 'resources/js/lib/next-navigation-shim.ts'),
+            'next/navigation': path.resolve(__dirname, 'resources/js/lib/next-navigation-shim.tsx'),
             'next/script': path.resolve(__dirname, 'resources/js/lib/next-script-shim.tsx'),
         },
     },

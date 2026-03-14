@@ -45,7 +45,7 @@ export default function Register() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="email" className="text-slate-600 font-medium pl-1">Email</Label>
-                                        <Input id="email" type="email" required autoComplete="email" name="email" placeholder="hello@mindway.com" className="bg-white/95 dark:bg-white/90 border-slate-200 focus:border-purple-300 focus:ring-purple-100 transition-all h-12" />
+                                        <Input id="email" type="email" required autoComplete="email" name="email" placeholder="hello@moodly.com" className="bg-white/95 dark:bg-white/90 border-slate-200 focus:border-purple-300 focus:ring-purple-100 transition-all h-12" />
                                         <InputError message={errors.email} />
                                     </div>
                                     <div className="space-y-2">

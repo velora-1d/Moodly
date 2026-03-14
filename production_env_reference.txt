@@ -1,9 +1,9 @@
-APP_NAME="MindWay"
+APP_NAME="Moodly"
 APP_ENV=production
 APP_KEY=base64:3fH4ad2uCWiVljOPVPbKTgbRkhWZOCwamZQAiLkNraU=
 APP_DEBUG=false
 APP_TIMEZONE=Asia/Jakarta
-APP_URL=https://mindway.my.id
+APP_URL=https://moodly.my.id
 
 APP_LOCALE=id
 APP_FALLBACK_LOCALE=en
@@ -15,8 +15,8 @@ PHP_TIL_DATA_DIR=storage/app/data
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=mindway
-DB_USERNAME=mindway_user
+DB_DATABASE=moodly
+DB_USERNAME=moodly_user
 DB_PASSWORD=password_rahasia
 
 SESSION_DRIVER=database

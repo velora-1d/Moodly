@@ -510,7 +510,7 @@ export default function ShopPage() {
       <footer className="mt-20 bg-white border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <p className="text-center text-gray-600 text-sm">
-            © 2024 MindWay Mental Health Shop. Semua hak dilindungi.
+            © 2024 Moodly Mental Health Shop. Semua hak dilindungi.
           </p>
         </div>
       </footer>

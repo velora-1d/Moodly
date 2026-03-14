@@ -50,7 +50,7 @@ const LearningAnywhere = () => {
                 <div className="bg-white rounded-[2.3rem] p-6">
                   <div className="text-center space-y-4">
                     <div className="text-5xl">🧘‍♀️</div>
-                    <div className="font-bold text-gray-800 text-lg">MindWay App</div>
+                    <div className="font-bold text-gray-800 text-lg">Moodly App</div>
                     <div className="space-y-2">
                       {['Daily Meditation', 'Mood Tracker', 'Sleep Stories'].map((feature, idx) => (
                         <div key={idx} className="bg-gradient-to-r from-purple-50 to-cyan-50 p-3 rounded-xl text-sm font-semibold text-gray-700">

@@ -15,11 +15,11 @@ const Footer = () => {
   ];
 
   const productLinks = [
-    { name: 'MindWay App', href: '#' },
-    { name: 'MindWay Therapy', href: '#' },
-    { name: 'MindWay Community', href: '#' },
-    { name: 'MindWay Journal', href: '#' },
-    { name: 'MindWay Pro', href: '#' },
+    { name: 'Moodly App', href: '#' },
+    { name: 'Moodly Therapy', href: '#' },
+    { name: 'Moodly Community', href: '#' },
+    { name: 'Moodly Journal', href: '#' },
+    { name: 'Moodly Pro', href: '#' },
   ];
 
   const resourceLinks = [
@@ -51,8 +51,8 @@ const Footer = () => {
         {/* Top section with logo and tagline */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <img src="/images/mindway-logo.png" alt="MindWay Logo" className="w-12 h-12 object-contain bg-white rounded-xl p-1" />
-            <h3 className="text-3xl font-extrabold">MindWay</h3>
+            <img src="/images/moodly-logo.png" alt="Moodly Logo" className="w-12 h-12 object-contain bg-white rounded-xl p-1" />
+            <h3 className="text-3xl font-extrabold">Moodly</h3>
           </div>
           <p className="text-lg opacity-90">
             Platform kesehatan mental #1 di Indonesia 🧠✨
@@ -152,7 +152,7 @@ const Footer = () => {
         {/* Bottom section */}
         <div className="border-t border-white/20 pt-8 text-center">
           <p className="text-sm text-white/80 mb-4">
-            © 2025 MindWay. Semua hak dilindungi undang-undang.
+            © 2025 Moodly. Semua hak dilindungi undang-undang.
           </p>
           <p className="text-xs text-white/60">
             💚 Dibuat dengan cinta untuk kesehatan mental yang lebih baik

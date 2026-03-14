@@ -11,8 +11,8 @@ const NavigationHeader = () => {
         <nav className="flex items-center justify-between">
           <Link href="/" aria-label="Homepage" className="flex items-center gap-3 group">
             <img
-              src="/images/mindway-logo.png"
-              alt="MindWay"
+              src="/images/moodly-logo.png"
+              alt="Moodly"
               width={160}
               height={45}
               className="h-10 w-auto object-contain transition-transform group-hover:scale-105"

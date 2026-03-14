@@ -24,7 +24,7 @@ const FeaturesEffective = () => {
 
             <div className="space-y-4 text-gray-700 text-lg">
               <p>
-                Merawat kesehatan mental dengan <strong className="text-purple-600">MindWay</strong> itu seru banget, dan penelitian menunjukkan{' '}
+                Merawat kesehatan mental dengan <strong className="text-purple-600">Moodly</strong> itu seru banget, dan penelitian menunjukkan{' '}
                 <a href="#" className="text-cyan-600 hover:text-cyan-700 font-semibold underline">
                   ini benar-benar berhasil
                 </a>

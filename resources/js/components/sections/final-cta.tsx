@@ -26,7 +26,7 @@ const FinalCta = () => {
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight">
               Mulai Perjalanan{' '}
               <span className="text-gradient-adventure">Kesehatan Mental</span>{' '}
-              Bersama MindWay
+              Bersama Moodly
             </h2>
             <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto">
               Raih ketenangan pikiran, tingkatkan well-being, dan jadilah versi terbaik dirimu. Perjalanan menuju mental wellness dimulai hari ini! 🧠✨

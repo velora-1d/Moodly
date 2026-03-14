@@ -25,7 +25,7 @@ const HeroSection = () => {
                     <div className="text-center lg:text-left order-2 lg:order-1">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-sm font-bold tracking-wide mb-6">
                             <Star className="h-4 w-4" fill="currentColor" />
-                            <span>Mulai Perjalanan Kesehatan Mental Bersama MindWay</span>
+                            <span>Mulai Perjalanan Kesehatan Mental Bersama Moodly</span>
                         </div>
 
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 tracking-tight leading-tight mb-6">
@@ -33,7 +33,7 @@ const HeroSection = () => {
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
                                 Mentalmu
                             </span> <br className="hidden lg:block" />
-                            dengan MindWay
+                            dengan Moodly
                         </h1>
 
                         <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
@@ -82,8 +82,8 @@ const HeroSection = () => {
                             {/* 3D Spline Viewer Container - z-10 (Behind Badges) */}
                             <div className="relative z-10 w-full h-full rounded-[2rem] border-4 border-white/40 shadow-2xl bg-white/20 backdrop-blur-md overflow-hidden transform hover:rotate-1 transition-transform duration-500 flex items-center justify-center">
                                 <img
-                                    src="/images/mindway-mascot-v3.jpg"
-                                    alt="MindWay Mascot"
+                                    src="/images/moodly-mascot-v3.jpg"
+                                    alt="Moodly Mascot"
                                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                                 />
                             </div>

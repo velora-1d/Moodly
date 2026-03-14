@@ -42,9 +42,9 @@ export default function DashboardTopNav({ items, fullWidth }: { items?: Item[]; 
         <div className={fullWidth ? "w-full px-0" : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"}>
           <div className="flex items-center justify-between h-16">
             <Link href={dashboard().url} className="flex items-center gap-3" prefetch>
-              <img src="/images/mindway-logo.png" alt="MindWay Logo" className="w-10 h-10 object-contain rounded-xl" />
+              <img src="/images/moodly-logo.png" alt="Moodly Logo" className="w-10 h-10 object-contain rounded-xl" />
               <div>
-                <h1 className="text-xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">MindWay</h1>
+                <h1 className="text-xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Moodly</h1>
                 <p className="text-xs text-gray-500">Perjalanan Mental Sehat</p>
               </div>
             </Link>

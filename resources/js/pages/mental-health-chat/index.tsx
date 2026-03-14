@@ -318,7 +318,7 @@ export default function MentalHealthChatPage() {
                     </div>
 
                     <div className="text-center text-xs text-muted-foreground">
-                        MindWay AI is an assistive tool and not a substitute for professional mental health care.
+                        Moodly AI is an assistive tool and not a substitute for professional mental health care.
                     </div>
 
                     <div className="space-y-2">

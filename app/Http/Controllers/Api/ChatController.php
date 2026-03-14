@@ -63,7 +63,7 @@ class ChatController extends Controller
         // System Prompt (Cleaned)
         $systemPrompt = [
             'role' => 'system', 
-            'content' => "Kamu adalah MindWay AI, asisten kesehatan mental yang empatik, suportif, dan profesional. Gunakan bahasa Indonesia yang hangat dan menenangkan. Jangan memberikan diagnosis medis, tapi berikan saran praktis dan dukungan emosional. Jika pengguna terdengar dalam bahaya, sarankan untuk menghubungi profesional."
+            'content' => "Kamu adalah Moodly AI, asisten kesehatan mental yang empatik, suportif, dan profesional. Gunakan bahasa Indonesia yang hangat dan menenangkan. Jangan memberikan diagnosis medis, tapi berikan saran praktis dan dukungan emosional. Jika pengguna terdengar dalam bahaya, sarankan untuk menghubungi profesional."
         ];
 
         // Gabungkan
@@ -132,13 +132,13 @@ class ChatController extends Controller
         $input = strtolower($input);
         
         $rules = [
-            ['keywords' => ['halo', 'hi', 'hai', 'pagi', 'siang', 'malam'], 'response' => "Halo! 👋 Aku MindWay Assistant. Aku di sini untuk mendengarkan. Bagaimana perasaanmu hari ini?"],
+            ['keywords' => ['halo', 'hi', 'hai', 'pagi', 'siang', 'malam'], 'response' => "Halo! 👋 Aku Moodly Assistant. Aku di sini untuk mendengarkan. Bagaimana perasaanmu hari ini?"],
             ['keywords' => ['sedih', 'nangis', 'kecewa', 'sakit', 'duka'], 'response' => "Aku turut sedih mendengarnya. 😔 Perasaan itu wajar dan valid. Mau ceritakan lebih lanjut apa yang membuatmu merasa begitu? Aku siap mendengarkan tanpa menghakimi."],
             ['keywords' => ['cemas', 'takut', 'panik', 'gugup', 'anxiety'], 'response' => "Tarik napas dalam-dalam... 🌿 Coba teknik 4-7-8: Tarik napas 4 detik, tahan 7 detik, hembuskan 8 detik. Kamu aman di sini. Apa yang memicu rasa cemasmu?"],
             ['keywords' => ['stress', 'stres', 'bingung', 'capek', 'lelah'], 'response' => "Sepertinya kamu sedang memikul beban berat ya. 🍵 Jangan lupa istirahat sejenak. Kadang istirahat singkat bisa menjernihkan pikiran. Mau bahas apa yang paling membebanimu?"],
             ['keywords' => ['senang', 'bahagia', 'semangat', 'happy'], 'response' => "Wah, ikut senang mendengarnya! 🎉 Energi positif itu menular. Apa hal baik yang terjadi hari ini?"],
             ['keywords' => ['terima kasih', 'makasih', 'thanks'], 'response' => "Sama-sama! 💜 Senang bisa menemanimu. Ingat, kamu berharga."],
-            ['keywords' => ['siapa kamu', 'robot', 'bot'], 'response' => "Aku MindWay AI, teman virtualmu untuk ngobrol soal kesehatan mental. Aku mesin, tapi aku peduli! 🤖✨"],
+            ['keywords' => ['siapa kamu', 'robot', 'bot'], 'response' => "Aku Moodly AI, teman virtualmu untuk ngobrol soal kesehatan mental. Aku mesin, tapi aku peduli! 🤖✨"],
         ];
 
         foreach ($rules as $rule) {

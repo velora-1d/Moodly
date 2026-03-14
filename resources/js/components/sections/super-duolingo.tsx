@@ -92,7 +92,7 @@ const SuperDuolingoSection = () => {
               
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight">
                 <span className="bg-gradient-to-r from-[#58cc02] via-[#1cd8d2] to-[#ce82ff] bg-clip-text text-transparent">
-                  MindWay PRO
+                  Moodly PRO
                 </span>
               </h2>
 

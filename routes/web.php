@@ -128,7 +128,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('invites', [\App\Http\Controllers\InviteController::class, 'store'])->name('invites.store');
 
-    // MindWay API Routes
+    // Moodly API Routes
     Route::prefix('api')->name('api.')->group(function () {
         // Dashboard
         Route::get('dashboard', [\App\Http\Controllers\Api\DashboardController::class, 'index'])->name('dashboard.data');
