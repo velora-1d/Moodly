@@ -82,5 +82,6 @@ php artisan migrate --force 2>&1 || echo "Migration skipped atau gagal"
 
 echo "=== Moodly siap dijalankan di port ${PORT} ==="
 
-# Jalankan supervisor (nginx + php-fpm)
-exec /usr/bin/supervisord -c /etc/supervisord.conf
+# Sesuai saran user: gunakan php artisan serve untuk fiksasi port
+# Ini akan berjalan di foreground dan Railway akan memetakan $PORT ke sini
+exec php artisan serve --host=0.0.0.0 --port="${PORT}"
