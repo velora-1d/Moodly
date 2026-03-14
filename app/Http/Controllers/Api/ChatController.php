@@ -69,28 +69,23 @@ class ChatController extends Controller
         // Gabungkan
         $messages = array_merge([$systemPrompt], $history);
 
-        // 3. Panggil GROQ API (Direct)
-        // Updated valid models as of Dec 2025
-        $models = [
-            'llama-3.3-70b-versatile', 
-            'llama-3.1-8b-instant',
-            'mixtral-8x7b-32768',
-        ];
-
         $botContent = null;
         $attemptedErrors = [];
 
-        foreach ($models as $model) {
+        // 3. Panggil AI API (Sumopod / AI_API_KEY)
+        $aiApiKey = env('AI_API_KEY');
+        $aiBaseUrl = env('AI_BASE_URL', 'https://api.groq.com/openai/v1');
+        $aiModel = env('AI_MODEL');
+
+        if ($aiApiKey) {
             try {
-                $apiKey = env('GROQ_API_KEY');
-                
                 $response = \Illuminate\Support\Facades\Http::withOptions([
                     'verify' => false, 
                 ])->withHeaders([
-                    'Authorization' => 'Bearer ' . $apiKey,
+                    'Authorization' => 'Bearer ' . $aiApiKey,
                     'Content-Type' => 'application/json',
-                ])->post('https://api.groq.com/openai/v1/chat/completions', [
-                    'model' => $model,
+                ])->post(rtrim($aiBaseUrl, '/') . '/chat/completions', [
+                    'model' => $aiModel ?: 'llama-3.3-70b-versatile',
                     'messages' => $messages,
                     'temperature' => 0.7,
                     'max_tokens' => 1024,
@@ -99,14 +94,47 @@ class ChatController extends Controller
                 if ($response->successful()) {
                     $data = $response->json();
                     $botContent = $data['choices'][0]['message']['content'] ?? null;
-                    if ($botContent) break; // Success!
                 } else {
-                    $errorBody = $response->body();
-                    $attemptedErrors[] = $model . ' (' . $response->status() . '): ' . $errorBody;
-                    \Illuminate\Support\Facades\Log::error("Groq Error [$model]: " . $errorBody);
+                    $attemptedErrors[] = 'Sumopod/AI API Error: ' . $response->body();
                 }
             } catch (\Exception $e) {
-                $attemptedErrors[] = $model . ': ' . $e->getMessage();
+                $attemptedErrors[] = 'AI API Exception: ' . $e->getMessage();
+            }
+        }
+
+        // 4. Fallback ke GROQ Manual (Jika AI_API_KEY tidak ada atau gagal)
+        if (!$botContent) {
+            $models = [
+                'llama-3.3-70b-versatile', 
+                'llama-3.1-8b-instant',
+                'mixtral-8x7b-32768',
+            ];
+
+            foreach ($models as $model) {
+                try {
+                    $apiKey = env('GROQ_API_KEY');
+                    if (!$apiKey) continue;
+
+                    $response = \Illuminate\Support\Facades\Http::withOptions([
+                        'verify' => false, 
+                    ])->withHeaders([
+                        'Authorization' => 'Bearer ' . $apiKey,
+                        'Content-Type' => 'application/json',
+                    ])->post('https://api.groq.com/openai/v1/chat/completions', [
+                        'model' => $model,
+                        'messages' => $messages,
+                        'temperature' => 0.7,
+                        'max_tokens' => 1024,
+                    ]);
+
+                    if ($response->successful()) {
+                        $data = $response->json();
+                        $botContent = $data['choices'][0]['message']['content'] ?? null;
+                        if ($botContent) break;
+                    }
+                } catch (\Exception $e) {
+                    $attemptedErrors[] = $model . ': ' . $e->getMessage();
+                }
             }
         }
 

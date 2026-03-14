@@ -127,54 +127,48 @@ class MentalHealthChatController extends Controller
                 ]
             ];
 
-            // Konfigurasi untuk API Gemini
-            $apiKey = config('services.gemini.api_key', env('GEMINI_API_KEY'));
-            
-            // Dapatkan model yang tersedia dan pilih yang terbaik
-            $availableModels = $this->getAvailableModels();
-            $selectedModel = $this->selectBestModel($availableModels);
-            
-            if (!$selectedModel) {
-                Log::error('Tidak ada model Gemini yang tersedia');
-                return response()->json(['error' => 'Tidak ada model AI yang tersedia saat ini'], 500);
-            }
-            
-            // Log model yang dipilih
-            Log::info('Menggunakan model Gemini: ' . $selectedModel);
-            
-            // Buat endpoint berdasarkan model yang dipilih
-            $endpoint = 'https://generativelanguage.googleapis.com/v1/' . $selectedModel . ':generateContent';
-            
-            // Kirim permintaan ke API Gemini dengan format yang benar
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-            ])->post($endpoint . '?key=' . $apiKey, [
-                'contents' => $contents,
-                'generationConfig' => [
+            // 130: Konfigurasi untuk AI API
+            $aiApiKey = env('AI_API_KEY');
+            $aiBaseUrl = env('AI_BASE_URL');
+            $aiModel = env('AI_MODEL');
+
+            if ($aiApiKey && $aiBaseUrl) {
+                // Gunakan Sumopod/OpenAI Format
+                $endpoint = rtrim($aiBaseUrl, '/') . '/chat/completions';
+                
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $aiApiKey,
+                    'Content-Type' => 'application/json',
+                ])->post($endpoint, [
+                    'model' => $aiModel ?: 'gpt-4o', // Model default untuk Sumopod
+                    'messages' => $contents, // $contents sudah berisi riwayat + prompt
                     'temperature' => 0.7,
-                    'topK' => 40,
-                    'topP' => 0.95,
-                    'maxOutputTokens' => 800,
-                ],
-                'safetySettings' => [
-                    [
-                        'category' => 'HARM_CATEGORY_HARASSMENT',
-                        'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'
+                ]);
+            } else {
+                // Gunakan Gemini asli (Fallback)
+                $apiKey = config('services.gemini.api_key', env('GEMINI_API_KEY'));
+                
+                // Dapatkan model yang tersedia dan pilih yang terbaik
+                $availableModels = $this->getAvailableModels();
+                $selectedModel = $this->selectBestModel($availableModels);
+                
+                if (!$selectedModel) {
+                    Log::error('Tidak ada model Gemini yang tersedia');
+                    return response()->json(['error' => 'Tidak ada model AI yang tersedia saat ini'], 500);
+                }
+                
+                $endpoint = 'https://generativelanguage.googleapis.com/v1/' . $selectedModel . ':generateContent';
+                
+                $response = Http::withHeaders([
+                    'Content-Type' => 'application/json',
+                ])->post($endpoint . '?key=' . $apiKey, [
+                    'contents' => $contents,
+                    'generationConfig' => [
+                        'temperature' => 0.7,
+                        'maxOutputTokens' => 800,
                     ],
-                    [
-                        'category' => 'HARM_CATEGORY_HATE_SPEECH',
-                        'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'
-                    ],
-                    [
-                        'category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-                        'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'
-                    ],
-                    [
-                        'category' => 'HARM_CATEGORY_DANGEROUS_CONTENT',
-                        'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'
-                    ],
-                ]
-            ]);
+                ]);
+            }
 
             if ($response->successful()) {
                 $responseData = $response->json();
