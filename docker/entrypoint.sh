@@ -71,11 +71,16 @@ php artisan config:cache 2>/dev/null || echo "Config cache gagal, lanjut..."
 php artisan route:cache 2>/dev/null || echo "Route cache gagal, lanjut..."
 php artisan view:cache 2>/dev/null || echo "View cache gagal, lanjut..."
 
+# --- DYNAMIC PORT CONFIGURATION ---
+# Railway menyuntikkan $PORT secara dinamis, pastikan Nginx menggunakan $PORT
+PORT="${PORT:-8080}"
+sed -i "s/__PORT__/${PORT}/g" /etc/nginx/http.d/default.conf
+
 # Jalankan migrasi database
 echo "=== Menjalankan migrasi ==="
 php artisan migrate --force 2>&1 || echo "Migration skipped atau gagal"
 
-echo "=== Moodly siap dijalankan di port 8080 ==="
+echo "=== Moodly siap dijalankan di port ${PORT} ==="
 
 # Jalankan supervisor (nginx + php-fpm)
 exec /usr/bin/supervisord -c /etc/supervisord.conf
