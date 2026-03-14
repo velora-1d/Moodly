@@ -82,6 +82,7 @@ if [ -f /etc/nginx/http.d/default.conf ]; then
 fi
 
 echo "=== Moodly siap dijalankan via Nginx + PHP-FPM ==="
+netstat -tulnp
 
 # Jalankan supervisor (nginx + php-fpm)
 exec /usr/bin/supervisord -c /etc/supervisord.conf
