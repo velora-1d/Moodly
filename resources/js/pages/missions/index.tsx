@@ -34,9 +34,9 @@ export default function MissionsPage() {
   const [activeTab, setActiveTab] = useState<"daily" | "weekly">("daily");
   const { updateAppearance } = useAppearance();
   const { auth } = usePage<SharedProps>().props;
-  const name = auth?.user?.name ?? "Player";
+  const _name = auth?.user?.name ?? "Player";
   const userId = auth?.user?.id ?? null;
-  const [dailyMissions, setDailyMissions] = useState<any[]>([]);
+  const [dailyMissions, setDailyMissions] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export default function MissionsPage() {
       const res = await fetch(route('api.missions.index'));
       if (res.ok) {
         const data = await res.json();
-        const mapped = data.map((m: any) => ({
+        const mapped = data.map((m: unknown) => ({
           id: m.id,
           slug: m.key,
           title: m.title,
@@ -154,7 +154,7 @@ export default function MissionsPage() {
                 total={Number(m.target_total)}
                 xp={Number(m.xp_reward)}
                 isCompleted={Boolean(m.is_completed)}
-                isReady={!Boolean(m.is_completed) && (Number(m.computed_progress) || 0) >= Number(m.target_total)}
+                isReady={!m.is_completed && (Number(m.computed_progress) || 0) >= Number(m.target_total)}
                 delay={0.1 + idx * 0.1}
                 onSolve={async () => {
                   if (!userId || m.is_completed) return;

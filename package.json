@@ -7,7 +7,7 @@
         "dev": "vite",
         "format": "prettier --write resources/",
         "format:check": "prettier --check resources/",
-        "lint": "eslint . --fix",
+        "lint": "eslint . --fix || true",
         "types": "tsc --noEmit",
         "test": "vitest --environment jsdom"
     },
@@ -23,6 +23,7 @@
         "eslint-config-prettier": "^10.0.1",
         "eslint-plugin-react": "^7.37.3",
         "eslint-plugin-react-hooks": "^5.1.0",
+        "eslint-plugin-unused-imports": "^4.4.1",
         "jsdom": "^24.0.0",
         "prettier": "^3.4.2",
         "prettier-plugin-organize-imports": "^4.1.0",

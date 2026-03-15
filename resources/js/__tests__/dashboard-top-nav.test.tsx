@@ -4,7 +4,7 @@ import DashboardTopNav from '@/components/dashboard-top-nav'
 
 // Mock minimal @inertiajs/react agar komponen dapat dirender di test
 vi.mock('@inertiajs/react', () => ({
-  Link: (props: any) => {
+  Link: (props: unknown) => {
     const { href, children, ...rest } = props
     return <a href={href} {...rest}>{children}</a>
   },

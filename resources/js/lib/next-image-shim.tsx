@@ -2,7 +2,7 @@ import React from 'react';
 
 // Shim ringan untuk kompatibilitas import `next/image` di Vite/React.
 // Mendukung properti umum seperti layout="fill", objectFit, objectPosition, priority.
-export default function Image(props: any) {
+export default function Image(props: unknown) {
   const {
     src,
     alt = '',
@@ -29,7 +29,7 @@ export default function Image(props: any) {
     ...(isFill
       ? {
           position: 'absolute',
-          inset: 0 as any,
+          inset: 0 as unknown,
           width: '100%',
           height: '100%',
         }

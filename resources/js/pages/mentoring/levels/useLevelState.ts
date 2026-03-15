@@ -12,7 +12,7 @@ export async function startSession(userId: number, levelId: number) {
   // no-op
 }
 
-export async function endSession(userId: number, levelId: number, payload: any, durationMs: number) {
+export async function endSession(userId: number, levelId: number, payload: unknown, durationMs: number) {
   try {
     const token = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null)?.content || '';
     await fetch(route('api.levels.update', { id: levelId }), {

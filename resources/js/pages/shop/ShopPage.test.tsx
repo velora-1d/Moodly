@@ -5,7 +5,7 @@ import { vi, describe, it, expect } from 'vitest';
 // Mock Inertia
 vi.mock('@inertiajs/react', () => ({
     Head: ({ title }: { title: string }) => <title>{title}</title>,
-    Link: ({ children, ...props }: any) => <a {...props}>{children}</a>,
+    Link: ({ children, ...props }: unknown) => <a {...props}>{children}</a>,
     usePage: () => ({
         url: '/shop',
         props: {
@@ -24,11 +24,11 @@ vi.mock('@/components/dashboard-top-nav', () => ({
 // Mock Framer Motion to render children immediately
 vi.mock('framer-motion', () => ({
     motion: {
-        div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-        button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
-        span: ({ children, ...props }: any) => <span {...props}>{children}</span>,
+        div: ({ children, ...props }: unknown) => <div {...props}>{children}</div>,
+        button: ({ children, ...props }: unknown) => <button {...props}>{children}</button>,
+        span: ({ children, ...props }: unknown) => <span {...props}>{children}</span>,
     },
-    AnimatePresence: ({ children }: any) => <>{children}</>,
+    AnimatePresence: ({ children }: unknown) => <>{children}</>,
 }));
 
 // Mock Sonner toast

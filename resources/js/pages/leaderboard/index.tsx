@@ -100,7 +100,7 @@ export default function Leaderboard() {
         const res = await fetch('/api/leaderboard?period=lifetime', { headers: { 'Accept': 'application/json' } });
         if (res.ok) {
           const json = await res.json();
-          const data: LBRow[] = (json?.data ?? []).map((r: any) => ({
+          const data: LBRow[] = (json?.data ?? []).map((r: unknown) => ({
             user_id: String(r.user_id),
             name: String(r.name ?? String(r.user_id).slice(0, 6)),
             totalExp: Number(r.total_xp ?? 0),

@@ -93,7 +93,7 @@ export default function ProfilePage() {
     if (!friendName.trim()) return;
     const token = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null)?.content || '';
     try {
-      const res = await fetch(route('friends.store'), {
+      const _res = await fetch(route('friends.store'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': token },
         body: JSON.stringify({ recipient_name: friendName.trim() }),

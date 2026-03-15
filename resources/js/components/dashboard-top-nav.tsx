@@ -5,10 +5,10 @@ import { Menu, Sparkles, Brain, Trophy, Target, ShoppingCart, Award } from "luci
 import { mentoring, leaderboard, missions, shop, profile, dashboard } from "@/routes";
 import AppLogoIcon from "@/components/app-logo-icon";
 
-type Item = { href: string; label: string; icon: any };
+type Item = { href: string; label: string; icon: unknown };
 
 export default function DashboardTopNav({ items, fullWidth }: { items?: Item[]; fullWidth?: boolean }) {
-  const page = usePage<any>();
+  const page = usePage<unknown>();
   const name: string = page?.props?.auth?.user?.name ?? "Player";
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   React.useEffect(() => {

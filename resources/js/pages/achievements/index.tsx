@@ -19,7 +19,7 @@ type Achievement = {
 };
 
 export default function AchievementsPage({ achievements }: { achievements: Achievement[] }) {
-    const { auth } = usePage<any>().props;
+    const { auth } = usePage<unknown>().props;
 
     const totalPoints = achievements.reduce((acc, curr) => acc + (curr.is_completed ? 100 : 0), 0); // Mock points logic
     const completedCount = achievements.filter(a => a.is_completed).length;

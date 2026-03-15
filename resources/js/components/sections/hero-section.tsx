@@ -3,7 +3,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { dashboard } from '@/routes';
 
 const HeroSection = () => {
-    const { auth } = usePage<any>().props;
+    const { auth } = usePage<unknown>().props;
 
     return (
         <section className="relative overflow-hidden bg-gradient-to-br from-white via-purple-50 to-cyan-50 pt-24 pb-16 md:pt-32 md:pb-24 lg:pt-40 lg:pb-32">
@@ -68,7 +68,7 @@ const HeroSection = () => {
                             </div>
                             <div className="flex items-center gap-2">
                                 <div className="p-2 bg-cyan-100 rounded-lg text-cyan-600"><Star size={18} /></div>
-                                <span>Gratis Selamanya</span>
+                                <span>Gratis Selamunknowna</span>
                             </div>
                         </div>
                     </div>

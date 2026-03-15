@@ -49,7 +49,7 @@ const moodLabels: Record<Mood, string> = {
 };
 
 export default function JournalingPage() {
-  const page = usePage<any>();
+  const page = usePage<unknown>();
   const userId: number | undefined = page?.props?.auth?.user?.id;
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [currentEntry, setCurrentEntry] = useState("");

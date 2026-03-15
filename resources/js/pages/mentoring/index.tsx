@@ -13,14 +13,14 @@ interface Level {
   id: number;
   title: string;
   description: string;
-  icon: any;
+  icon: unknown;
   status: "locked" | "current" | "completed";
   stars: number;
   maxStars: 3;
   xpReward: number;
 }
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, unknown> = {
   heart: Heart,
   brain: Brain,
   sun: Sun,
@@ -36,7 +36,7 @@ const iconMap: Record<string, any> = {
 // moved inside component
 
 export default function MentoringPage() {
-  const { auth } = usePage<any>().props;
+  const { auth } = usePage<unknown>().props;
   const [levels, setLevelState] = useState<Level[]>([]);
   const [selectedLevel, setSelectedLevel] = useState<Level | null>(null);
   const [showAchievement, setShowAchievement] = useState(false);
@@ -45,7 +45,7 @@ export default function MentoringPage() {
   const completedLevels = levels.filter((l: Level) => l.status === "completed").length;
   const progressPercentage = (completedLevels / levels.length) * 100;
 
-  const achievementTimeoutRef = { current: 0 as any }
+  const achievementTimeoutRef = { current: 0 as unknown }
 
   const handleLevelClick = (level: Level) => {
     if (level.status !== "locked") {
@@ -75,12 +75,12 @@ export default function MentoringPage() {
       try {
         const res = await fetch(route('api.levels.index'));
         if (res.ok) {
-          const data: any[] = await res.json();
+          const data: unknown[] = await res.json();
           // Map API data to Level interface
           // We need to merge with static definitions of Title/Desc/Icon based on ID
           // Because DB only stores status/progress
 
-          const staticDefs: Record<number, any> = {
+          const staticDefs: Record<number, unknown> = {
             1: { title: 'Latihan Pernapasan', description: 'Teknik dasar pernapasan untuk relaksasi.', icon_slug: 'wind', xp: 50 },
             2: { title: 'Mindfulness', description: 'Latihan fokus dan kesadaran diri.', icon_slug: 'brain', xp: 75 },
             3: { title: 'CBT Game', description: 'Kenali pola pikir negatifmu.', icon_slug: 'sparkles', xp: 100 },
@@ -89,7 +89,7 @@ export default function MentoringPage() {
             6: { title: 'Visualisasi', description: 'Bayangkan kesuksesan.', icon_slug: 'trophy', xp: 200 },
           };
 
-          const resolved: Level[] = data.map((l: any) => {
+          const resolved: Level[] = data.map((l: unknown) => {
             const def = staticDefs[l.level_id] || { title: `Level ${l.level_id}`, description: 'Lanjutan...', icon_slug: 'star', xp: 100 };
             const Icon = iconMap[def.icon_slug] ?? Brain;
             return {

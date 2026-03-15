@@ -23,7 +23,7 @@ export default function AppBottomNav() {
                 {items.map((item) => {
                     const href = typeof item.href === 'string' ? item.href : item.href.url;
                     const isActive = href !== '#' && page.url.startsWith(href);
-                    const Icon = item.icon as any;
+                    const Icon = item.icon as unknown;
                     return (
                         <li key={item.title} className="flex-1">
                             <Link

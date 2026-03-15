@@ -1,0 +1,307 @@
+
+> lint
+> eslint . --fix
+
+
+/app/resources/js/__tests__/crypto.spec.ts
+  17:54  error  Empty block statement  no-empty
+
+/app/resources/js/__tests__/dashboard-top-nav.test.tsx
+  7:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/resources/js/components/ErrorReporter.tsx
+  11:48  error  'reset' is defined but never used                                      @typescript-eslint/no-unused-vars
+  71:7   error  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+
+/app/resources/js/components/app-bottom-nav.tsx
+  26:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/resources/js/components/app-logo-icon.tsx
+  1:10  error  'SVGAttributes' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/resources/js/components/app-logo.tsx
+  1:8  error  'AppLogoIcon' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/resources/js/components/cbt-game/CBTGameContainer.tsx
+    4:18  error  'AVATARS' is defined but never used                   @typescript-eslint/no-unused-vars
+    9:42  error  'Heart' is defined but never used                     @typescript-eslint/no-unused-vars
+    9:49  error  'Play' is defined but never used                      @typescript-eslint/no-unused-vars
+   34:70  error  Empty block statement                                 no-empty
+   42:9   error  'loadGame' is assigned a value but never used         @typescript-eslint/no-unused-vars
+   55:9   error  'hasSavedGame' is assigned a value but never used     @typescript-eslint/no-unused-vars
+   77:39  error  Empty block statement                                 no-empty
+   83:9   error  'handleStartGame' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  105:25  error  Empty block statement                                 no-empty
+  124:15  error  Empty block statement                                 no-empty
+  142:82  error  Unexpected any. Specify a different type              @typescript-eslint/no-explicit-any
+  144:21  error  Unexpected any. Specify a different type              @typescript-eslint/no-explicit-any
+
+/app/resources/js/components/dashboard-top-nav.tsx
+   4:16  error  'Sparkles' is defined but never used      @typescript-eslint/no-unused-vars
+   8:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  11:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/resources/js/components/sections/features-ai-chat.tsx
+  6:30  error  'Heart' is defined but never used     @typescript-eslint/no-unused-vars
+  6:37  error  'Clock' is defined but never used     @typescript-eslint/no-unused-vars
+  6:44  error  'Shield' is defined but never used    @typescript-eslint/no-unused-vars
+  6:52  error  'Sparkles' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/resources/js/components/sections/features-motivated.tsx
+  1:10  error  'Heart' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/resources/js/components/sections/features-personalized.tsx
+  1:10  error  'Sparkles' is defined but never used  @typescript-eslint/no-unused-vars
+  1:26  error  'Target' is defined but never used    @typescript-eslint/no-unused-vars
+
+/app/resources/js/components/sections/features-science.tsx
+  1:22  error  'BookOpen' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/resources/js/components/sections/final-cta.tsx
+  2:56  error  'Zap' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/resources/js/components/sections/footer.tsx
+  2:10  error  'Brain' is defined but never used      @typescript-eslint/no-unused-vars
+  2:24  error  'Instagram' is defined but never used  @typescript-eslint/no-unused-vars
+  2:35  error  'Twitter' is defined but never used    @typescript-eslint/no-unused-vars
+  2:44  error  'Youtube' is defined but never used    @typescript-eslint/no-unused-vars
+  2:53  error  'Facebook' is defined but never used   @typescript-eslint/no-unused-vars
+
+/app/resources/js/components/sections/hero-section.tsx
+  6:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/resources/js/components/sections/language-carousel.tsx
+  2:29  error  'Heart' is defined but never used     @typescript-eslint/no-unused-vars
+  2:36  error  'Sparkles' is defined but never used  @typescript-eslint/no-unused-vars
+  2:46  error  'Smile' is defined but never used     @typescript-eslint/no-unused-vars
+  2:53  error  'Wind' is defined but never used      @typescript-eslint/no-unused-vars
+  2:59  error  'Moon' is defined but never used      @typescript-eslint/no-unused-vars
+  2:65  error  'Sun' is defined but never used       @typescript-eslint/no-unused-vars
+
+/app/resources/js/components/sections/learning-anywhere.tsx
+  2:22  error  'Download' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/resources/js/components/sections/navigation-header.tsx
+  5:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/resources/js/components/sections/products-abc.tsx
+  1:28  error  'Sparkles' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/resources/js/components/sections/products-english-test.tsx
+  1:10  error  'Brain' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/resources/js/components/sections/products-schools.tsx
+  1:10  error  'Users' is defined but never used           @typescript-eslint/no-unused-vars
+  1:29  error  'HeartHandshake' is defined but never used  @typescript-eslint/no-unused-vars
+  1:60  error  'Sparkles' is defined but never used        @typescript-eslint/no-unused-vars
+  1:70  error  'Zap' is defined but never used             @typescript-eslint/no-unused-vars
+
+/app/resources/js/components/sections/super-duolingo.tsx
+  2:17  error  'Zap' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/resources/js/components/ui/calendar.tsx
+  128:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  138:57  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  159:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/resources/js/components/ui/chart.tsx
+  128:15  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  184:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  262:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  281:20  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/resources/js/components/ui/container-scroll-animation.tsx
+  57:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/resources/js/layouts/auth/auth-split-layout.tsx
+  17:13  error  'name' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/resources/js/layouts/settings/layout.tsx
+  3:69  error  'Star' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/resources/js/lib/next-image-shim.tsx
+   5:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  32:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/resources/js/lib/next-link-shim.tsx
+  5:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/resources/js/pages/achievements/index.tsx
+   6:29  error  'Medal' is defined but never used                 @typescript-eslint/no-unused-vars
+   6:36  error  'Star' is defined but never used                  @typescript-eslint/no-unused-vars
+   6:50  error  'Crown' is defined but never used                 @typescript-eslint/no-unused-vars
+  22:13  error  'auth' is assigned a value but never used         @typescript-eslint/no-unused-vars
+  22:30  error  Unexpected any. Specify a different type          @typescript-eslint/no-explicit-any
+  24:11  error  'totalPoints' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/resources/js/pages/auth/confirm-password.tsx
+  18:9  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+/app/resources/js/pages/dashboard.tsx
+   14:3   error  'Menu' is defined but never used                                @typescript-eslint/no-unused-vars
+  102:10  error  'loading' is assigned a value but never used                    @typescript-eslint/no-unused-vars
+  104:9   error  'dailyPct' is assigned a value but never used                   @typescript-eslint/no-unused-vars
+  117:9   error  'quickActions' is assigned a value but never used               @typescript-eslint/no-unused-vars
+  136:34  error  'setWeeklyCompletedLessons' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  137:30  error  'setWeeklyTotalLessons' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  226:14  error  'e' is defined but never used                                   @typescript-eslint/no-unused-vars
+  235:18  error  'addDailyXP' is defined but never used                          @typescript-eslint/no-unused-vars
+  241:12  error  'prevMoodHasToday' is defined but never used                    @typescript-eslint/no-unused-vars
+
+/app/resources/js/pages/journal/index.tsx
+  11:19  error  'router' is defined but never used        @typescript-eslint/no-unused-vars
+  52:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/resources/js/pages/leaderboard/index.tsx
+   40:6   error  'Entry' is defined but never used         @typescript-eslint/no-unused-vars
+  103:60  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/resources/js/pages/mental-health-chat/index.tsx
+    6:15  error    'RefreshCw' is defined but never used                                                                               @typescript-eslint/no-unused-vars
+   50:26  error    'setSessionCache' is assigned a value but never used                                                                @typescript-eslint/no-unused-vars
+   51:11  error    'SESSIONS_KEY' is assigned a value but never used                                                                   @typescript-eslint/no-unused-vars
+   52:11  error    'CACHE_KEY' is assigned a value but never used                                                                      @typescript-eslint/no-unused-vars
+   84:22  error    'e' is defined but never used                                                                                       @typescript-eslint/no-unused-vars
+   89:8   warning  React Hook useEffect has a missing dependency: 'activeSessionId'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  103:60  error    Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+  111:22  error    'e' is defined but never used                                                                                       @typescript-eslint/no-unused-vars
+  132:18  error    'e' is defined but never used                                                                                       @typescript-eslint/no-unused-vars
+  183:18  error    'error' is defined but never used                                                                                   @typescript-eslint/no-unused-vars
+
+/app/resources/js/pages/mentoring/components/sections/course-curriculum.tsx
+  5:33  error  'KeyRound' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/resources/js/pages/mentoring/components/sections/hero-banner.tsx
+  21:9  error  'snakeStyle' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/resources/js/pages/mentoring/index.tsx
+    5:16  error    'Lock' is defined but never used                                                                                          @typescript-eslint/no-unused-vars
+    5:71  error    'Zap' is defined but never used                                                                                           @typescript-eslint/no-unused-vars
+   16:9   error    Unexpected any. Specify a different type                                                                                  @typescript-eslint/no-explicit-any
+   23:31  error    Unexpected any. Specify a different type                                                                                  @typescript-eslint/no-explicit-any
+   39:28  error    Unexpected any. Specify a different type                                                                                  @typescript-eslint/no-explicit-any
+   48:49  error    Unexpected any. Specify a different type                                                                                  @typescript-eslint/no-explicit-any
+   50:9   error    'handleLevelClick' is assigned a value but never used                                                                     @typescript-eslint/no-unused-vars
+   78:23  error    Unexpected any. Specify a different type                                                                                  @typescript-eslint/no-explicit-any
+   83:44  error    Unexpected any. Specify a different type                                                                                  @typescript-eslint/no-explicit-any
+   92:50  error    Unexpected any. Specify a different type                                                                                  @typescript-eslint/no-explicit-any
+  116:6   warning  React Hook useEffect has a missing dependency: 'achievementTimeoutRef'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/app/resources/js/pages/mentoring/levels/LevelLayout.tsx
+  1:16  error  'usePage' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/resources/js/pages/mentoring/levels/level-1.tsx
+    4:10  error    'Progress' is defined but never used                                                                                          @typescript-eslint/no-unused-vars
+    9:21  error    'useMemo' is defined but never used                                                                                           @typescript-eslint/no-unused-vars
+   11:36  error    'getCompletion' is defined but never used                                                                                     @typescript-eslint/no-unused-vars
+   73:10  error    'exhaleFx' is assigned a value but never used                                                                                 @typescript-eslint/no-unused-vars
+   95:9   error    'bgVariants' is assigned a value but never used                                                                               @typescript-eslint/no-unused-vars
+  103:94  error    Unexpected any. Specify a different type                                                                                      @typescript-eslint/no-explicit-any
+  115:13  error    Empty block statement                                                                                                         no-empty
+  122:15  error    Empty block statement                                                                                                         no-empty
+  160:9   error    'guideScale' is assigned a value but never used                                                                               @typescript-eslint/no-unused-vars
+  162:9   error    'guideGlow' is assigned a value but never used                                                                                @typescript-eslint/no-unused-vars
+  163:9   error    'boatY' is assigned a value but never used                                                                                    @typescript-eslint/no-unused-vars
+  223:13  error    Empty block statement                                                                                                         no-empty
+  230:13  error    Empty block statement                                                                                                         no-empty
+  243:6   warning  React Hook useEffect has missing dependencies: 'onExhale' and 'onInhale'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/app/resources/js/pages/mentoring/levels/level-2.tsx
+  45:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/resources/js/pages/mentoring/levels/level-3.tsx
+   6:10  error  'getCompletion' is defined but never used  @typescript-eslint/no-unused-vars
+  11:28  error  Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  31:55  error  Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+
+/app/resources/js/pages/mentoring/levels/level-6.tsx
+  5:36  error  'complete' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/resources/js/pages/mentoring/levels/useLevelState.ts
+   3:37  error  'userId' is defined but never used        @typescript-eslint/no-unused-vars
+   3:53  error  'levelId' is defined but never used       @typescript-eslint/no-unused-vars
+   7:41  error  'userId' is defined but never used        @typescript-eslint/no-unused-vars
+   7:57  error  'levelId' is defined but never used       @typescript-eslint/no-unused-vars
+  11:36  error  'userId' is defined but never used        @typescript-eslint/no-unused-vars
+  11:52  error  'levelId' is defined but never used       @typescript-eslint/no-unused-vars
+  15:76  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  15:81  error  'durationMs' is defined but never used    @typescript-eslint/no-unused-vars
+  36:65  error  'stars' is defined but never used         @typescript-eslint/no-unused-vars
+  36:80  error  'xp' is defined but never used            @typescript-eslint/no-unused-vars
+
+/app/resources/js/pages/missions/index.tsx
+    3:16  error  'Link' is defined but never used              @typescript-eslint/no-unused-vars
+    8:10  error  'mentoring' is defined but never used         @typescript-eslint/no-unused-vars
+    8:36  error  'leaderboardRoute' is defined but never used  @typescript-eslint/no-unused-vars
+    8:66  error  'missionsRoute' is defined but never used     @typescript-eslint/no-unused-vars
+    8:81  error  'shop' is defined but never used              @typescript-eslint/no-unused-vars
+    8:87  error  'profile' is defined but never used           @typescript-eslint/no-unused-vars
+   15:3   error  'Trophy' is defined but never used            @typescript-eslint/no-unused-vars
+   16:3   error  'Target' is defined but never used            @typescript-eslint/no-unused-vars
+   17:3   error  'Star' is defined but never used              @typescript-eslint/no-unused-vars
+   18:3   error  'Flame' is defined but never used             @typescript-eslint/no-unused-vars
+   20:3   error  'ShoppingCart' is defined but never used      @typescript-eslint/no-unused-vars
+   21:3   error  'User' is defined but never used              @typescript-eslint/no-unused-vars
+   22:3   error  'MoreHorizontal' is defined but never used    @typescript-eslint/no-unused-vars
+   23:3   error  'Award' is defined but never used             @typescript-eslint/no-unused-vars
+   37:9   error  'name' is assigned a value but never used     @typescript-eslint/no-unused-vars
+   39:54  error  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+   52:37  error  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  177:28  error  'e' is defined but never used                 @typescript-eslint/no-unused-vars
+  229:10  error  'NavTab' is defined but never used            @typescript-eslint/no-unused-vars
+
+/app/resources/js/pages/profile/index.tsx
+    6:10  error  'mentoring' is defined but never used         @typescript-eslint/no-unused-vars
+    6:36  error  'leaderboardRoute' is defined but never used  @typescript-eslint/no-unused-vars
+    6:66  error  'missionsRoute' is defined but never used     @typescript-eslint/no-unused-vars
+    6:81  error  'shop' is defined but never used              @typescript-eslint/no-unused-vars
+    6:98  error  'profileRoute' is defined but never used      @typescript-eslint/no-unused-vars
+    8:46  error  'Target' is defined but never used            @typescript-eslint/no-unused-vars
+    8:54  error  'ShoppingCart' is defined but never used      @typescript-eslint/no-unused-vars
+    8:68  error  'User' is defined but never used              @typescript-eslint/no-unused-vars
+    8:74  error  'MoreHorizontal' is defined but never used    @typescript-eslint/no-unused-vars
+    8:90  error  'Star' is defined but never used              @typescript-eslint/no-unused-vars
+    8:96  error  'Award' is defined but never used             @typescript-eslint/no-unused-vars
+   21:10  error  'NavTab' is defined but never used            @typescript-eslint/no-unused-vars
+   96:13  error  'res' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  102:13  error  Empty block statement                         no-empty
+  110:13  error  Empty block statement                         no-empty
+  118:13  error  Empty block statement                         no-empty
+
+/app/resources/js/pages/settings/profile.tsx
+   8:8  error  'HeadingSmall' is defined but never used          @typescript-eslint/no-unused-vars
+  21:7  error  'breadcrumbs' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/resources/js/pages/shop/ShopPage.test.tsx
+   8:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  27:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  28:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  29:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  31:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/resources/js/pages/shop/index.tsx
+  6:24  error  'Filter' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/resources/js/visual-edits/VisualEditsMessenger.tsx
+   509:6  warning  React Hook useEffect has a missing dependency: 'isVisualEditMode'. Either include it or remove the dependency array                           react-hooks/exhaustive-deps
+   954:6  warning  React Hook useEffect has missing dependencies: 'handleStyleChange' and 'updateFocusBox'. Either include them or remove the dependency array   react-hooks/exhaustive-deps
+  1291:6  warning  React Hook useEffect has a missing dependency: 'cleanupEditingElement'. Either include it or remove the dependency array                      react-hooks/exhaustive-deps
+  1332:6  warning  React Hook useEffect has a missing dependency: 'updateFocusBox'. Either include it or remove the dependency array                             react-hooks/exhaustive-deps
+  2008:6  warning  React Hook useEffect has missing dependencies: 'cleanupEditingElement' and 'isScrolling'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/app/resources/js/visual-edits/component-tagger-loader.js
+    3:23  error  'exports' is not defined                                               no-undef
+    4:1   error  'exports' is not defined                                               no-undef
+    5:18  error  A `require()` style import is forbidden                                @typescript-eslint/no-require-imports
+    5:18  error  'require' is not defined                                               no-undef
+    6:24  error  A `require()` style import is forbidden                                @typescript-eslint/no-require-imports
+    6:24  error  'require' is not defined                                               no-undef
+    7:25  error  A `require()` style import is forbidden                                @typescript-eslint/no-require-imports
+    7:25  error  'require' is not defined                                               no-undef
+    8:14  error  A `require()` style import is forbidden                                @typescript-eslint/no-require-imports
+    8:14  error  'require' is not defined                                               no-undef
+  286:13  error  Unexpected lexical declaration in case block                           no-case-declarations
+  386:35  error  'process' is not defined                                               no-undef
+  430:17  error  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+
+✖ 199 problems (191 errors, 8 warnings)
