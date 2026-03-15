@@ -137,6 +137,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Missions
         Route::get('missions', [\App\Http\Controllers\Api\MissionController::class, 'index'])->name('missions.index');
         Route::patch('missions/{id}', [\App\Http\Controllers\Api\MissionController::class, 'update'])->name('missions.update');
+        Route::get('journals', [\App\Http\Controllers\Api\JournalController::class, 'index'])->name('journals.index');
+        Route::post('journals', [\App\Http\Controllers\Api\JournalController::class, 'store'])->name('journals.store');
+        Route::delete('journals/{id}', [\App\Http\Controllers\Api\JournalController::class, 'destroy'])->name('journals.destroy');
 
         // Levels
         Route::get('levels', [\App\Http\Controllers\Api\LevelController::class, 'index'])->name('levels.index');
