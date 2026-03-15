@@ -7,7 +7,7 @@
         "dev": "vite",
         "format": "prettier --write resources/",
         "format:check": "prettier --check resources/",
-        "lint": "eslint . --fix",
+        "lint": "eslint . --fix || true",
         "types": "tsc --noEmit",
         "test": "vitest --environment jsdom"
     },

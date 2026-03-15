@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Smile, Meh, Frown, CloudRain, Sun, Moon, Calendar, Trash2, PenLine, Sparkles } from "lucide-react";
 import DashboardTopNav from "@/components/dashboard-top-nav";
-import { usePage, router } from "@inertiajs/react";
+import { usePage } from "@inertiajs/react";
 import { toast } from "sonner";
 import { route } from 'ziggy-js';
 
@@ -49,7 +49,7 @@ const moodLabels: Record<Mood, string> = {
 };
 
 export default function JournalingPage() {
-  const page = usePage<any>();
+  const page = usePage<{ props: { auth: { user: { id: number } } } }>();
   const userId: number | undefined = page?.props?.auth?.user?.id;
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [currentEntry, setCurrentEntry] = useState("");

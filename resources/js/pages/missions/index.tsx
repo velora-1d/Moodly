@@ -154,7 +154,7 @@ export default function MissionsPage() {
                 total={Number(m.target_total)}
                 xp={Number(m.xp_reward)}
                 isCompleted={Boolean(m.is_completed)}
-                isReady={!Boolean(m.is_completed) && (Number(m.computed_progress) || 0) >= Number(m.target_total)}
+                isReady={!m.is_completed && (Number(m.computed_progress) || 0) >= Number(m.target_total)}
                 delay={0.1 + idx * 0.1}
                 onSolve={async () => {
                   if (!userId || m.is_completed) return;
