@@ -6,7 +6,7 @@ import FeaturesEffective from '@/components/sections/features-effective'
 import FeaturesScience from '@/components/sections/features-science'
 import FeaturesMotivated from '@/components/sections/features-motivated'
 import FeaturesPersonalized from '@/components/sections/features-personalized'
-import LearningAnywhere from '@/components/sections/learning-unknownwhere'
+import LearningAnywhere from '@/components/sections/learning-anywhere'
 
 import ProductsMath from '@/components/sections/products-math'
 import FinalCta from '@/components/sections/final-cta'

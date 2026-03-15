@@ -42,12 +42,12 @@ export const LEVELS: Level[] = [
       description: "Massa asap gelap yang berputar-putar dan membisikkan kata-kata yang mematahkan semangat.",
       negativeThoughtType: "Memperburuk Keadaan (Catastrophizing)"
     },
-    introDialogue: "Kamu menemui bayangan gelap yang menghalangi jalanmu. Ia menjulang di atasmu, membuat segalunknowna tampak mustahil.",
+    introDialogue: "Kamu menemui bayangan gelap yang menghalangi jalanmu. Ia menjulang di atasmu, membuat segalanya tampak mustahil.",
     playerThought: "Aku tidak akan pernah bisa menyelesaikan proyek ini. Semua orang akan menganggapku gagal dan aku akan kehilangan pekerjaanku.",
     background: GAME_ASSETS.background,
     choices: [
       { id: "c1", text: "Terima pikiran itu sebagai kebenaran dan menyerah.", type: "unhealthy", feedback: "Bayangan itu membesar dan menelan jalan di depan. Dada terasa berat dan langkahmu berhenti. Menyerah membuat pikiran negatif semakin kuat dan kesempatan kecil yang mungkin ada pun hilang.", healthChange: -20, scoreChange: 0 },
-      { id: "c2", text: "Katakan pada dirimu: 'Berhenti memikirkannya!' dan coba abaikan.", type: "neutral", feedback: "Bayangan itu sempat memudar lalu kembali menekan dari segala arah. Mengusir pikiran tanpa memprosesnya hunknowna menunda kecemasan—ia muncul lagi lebih kuat saat kamu lelah.", healthChange: -5, scoreChange: 5 },
+      { id: "c2", text: "Katakan pada dirimu: 'Berhenti memikirkannya!' dan coba abaikan.", type: "neutral", feedback: "Bayangan itu sempat memudar lalu kembali menekan dari segala arah. Mengusir pikiran tanpa memprosesnya hanya menunda kecemasan—ia muncul lagi lebih kuat saat kamu lelah.", healthChange: -5, scoreChange: 5 },
       { id: "c3", text: "Tantang pikiran itu: 'Aku pernah menangani proyek sulit sebelumnya. Aku bisa memecahnya menjadi langkah-langkah kecil.'", type: "healthy", feedback: "Bayangan menyusut ketika kamu memecah tugas menjadi langkah-langkah kecil. Kamu menuliskan langkah pertama yang realistis, menandai kemajuan, dan perspektifmu jernih kembali.", healthChange: 20, scoreChange: 50 }
     ]
   },
@@ -77,7 +77,7 @@ export const LEVELS: Level[] = [
       negativeThoughtType: "Meramal Nasib Buruk (Fortune Telling)"
     },
     introDialogue: "Kabut tebal mengelilingimu, membuatmu sulit melihat jalan ke depan. Bisikan-bisikan cemas memenuhi udara.",
-    playerThought: "Bagaimana jika aku membuat keputusan yang salah? Semuunknowna akan hancur dan aku tidak akan pernah bahagia.",
+    playerThought: "Bagaimana jika aku membuat keputusan yang salah? Semuanya akan hancur dan aku tidak akan pernah bahagia.",
     background: GAME_ASSETS.background,
     choices: [
       { id: "c1", text: "Hindari membuat keputusan sama sekali dan bersembunyi di dalam kabut.", type: "unhealthy", feedback: "Kabut menebal dan jarak pandang menghilang. Menghindari keputusan membuatmu terjebak; peluang kecil berlalu tanpa kamu sadari.", healthChange: -20, scoreChange: 0 },

@@ -68,7 +68,7 @@ const HeroSection = () => {
                             </div>
                             <div className="flex items-center gap-2">
                                 <div className="p-2 bg-cyan-100 rounded-lg text-cyan-600"><Star size={18} /></div>
-                                <span>Gratis Selamunknowna</span>
+                                <span>Gratis Selamanya</span>
                             </div>
                         </div>
                     </div>
