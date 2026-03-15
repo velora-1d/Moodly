@@ -8,7 +8,7 @@ type ReporterProps = {
   reset?: () => void;
 };
 
-export default function ErrorReporter({ error }: ReporterProps) {
+export default function ErrorReporter({ error, reset }: ReporterProps) {
   /* ─ instrumentation shared by every route ─ */
   const lastOverlayMsg = useRef("");
   const pollRef = useRef<NodeJS.Timeout | null>(null);
@@ -68,7 +68,7 @@ export default function ErrorReporter({ error }: ReporterProps) {
     return () => {
       window.removeEventListener("error", onError);
       window.removeEventListener("unhandledrejection", onReject);
-      if (pollRef.current) clearInterval(pollRef.current);
+      pollRef.current && clearInterval(pollRef.current);
     };
   }, []);
 

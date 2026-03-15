@@ -48,8 +48,8 @@ export default function MentalHealthChatPage() {
     const [sessions, setSessions] = useState<ChatSession[]>([]);
     const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
     const [sessionCache, setSessionCache] = useState<Record<string, Message[]>>({});
-    const _SESSIONS_KEY = 'mh_sessions';
-    const _CACHE_KEY = 'mh_session_cache';
+    const SESSIONS_KEY = 'mh_sessions';
+    const CACHE_KEY = 'mh_session_cache';
 
     const bgClass = 'min-h-screen relative bg-gradient-to-br from-purple-50 via-violet-50 to-white';
 
@@ -100,7 +100,7 @@ export default function MentalHealthChatPage() {
                 if (res.ok) {
                     const data = await res.json();
                     // Map DB messages to UI
-                    const mapped: Message[] = data.map((m: unknown) => ({
+                    const mapped: Message[] = data.map((m: any) => ({
                         id: String(m.id),
                         content: m.content,
                         role: m.role,

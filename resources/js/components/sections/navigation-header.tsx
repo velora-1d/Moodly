@@ -2,7 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { ChevronDown, Sparkles, Trophy, Heart } from 'lucide-react';
 
 const NavigationHeader = () => {
-  const { auth } = usePage<unknown>().props;
+  const { auth } = usePage<any>().props;
   const user = auth.user;
 
   return (

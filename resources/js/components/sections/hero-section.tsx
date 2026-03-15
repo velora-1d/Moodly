@@ -3,7 +3,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { dashboard } from '@/routes';
 
 const HeroSection = () => {
-    const { auth } = usePage<unknown>().props;
+    const { auth } = usePage<any>().props;
 
     return (
         <section className="relative overflow-hidden bg-gradient-to-br from-white via-purple-50 to-cyan-50 pt-24 pb-16 md:pt-32 md:pb-24 lg:pt-40 lg:pb-32">

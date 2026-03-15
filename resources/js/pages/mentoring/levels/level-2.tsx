@@ -42,7 +42,7 @@ const MOTIVATIONAL_MESSAGES = [
 ]
 
 export default function Level2() {
-  const { auth } = usePage<unknown>().props
+  const { auth } = usePage<any>().props
   const [gameState, setGameState] = useState<GameState>("playing")
   const [score, setScore] = useState(0)
   const [level, setLevel] = useState(1)

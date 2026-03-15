@@ -1,4 +1,4 @@
-
+import { SVGAttributes } from 'react';
 
 import { HTMLAttributes } from 'react';
 

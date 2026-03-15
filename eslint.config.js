@@ -1,53 +1,44 @@
-import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import reactPlugin from 'eslint-plugin-react';
-import reactHooksPlugin from 'eslint-plugin-react-hooks';
+import js from '@eslint/js';
+import prettier from 'eslint-config-prettier/flat';
+import react from 'eslint-plugin-react';
+import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
+import typescript from 'typescript-eslint';
 
-export default tseslint.config(
-  {
-    ignores: ['vendor/**/*', 'public/**/*', 'node_modules/**/*', 'bootstrap/**/*', 'storage/**/*', 'tests/**/*', 'config/**/*', 'database/**/*']
-  },
-  eslint.configs.recommended,
-  ...tseslint.configs.recommended,
-  {
-    files: ['resources/js/**/*.{ts,tsx,js,jsx}'],
-    plugins: {
-      react: reactPlugin,
-      'react-hooks': reactHooksPlugin,
-    },
-    languageOptions: {
-      globals: {
-        ...globals.browser,
-        ...globals.node,
-        route: 'readonly',
-        Ziggy: 'readonly',
-      },
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
+/** @type {import('eslint').Linter.Config[]} */
+export default [
+    js.configs.recommended,
+    ...typescript.configs.recommended,
+    {
+        ...react.configs.flat.recommended,
+        ...react.configs.flat['jsx-runtime'], // Required for React 17+
+        languageOptions: {
+            globals: {
+                ...globals.browser,
+            },
         },
-      },
+        rules: {
+            'react/react-in-jsx-scope': 'off',
+            'react/prop-types': 'off',
+            'react/no-unescaped-entities': 'off',
+        },
+        settings: {
+            react: {
+                version: 'detect',
+            },
+        },
     },
-    settings: {
-      react: {
-        version: 'detect',
-      },
+    {
+        plugins: {
+            'react-hooks': reactHooks,
+        },
+        rules: {
+            'react-hooks/rules-of-hooks': 'error',
+            'react-hooks/exhaustive-deps': 'warn',
+        },
     },
-    rules: {
-      'react/react-in-jsx-scope': 'off',
-      'react/prop-types': 'off',
-
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/ban-ts-comment': 'off',
-      'no-empty': 'off',
-      'no-undef': 'off',
-      '@typescript-eslint/no-require-imports': 'off',
-      'no-case-declarations': 'off',
-      '@typescript-eslint/no-unused-expressions': 'off',
-      'react-hooks/exhaustive-deps': 'off',
-
-      '@typescript-eslint/no-unused-vars': 'off'
+    {
+        ignores: ['vendor', 'node_modules', 'public', 'bootstrap/ssr', 'tailwind.config.js'],
     },
-  },
-);
+    prettier, // Turn off all rules that might conflict with Prettier
+];

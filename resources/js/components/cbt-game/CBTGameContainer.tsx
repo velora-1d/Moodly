@@ -139,9 +139,9 @@ export default function CBTGameContainer({ onComplete }: { onComplete?: (payload
     const { default: confetti } = await import('canvas-confetti');
     const duration = 3 * 1000;
     const animationEnd = Date.now() + duration;
-    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 } as unknown;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 } as any;
     const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
-    const interval: unknown = setInterval(function() {
+    const interval: any = setInterval(function() {
       const timeLeft = animationEnd - Date.now();
       if (timeLeft <= 0) {
         return clearInterval(interval);
