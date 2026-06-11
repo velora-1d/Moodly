@@ -1,6 +1,13 @@
 # 🚀 Panduan Cepat Setup Moodly
 
-Ikuti 3 langkah sederhana ini untuk menjalankan proyek di laptop Anda:
+Ikuti langkah-langkah sederhana ini untuk menjalankan proyek di laptop Anda:
+
+### Langkah 0: Clone Repositori
+Clone proyek ini ke laptop Anda dan masuk ke foldernya.
+```bash
+git clone https://github.com/velora-1d/Moodly.git
+cd Moodly
+```
 
 ### Langkah 1: Persiapan Sistem
 Instal PostgreSQL dan Docker secara otomatis.
