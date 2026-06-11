@@ -44,9 +44,11 @@ if [ ! -f docker-compose.yml ]; then
     php artisan sail:install --with=pgsql --no-interaction
 fi
 
-# 4. Enforce PostgreSQL (Sail Configuration)
-echo -e "\n${BLUE}[4/7] Configuring PostgreSQL for Laravel Sail...${NC}"
-# Use sed to update .env for Sail defaults
+# 4. Enforce PostgreSQL & Local Config (Sail Configuration)
+echo -e "\n${BLUE}[4/7] Configuring Environment for Local Development...${NC}"
+# Use sed to update .env for Sail and local defaults
+sed -i 's|^APP_URL=.*|APP_URL=http://localhost|' .env
+sed -i 's/^APP_ENV=.*/APP_ENV=local/' .env
 sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=pgsql/' .env
 sed -i 's/^DB_HOST=.*/DB_HOST=pgsql/' .env
 sed -i 's/^DB_PORT=.*/DB_PORT=5432/' .env
