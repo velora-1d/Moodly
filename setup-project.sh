@@ -63,9 +63,12 @@ echo -e "${GREEN}Environment configured for PostgreSQL via Sail.${NC}"
 
 # 5. Start Laravel Sail
 echo -e "\n${BLUE}[5/7] Starting Docker containers (Laravel Sail)...${NC}"
+# Pastikan container lama mati dan volume bersih jika ini setup ulang untuk menghindari stale password
+./vendor/bin/sail down -v > /dev/null 2>&1
 ./vendor/bin/sail up -d
-echo -e "${BLUE}Waiting for database to be ready (10s)...${NC}"
-sleep 10
+
+echo -e "${BLUE}Waiting for database to be ready (15s)...${NC}"
+sleep 15
 
 # 6. Database Initialization (Migrate & Seed)
 echo -e "\n${BLUE}[6/7] Initializing database (Migrate & Seed)...${NC}"
