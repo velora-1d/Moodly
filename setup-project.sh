@@ -37,6 +37,13 @@ else
     echo -e "Existing .env file found. Skipping copy."
 fi
 
+# 3.1 Sail Configuration (Generate docker-compose.yml)
+if [ ! -f docker-compose.yml ]; then
+    echo -e "\n${BLUE}[3.1/7] Generating Laravel Sail configuration (docker-compose.yml)...${NC}"
+    # Gunakan --no-interaction agar script tidak berhenti meminta pilihan
+    php artisan sail:install --with=pgsql --no-interaction
+fi
+
 # 4. Enforce PostgreSQL (Sail Configuration)
 echo -e "\n${BLUE}[4/7] Configuring PostgreSQL for Laravel Sail...${NC}"
 # Use sed to update .env for Sail defaults
