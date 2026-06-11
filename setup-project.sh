@@ -87,7 +87,11 @@ echo -e "\n${BLUE}[7/7] Setting up frontend dependencies...${NC}"
 echo -e "${GREEN}Frontend dependencies installed and assets built.${NC}"
 
 echo -e "\n${GREEN}=== Setup Berhasil! ===${NC}"
-echo -e "Wajib jalankan perintah ke-3 untuk mulai bekerja:"
-echo -e "${BLUE}./vendor/bin/sail npm run dev${NC}"
-echo -e "\nBuka aplikasi di browser pada alamat: ${BLUE}http://localhost${NC}"
-echo -e "(Port default adalah 80, jadi cukup akses http://localhost)${NC}"
+echo -e "Script akan otomatis menjalankan server pengembangan sekarang."
+echo -e "\n${BLUE}PENTING:${NC}"
+echo -e "Silakan buka browser dan akses alamat ini untuk melihat website:"
+echo -e "${GREEN}http://localhost${NC}"
+echo -e "(Klik link di atas atau copy-paste ke browser Anda)\n"
+
+# Menjalankan perintah ke-3 secara otomatis
+./vendor/bin/sail npm run dev
