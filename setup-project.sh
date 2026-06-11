@@ -21,7 +21,8 @@ echo -e "${GREEN}Docker is running.${NC}"
 
 # 2. Initial Dependencies
 echo -e "\n${BLUE}[2/7] Installing PHP dependencies via Composer...${NC}"
-composer install
+# Mengabaikan platform reqs karena PHP asli akan berjalan di dalam Docker (Sail)
+composer install --ignore-platform-reqs
 if [ $? -ne 0 ]; then
     echo -e "${RED}Error: Composer install failed.${NC}"
     exit 1
