@@ -39,18 +39,38 @@
 - `vercel.json` + `api/index.php` — Konfigurasi deploy Vercel
 
 ## ⚙️ Persiapan Lokal
-1. Clone repo dan masuk direktori project.
-2. Install dependency PHP & JS:
-   - `composer install`
-   - `npm install`
-3. Buat `.env` dan generate key:
-   - `cp .env.example .env`
-   - `php artisan key:generate`
-4. Jalankan migrasi dan seeder bila diperlukan:
-   - `php artisan migrate --force`
-5. Jalankan pengembangan lokal:
-   - `npm run dev`
-   - `php artisan serve`
+Proyek ini menggunakan **Laravel Sail** (Docker) untuk memudahkan pengembangan lokal dengan PostgreSQL.
+
+### Prasyarat
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) terinstal dan sedang berjalan.
+- PHP & Composer terinstal di sistem lokal (untuk inisialisasi awal).
+
+### Langkah Cepat (Otomatis)
+1. Clone repo dan masuk ke direktori proyek.
+2. Jalankan script pertama untuk instalasi sistem (PostgreSQL & Docker):
+   ```bash
+   ./setup-system.sh
+   ```
+3. Pastikan Docker sudah menyala, lalu jalankan script kedua untuk setup proyek:
+   ```bash
+   ./setup-project.sh
+   ```
+   Script ini akan otomatis menginstal dependency via Sail, menjalankan migrasi, dan seeding.
+
+4. Jalankan server pengembangan:
+   ```bash
+   ./vendor/bin/sail npm run dev
+   ```
+   Aplikasi dapat diakses di `http://localhost`.
+
+### Langkah Manual (Jika Tidak Menggunakan Sail)
+Jika Anda ingin menggunakan database PostgreSQL lokal tanpa Docker:
+1. Clone repo.
+2. `composer install` & `npm install`.
+3. `cp .env.example .env` & `php artisan key:generate`.
+4. Sesuaikan `DB_CONNECTION=pgsql` dan kredensial database di `.env`.
+5. `php artisan migrate --seed`.
+6. `npm run dev` & `php artisan serve`.
 
 ## 🔑 Environment Variables
 Minimal variabel penting:
