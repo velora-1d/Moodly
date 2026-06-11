@@ -47,17 +47,18 @@ fi
 # 4. Enforce PostgreSQL (Sail Configuration)
 echo -e "\n${BLUE}[4/7] Configuring PostgreSQL for Laravel Sail...${NC}"
 # Use sed to update .env for Sail defaults
-sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=pgsql/g' .env
-sed -i 's/DB_HOST=127.0.0.1/DB_HOST=pgsql/g' .env
-sed -i 's/DB_PORT=3306/DB_PORT=5432/g' .env
-# Comment out MySQL specific lines if they exist
-sed -i 's/^DB_DATABASE=/# DB_DATABASE=/g' .env
-sed -i 's/^DB_USERNAME=/# DB_USERNAME=/g' .env
-sed -i 's/^DB_PASSWORD=/# DB_PASSWORD=/g' .env
-# Add Sail specific DB configs if not present
-if ! grep -q "DB_DATABASE=moodly" .env; then
-    echo -e "\nDB_DATABASE=moodly\nDB_USERNAME=sail\nDB_PASSWORD=password" >> .env
-fi
+sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=pgsql/' .env
+sed -i 's/^DB_HOST=.*/DB_HOST=pgsql/' .env
+sed -i 's/^DB_PORT=.*/DB_PORT=5432/' .env
+sed -i 's/^DB_DATABASE=.*/DB_DATABASE=moodly/' .env
+sed -i 's/^DB_USERNAME=.*/DB_USERNAME=sail/' .env
+sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=password/' .env
+
+# Pastikan variabel tidak ada yang di-comment
+sed -i 's/^# DB_DATABASE=/DB_DATABASE=/g' .env
+sed -i 's/^# DB_USERNAME=/DB_USERNAME=/g' .env
+sed -i 's/^# DB_PASSWORD=/DB_PASSWORD=/g' .env
+
 echo -e "${GREEN}Environment configured for PostgreSQL via Sail.${NC}"
 
 # 5. Start Laravel Sail
