@@ -82,7 +82,7 @@ index.form = indexForm
 
 /**
 * @see \App\Http\Controllers\Api\DashboardController::storeMood
-* @see app/Http/Controllers/Api/DashboardController.php:68
+* @see app/Http/Controllers/Api/DashboardController.php:70
 * @route '/api/moods'
 */
 export const storeMood = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -97,7 +97,7 @@ storeMood.definition = {
 
 /**
 * @see \App\Http\Controllers\Api\DashboardController::storeMood
-* @see app/Http/Controllers/Api/DashboardController.php:68
+* @see app/Http/Controllers/Api/DashboardController.php:70
 * @route '/api/moods'
 */
 storeMood.url = (options?: RouteQueryOptions) => {
@@ -106,7 +106,7 @@ storeMood.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Api\DashboardController::storeMood
-* @see app/Http/Controllers/Api/DashboardController.php:68
+* @see app/Http/Controllers/Api/DashboardController.php:70
 * @route '/api/moods'
 */
 storeMood.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -116,7 +116,7 @@ storeMood.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\Api\DashboardController::storeMood
-* @see app/Http/Controllers/Api/DashboardController.php:68
+* @see app/Http/Controllers/Api/DashboardController.php:70
 * @route '/api/moods'
 */
 const storeMoodForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -126,7 +126,7 @@ const storeMoodForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'>
 
 /**
 * @see \App\Http\Controllers\Api\DashboardController::storeMood
-* @see app/Http/Controllers/Api/DashboardController.php:68
+* @see app/Http/Controllers/Api/DashboardController.php:70
 * @route '/api/moods'
 */
 storeMoodForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
